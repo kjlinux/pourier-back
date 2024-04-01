@@ -276,7 +276,7 @@ Route::middleware('auth:api')->prefix('user')->group(function () {
     // Profile Management
     Route::get('/profile', [ProfileController::class, 'show'])->name('user.profile.show');
     Route::put('/profile', [ProfileController::class, 'update'])->name('user.profile.update');
-    Route::put('/avatar', [ProfileController::class, 'updateAvatar'])->name('user.profile.updateAvatar');
+    Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('user.profile.updateAvatar');
     Route::put('/password', [ProfileController::class, 'updatePassword'])->name('user.profile.updatePassword');
 
     // Notifications

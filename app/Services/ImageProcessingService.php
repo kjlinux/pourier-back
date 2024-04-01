@@ -102,12 +102,18 @@ class ImageProcessingService
         $fontSize = (int) ($width * 0.05); // 5% de la largeur
         $color = 'rgba(255, 255, 255, 0.3)'; // Blanc semi-transparent
 
+        // Vérifier si une police personnalisée existe
+        $fontPath = public_path('fonts/Arial.ttf');
+        $useCustomFont = file_exists($fontPath);
+
         // Ajouter plusieurs watermarks en diagonal
         $spacing = 200;
         for ($y = -$height; $y < $height * 2; $y += $spacing) {
             for ($x = -$width; $x < $width * 2; $x += $spacing) {
-                $image->text($watermarkText, $x, $y, function ($font) use ($fontSize, $color) {
-                    $font->filename(public_path('fonts/Arial.ttf')); // Utiliser une police système
+                $image->text($watermarkText, $x, $y, function ($font) use ($fontSize, $color, $fontPath, $useCustomFont) {
+                    if ($useCustomFont) {
+                        $font->filename($fontPath);
+                    }
                     $font->size($fontSize);
                     $font->color($color);
                     $font->angle(-45); // Angle diagonal

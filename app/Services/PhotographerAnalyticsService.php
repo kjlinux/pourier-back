@@ -279,7 +279,7 @@ class PhotographerAnalyticsService
                     $query->where('payment_status', 'completed')
                         ->where('paid_at', '>=', $startDate);
                 })
-                ->selectRaw('HOUR(orders.paid_at) as hour, COUNT(*) as count')
+                ->selectRaw('EXTRACT(HOUR FROM orders.paid_at)::integer as hour, COUNT(*) as count')
                 ->join('orders', 'order_items.order_id', '=', 'orders.id')
                 ->groupBy('hour')
                 ->get();

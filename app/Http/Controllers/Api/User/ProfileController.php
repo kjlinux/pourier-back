@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
+use App\Services\StorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -163,15 +164,31 @@ class ProfileController extends Controller
      *     )
      * )
      */
-    public function updateAvatar(Request $request): JsonResponse
+    public function updateAvatar(Request $request, StorageService $storageService): JsonResponse
     {
-        $request->validate(['avatar' => 'required|image|max:2048']);
+        $request->validate(['avatar' => 'required|image|mimes:jpeg,png,gif,webp|max:2048']);
 
-        // TODO: Upload avatar to S3 and update user
-        // $path = $this->storageService->uploadAvatar($request->file('avatar'), $request->user());
-        // $request->user()->update(['avatar_url' => $path]);
+        $user = $request->user();
 
-        return response()->json(['success' => true, 'message' => 'Avatar mis à jour.']);
+        // Delete old avatar if exists
+        if ($user->avatar_url) {
+            $storageService->deleteFile($user->avatar_url);
+        }
+
+        // Store new avatar
+        $tempPath = $request->file('avatar')->getRealPath();
+        $avatarUrl = $storageService->storeAvatar($tempPath, $user->id);
+
+        // Update user
+        $user->update(['avatar_url' => $avatarUrl]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Avatar mis à jour avec succès.',
+            'data' => [
+                'avatar_url' => $avatarUrl
+            ]
+        ]);
     }
 
     /**

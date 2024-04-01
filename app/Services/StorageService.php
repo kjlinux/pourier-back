@@ -7,7 +7,60 @@ use Illuminate\Support\Str;
 
 class StorageService
 {
-    private const DISK = 's3';
+    private const DISK = 'local';
+
+    /**
+     * Get the high resolution path for a photo (original file)
+     */
+    public function getHighResPath(\App\Models\Photo $photo): string
+    {
+        // Extract path from the original_url stored in database
+        return $this->extractPathFromUrl($photo->original_url);
+    }
+
+    /**
+     * Get the watermark/preview path for a photo
+     */
+    public function getWatermarkPath(\App\Models\Photo $photo): string
+    {
+        // Extract path from the preview_url stored in database
+        return $this->extractPathFromUrl($photo->preview_url);
+    }
+
+    /**
+     * Get the preview path for a photo
+     */
+    public function getPreviewPath(\App\Models\Photo $photo): string
+    {
+        return $this->extractPathFromUrl($photo->preview_url);
+    }
+
+    /**
+     * Get the thumbnail path for a photo
+     */
+    public function getThumbnailPath(\App\Models\Photo $photo): string
+    {
+        return $this->extractPathFromUrl($photo->thumbnail_url);
+    }
+
+    /**
+     * Extract the storage path from a URL
+     */
+    private function extractPathFromUrl(?string $url): string
+    {
+        if (!$url) {
+            return '';
+        }
+
+        // If it's already a path (not a URL), return as-is
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return $url;
+        }
+
+        // Extract path from URL
+        $path = parse_url($url, PHP_URL_PATH);
+        return ltrim($path, '/');
+    }
 
     public function storeOriginal(string $filePath, string $photographerId): string
     {

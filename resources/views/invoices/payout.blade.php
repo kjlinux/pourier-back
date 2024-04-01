@@ -11,7 +11,7 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-family: 'Inter', 'DejaVu Sans', Arial, sans-serif;
             font-size: 12px;
             color: #333;
             line-height: 1.6;
@@ -37,13 +37,18 @@
         .company-name {
             font-size: 24px;
             font-weight: bold;
-            color: #2c3e50;
+            color: #15803d;
+            margin-bottom: 5px;
+        }
+        .company-tagline {
+            font-size: 10px;
+            color: #7f8c8d;
             margin-bottom: 10px;
         }
         .document-title {
             font-size: 28px;
             font-weight: bold;
-            color: #2c3e50;
+            color: #15803d;
             margin-bottom: 5px;
         }
         .document-subtitle {
@@ -52,16 +57,17 @@
             margin-bottom: 5px;
         }
         .photographer-info {
-            background-color: #f8f9fa;
+            background-color: #f0fdf4;
             padding: 20px;
             border-radius: 5px;
             margin-bottom: 30px;
+            border-left: 4px solid #22c55e;
         }
         .info-title {
             font-weight: bold;
             font-size: 16px;
             margin-bottom: 15px;
-            color: #2c3e50;
+            color: #15803d;
         }
         table {
             width: 100%;
@@ -69,7 +75,7 @@
             margin-bottom: 30px;
         }
         thead {
-            background-color: #2c3e50;
+            background-color: #15803d;
             color: white;
         }
         th, td {
@@ -81,14 +87,18 @@
             font-weight: bold;
             font-size: 12px;
         }
+        tbody tr:hover {
+            background-color: #f0fdf4;
+        }
         .text-right {
             text-align: right;
         }
         .summary {
-            background-color: #e8f5e9;
+            background-color: #f0fdf4;
             padding: 20px;
             border-radius: 5px;
             margin-bottom: 30px;
+            border: 1px solid #bbf7d0;
         }
         .summary-row {
             display: table;
@@ -105,15 +115,23 @@
         }
         .total-row {
             font-size: 18px;
-            color: #2c3e50;
-            border-top: 2px solid #4caf50;
+            color: #15803d;
+            border-top: 2px solid #22c55e;
             padding-top: 15px;
             margin-top: 15px;
+        }
+        .commission-info {
+            background-color: #fffbeb;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            border-left: 4px solid #f59e0b;
+            font-size: 11px;
         }
         .footer {
             margin-top: 60px;
             padding-top: 20px;
-            border-top: 2px solid #e0e0e0;
+            border-top: 2px solid #22c55e;
             font-size: 10px;
             color: #7f8c8d;
             text-align: center;
@@ -124,7 +142,8 @@
     <div class="container">
         <div class="header">
             <div class="header-left">
-                <div class="company-name">{{ config('app.name') }}</div>
+                <div class="company-name">POUIRE</div>
+                <div class="company-tagline">by TANGA GROUP</div>
                 <div>Reçu de paiement photographe</div>
             </div>
             <div class="header-right">
@@ -154,11 +173,15 @@
                     <td>{{ $item['order_number'] }}</td>
                     <td>{{ $item['photo_title'] }}</td>
                     <td>{{ $item['sale_date'] }}</td>
-                    <td class="text-right">{{ number_format($item['amount'], 2) }} €</td>
+                    <td class="text-right">{{ number_format($item['amount'], 0, ',', ' ') }} FCFA</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+
+        <div class="commission-info">
+            <strong>Note:</strong> Les montants affichés correspondent à votre part nette après déduction de la commission POUIRE (20%).
+        </div>
 
         <div class="summary">
             <div class="summary-row">
@@ -171,13 +194,14 @@
             </div>
             <div class="summary-row total-row">
                 <div class="summary-label">Total versé:</div>
-                <div class="summary-value">{{ number_format($total_amount, 2) }} €</div>
+                <div class="summary-value">{{ number_format($total_amount, 0, ',', ' ') }} FCFA</div>
             </div>
         </div>
 
         <div class="footer">
             <p>Ce document atteste du paiement des revenus pour la période indiquée.</p>
-            <p>{{ config('app.name') }} - Plateforme de vente de photos</p>
+            <p style="margin-top: 8px;">POUIRE by TANGA GROUP - La première plateforme de vente de photos professionnelles africaines</p>
+            <p style="margin-top: 8px; font-size: 9px;">&copy; 2025 POUIRE by TANGA GROUP. Tous droits réservés.</p>
         </div>
     </div>
 </body>

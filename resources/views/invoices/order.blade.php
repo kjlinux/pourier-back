@@ -11,7 +11,7 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-family: 'Inter', 'DejaVu Sans', Arial, sans-serif;
             font-size: 12px;
             color: #333;
             line-height: 1.6;
@@ -37,13 +37,18 @@
         .company-name {
             font-size: 24px;
             font-weight: bold;
-            color: #2c3e50;
+            color: #15803d;
+            margin-bottom: 10px;
+        }
+        .company-tagline {
+            font-size: 10px;
+            color: #7f8c8d;
             margin-bottom: 10px;
         }
         .invoice-title {
             font-size: 28px;
             font-weight: bold;
-            color: #2c3e50;
+            color: #15803d;
             margin-bottom: 5px;
         }
         .invoice-number {
@@ -69,7 +74,7 @@
             font-weight: bold;
             font-size: 14px;
             margin-bottom: 10px;
-            color: #2c3e50;
+            color: #15803d;
         }
         .address-content {
             font-size: 12px;
@@ -81,7 +86,7 @@
             margin-bottom: 30px;
         }
         thead {
-            background-color: #2c3e50;
+            background-color: #15803d;
             color: white;
         }
         th, td {
@@ -94,7 +99,7 @@
             font-size: 12px;
         }
         tbody tr:hover {
-            background-color: #f8f9fa;
+            background-color: #f0fdf4;
         }
         .text-right {
             text-align: right;
@@ -114,14 +119,14 @@
         .totals .total-row {
             font-weight: bold;
             font-size: 16px;
-            background-color: #2c3e50;
+            background-color: #15803d;
             color: white;
         }
         .footer {
             clear: both;
             margin-top: 60px;
             padding-top: 20px;
-            border-top: 2px solid #e0e0e0;
+            border-top: 2px solid #22c55e;
             font-size: 10px;
             color: #7f8c8d;
             text-align: center;
@@ -131,22 +136,27 @@
             display: table;
             clear: both;
         }
+        .highlight {
+            color: #d97706;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div class="header-left">
-                <div class="company-name">{{ $company['name'] }}</div>
+                <div class="company-name">POUIRE</div>
+                <div class="company-tagline">by TANGA GROUP - Photos professionnelles africaines</div>
                 <div class="address-content">
                     {{ $company['address'] }}<br>
                     {{ $company['postal_code'] }} {{ $company['city'] }}<br>
                     {{ $company['country'] }}<br>
                     @if(isset($company['siret']))
-                        SIRET: {{ $company['siret'] }}<br>
+                        RCCM: {{ $company['siret'] }}<br>
                     @endif
                     @if(isset($company['vat_number']))
-                        TVA: {{ $company['vat_number'] }}
+                        IFU: {{ $company['vat_number'] }}
                     @endif
                 </div>
             </div>
@@ -189,8 +199,8 @@
                 <tr>
                     <td>{{ $item['description'] }}</td>
                     <td class="text-right">{{ $item['quantity'] }}</td>
-                    <td class="text-right">{{ number_format($item['unit_price'], 2) }} €</td>
-                    <td class="text-right">{{ number_format($item['total'], 2) }} €</td>
+                    <td class="text-right">{{ number_format($item['unit_price'], 0, ',', ' ') }} FCFA</td>
+                    <td class="text-right">{{ number_format($item['total'], 0, ',', ' ') }} FCFA</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -201,26 +211,30 @@
                 <table>
                     <tr>
                         <td>Sous-total:</td>
-                        <td class="text-right">{{ number_format($subtotal, 2) }} €</td>
+                        <td class="text-right">{{ number_format($subtotal, 0, ',', ' ') }} FCFA</td>
                     </tr>
+                    @if(isset($tax) && $tax > 0)
                     <tr>
-                        <td>TVA (20%):</td>
-                        <td class="text-right">{{ number_format($tax, 2) }} €</td>
+                        <td>TVA (18%):</td>
+                        <td class="text-right">{{ number_format($tax, 0, ',', ' ') }} FCFA</td>
                     </tr>
+                    @endif
                     <tr class="total-row">
                         <td>Total TTC:</td>
-                        <td class="text-right">{{ number_format($total, 2) }} €</td>
+                        <td class="text-right">{{ number_format($total, 0, ',', ' ') }} FCFA</td>
                     </tr>
                 </table>
             </div>
         </div>
 
         <div class="footer">
-            <p>Merci pour votre achat !</p>
-            <p>{{ $company['name'] }} - {{ $company['address'] }}, {{ $company['postal_code'] }} {{ $company['city'] }}</p>
+            <p style="color: #15803d; font-weight: bold; font-size: 12px;">Merci pour votre achat sur POUIRE !</p>
+            <p style="margin-top: 8px;">POUIRE by TANGA GROUP - La première plateforme de vente de photos professionnelles africaines</p>
+            <p style="margin-top: 4px;">{{ $company['address'] }}, {{ $company['postal_code'] }} {{ $company['city'] }}, {{ $company['country'] }}</p>
             @if(isset($company['siret']))
-                <p>SIRET: {{ $company['siret'] }} @if(isset($company['vat_number']))- TVA: {{ $company['vat_number'] }}@endif</p>
+                <p>RCCM: {{ $company['siret'] }} @if(isset($company['vat_number']))- IFU: {{ $company['vat_number'] }}@endif</p>
             @endif
+            <p style="margin-top: 8px; font-size: 9px;">&copy; 2025 POUIRE by TANGA GROUP. Tous droits réservés.</p>
         </div>
     </div>
 </body>

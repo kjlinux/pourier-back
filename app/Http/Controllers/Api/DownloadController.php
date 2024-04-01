@@ -10,6 +10,7 @@ use App\Services\StorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use ZipArchive;
 use OpenApi\Annotations as OA;
@@ -70,25 +71,64 @@ class DownloadController extends Controller
      *     )
      * )
      */
-    public function downloadPhoto(Request $request, Photo $photo): StreamedResponse
+    public function downloadPhoto(Request $request, Photo $photo): StreamedResponse|BinaryFileResponse
     {
         // La policy vérifie si l'utilisateur a acheté cette photo
         Gate::authorize('download', $photo);
 
-        $filePath = $this->storageService->getHighResPath($photo);
+        $originalUrl = $photo->original_url;
 
-        if (!Storage::disk('public')->exists($filePath)) {
+        if (!$originalUrl) {
             abort(404, 'Photo file not found');
         }
 
         // Incrémenter le compteur de téléchargements
         $photo->incrementDownloads();
 
-        return Storage::disk('public')->download(
-            $filePath,
-            $photo->title . '.jpg',
-            ['Content-Type' => 'image/jpeg']
-        );
+        // Check if it's an external URL or local path
+        if (filter_var($originalUrl, FILTER_VALIDATE_URL)) {
+            // Stream from external URL
+            return $this->streamFromUrl($originalUrl, $photo->title . '.jpg');
+        }
+
+        // Local file
+        if (!Storage::disk('local')->exists($originalUrl)) {
+            abort(404, 'Photo file not found');
+        }
+
+        $filePath = Storage::disk('local')->path($originalUrl);
+        return response()->download($filePath, $photo->title . '.jpg', [
+            'Content-Type' => 'image/jpeg'
+        ]);
+    }
+
+    /**
+     * Stream a file from an external URL
+     */
+    private function streamFromUrl(string $url, string $filename): StreamedResponse
+    {
+        return response()->streamDownload(function () use ($url) {
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 30,
+                    'user_agent' => 'Mozilla/5.0'
+                ]
+            ]);
+
+            $stream = @fopen($url, 'r', false, $context);
+            if ($stream === false) {
+                abort(404, 'Unable to fetch photo from source');
+            }
+
+            while (!feof($stream)) {
+                echo fread($stream, 8192);
+                flush();
+            }
+
+            fclose($stream);
+        }, $filename, [
+            'Content-Type' => 'image/jpeg',
+        ]);
     }
 
     /**
@@ -175,20 +215,49 @@ class DownloadController extends Controller
             abort(500, 'Could not create zip file');
         }
 
+        $addedFiles = 0;
         foreach ($photos as $photo) {
-            $filePath = $this->storageService->getHighResPath($photo);
-            $fullPath = Storage::disk('public')->path($filePath);
+            $originalUrl = $photo->original_url;
+            if (!$originalUrl) {
+                continue;
+            }
 
-            if (file_exists($fullPath)) {
-                $zip->addFile($fullPath, $photo->title . '_' . $photo->id . '.jpg');
+            $filename = $photo->title . '_' . $photo->id . '.jpg';
+
+            // Check if it's an external URL or local path
+            if (filter_var($originalUrl, FILTER_VALIDATE_URL)) {
+                // Fetch content from external URL
+                $context = stream_context_create([
+                    'http' => [
+                        'timeout' => 30,
+                        'user_agent' => 'Mozilla/5.0'
+                    ]
+                ]);
+                $content = @file_get_contents($originalUrl, false, $context);
+                if ($content !== false) {
+                    $zip->addFromString($filename, $content);
+                    $addedFiles++;
+                }
+            } else {
+                // Local file
+                $fullPath = Storage::disk('local')->path($originalUrl);
+                if (file_exists($fullPath)) {
+                    $zip->addFile($fullPath, $filename);
+                    $addedFiles++;
+                }
             }
         }
 
         $zip->close();
 
+        if ($addedFiles === 0) {
+            @unlink($zipPath);
+            abort(404, 'No photos could be downloaded');
+        }
+
         return response()->streamDownload(function () use ($zipPath) {
             readfile($zipPath);
-            unlink($zipPath);
+            @unlink($zipPath);
         }, $zipFileName, [
             'Content-Type' => 'application/zip',
         ]);
@@ -241,15 +310,25 @@ class DownloadController extends Controller
      *     )
      * )
      */
-    public function downloadInvoice(Request $request, Order $order): StreamedResponse
+    public function downloadInvoice(Request $request, Order $order): BinaryFileResponse
     {
         Gate::authorize('view', $order);
 
+        // Check if order is completed
+        if ($order->payment_status !== 'completed') {
+            abort(403, 'Invoice is only available for completed orders');
+        }
+
+        // Generate invoice on-demand if it doesn't exist
         if (!$this->invoiceService->hasInvoice($order)) {
-            abort(404, 'Invoice not found');
+            $this->invoiceService->generateInvoice($order);
         }
 
         $invoicePath = $this->invoiceService->getInvoicePath($order);
+
+        if (!$invoicePath) {
+            abort(500, 'Failed to generate invoice');
+        }
 
         return response()->download(
             $invoicePath,
@@ -294,18 +373,28 @@ class DownloadController extends Controller
      *     )
      * )
      */
-    public function downloadPreview(Photo $photo): StreamedResponse
+    public function downloadPreview(Photo $photo): StreamedResponse|BinaryFileResponse
     {
-        $filePath = $this->storageService->getWatermarkPath($photo);
+        $previewUrl = $photo->preview_url;
 
-        if (!Storage::disk('public')->exists($filePath)) {
+        if (!$previewUrl) {
             abort(404, 'Preview not found');
         }
 
-        return Storage::disk('public')->download(
-            $filePath,
-            'preview_' . $photo->title . '.jpg',
-            ['Content-Type' => 'image/jpeg']
-        );
+        // Check if it's an external URL or local path
+        if (filter_var($previewUrl, FILTER_VALIDATE_URL)) {
+            // Stream from external URL
+            return $this->streamFromUrl($previewUrl, 'preview_' . $photo->title . '.jpg');
+        }
+
+        // Local file
+        if (!Storage::disk('local')->exists($previewUrl)) {
+            abort(404, 'Preview not found');
+        }
+
+        $filePath = Storage::disk('local')->path($previewUrl);
+        return response()->download($filePath, 'preview_' . $photo->title . '.jpg', [
+            'Content-Type' => 'image/jpeg'
+        ]);
     }
 }

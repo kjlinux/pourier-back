@@ -101,7 +101,7 @@ class SearchController extends Controller
 
         // Recherche par mots-clés (title, description, tags)
         if ($request->filled('query')) {
-            $searchTerm = $request->query;
+            $searchTerm = $request->input('query');
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('title', 'LIKE', "%{$searchTerm}%")
                     ->orWhere('description', 'LIKE', "%{$searchTerm}%")
