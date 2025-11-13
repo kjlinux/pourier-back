@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('slug', 100)->unique();
             $table->text('description')->nullable();
             $table->string('icon_url')->nullable();
-            $table->foreignUuid('parent_id')->nullable()->constrained('categories')->onDelete('cascade');
+            $table->uuid('parent_id')->nullable();
             $table->unsignedInteger('display_order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->unsignedInteger('photo_count')->default(0);
@@ -27,6 +27,11 @@ return new class extends Migration
             $table->index('slug');
             $table->index('parent_id');
             $table->index(['is_active', 'display_order']);
+        });
+
+        // Add foreign key constraint after table creation
+        Schema::table('categories', function (Blueprint $table) {
+            $table->foreign('parent_id')->references('id')->on('categories')->onDelete('cascade');
         });
     }
 
