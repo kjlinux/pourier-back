@@ -19,6 +19,7 @@ class Order extends Model
         'total',
         'payment_status',
         'payment_method',
+        'payment_provider',
         'payment_id',
         'cinetpay_transaction_id',
         'billing_email',
@@ -27,6 +28,9 @@ class Order extends Model
         'billing_phone',
         'invoice_url',
         'paid_at',
+        'invoice_path',
+        'invoice_generated_at',
+        'completed_at',
     ];
 
     protected function casts(): array
@@ -34,6 +38,8 @@ class Order extends Model
         return [
             'subtotal' => 'integer',
             'tax' => 'integer',
+            'invoice_generated_at' => 'datetime',
+            'completed_at' => 'datetime',
             'discount' => 'integer',
             'total' => 'integer',
             'paid_at' => 'datetime',
@@ -62,5 +68,61 @@ class Order extends Model
     public function scopePending($query)
     {
         return $query->where('payment_status', 'pending');
+    }
+
+    public function scopeFailed($query)
+    {
+        return $query->where('payment_status', 'failed');
+    }
+
+    public function scopeRefunded($query)
+    {
+        return $query->where('payment_status', 'refunded');
+    }
+
+    // Methods
+
+    public function markAsCompleted(string $transactionId): void
+    {
+        $this->update([
+            'payment_status' => 'completed',
+            'payment_id' => $transactionId,
+            'paid_at' => now(),
+        ]);
+    }
+
+    public function markAsFailed(): void
+    {
+        $this->update([
+            'payment_status' => 'failed',
+        ]);
+    }
+
+    public function isPending(): bool
+    {
+        return $this->payment_status === 'pending';
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->payment_status === 'completed';
+    }
+
+    public static function generateOrderNumber(): string
+    {
+        $date = now()->format('Ymd');
+        $random = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
+        return "ORD-{$date}-{$random}";
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($order) {
+            if (empty($order->order_number)) {
+                $order->order_number = static::generateOrderNumber();
+            }
+        });
     }
 }

@@ -117,4 +117,58 @@ class Photo extends Model
                   ->orWhere('featured_until', '>', now());
             });
     }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('status', 'rejected');
+    }
+
+    // Methods
+
+    public function approve($moderator)
+    {
+        $this->update([
+            'status' => 'approved',
+            'is_public' => true,
+            'moderated_at' => now(),
+            'moderated_by' => $moderator->id,
+            'rejection_reason' => null,
+        ]);
+    }
+
+    public function reject($moderator, string $reason)
+    {
+        $this->update([
+            'status' => 'rejected',
+            'is_public' => false,
+            'moderated_at' => now(),
+            'moderated_by' => $moderator->id,
+            'rejection_reason' => $reason,
+        ]);
+    }
+
+    public function incrementViews()
+    {
+        $this->increment('views_count');
+    }
+
+    public function incrementSales()
+    {
+        $this->increment('sales_count');
+    }
+
+    public function incrementDownloads()
+    {
+        $this->increment('downloads_count');
+    }
+
+    public function incrementFavorites()
+    {
+        $this->increment('favorites_count');
+    }
+
+    public function decrementFavorites()
+    {
+        $this->decrement('favorites_count');
+    }
 }

@@ -15,13 +15,16 @@ class OrderItem extends Model
         'photo_id',
         'photographer_id',
         'photo_title',
+        'photo_thumbnail',
+        'photographer_name',
         'license_type',
         'price',
         'photographer_amount',
-        'commission',
+        'platform_commission',
         'download_url',
-        'download_count',
         'download_expires_at',
+        'photographer_paid',
+        'photographer_paid_at',
     ];
 
     protected function casts(): array
@@ -29,8 +32,9 @@ class OrderItem extends Model
         return [
             'price' => 'integer',
             'photographer_amount' => 'integer',
-            'commission' => 'integer',
-            'download_count' => 'integer',
+            'photographer_paid' => 'boolean',
+            'photographer_paid_at' => 'datetime',
+            'platform_commission' => 'integer',
             'download_expires_at' => 'datetime',
         ];
     }
@@ -50,5 +54,30 @@ class OrderItem extends Model
     public function photographer()
     {
         return $this->belongsTo(User::class, 'photographer_id');
+    }
+
+    // Methods
+
+    public function generateDownloadUrl(): string
+    {
+        $storageService = app(\App\Services\StorageService::class);
+
+        // Générer une URL signée valide 24h
+        $signedUrl = $storageService->generateSignedDownloadUrl(
+            $this->photo->original_url,
+            24 // 24 heures
+        );
+
+        $this->update([
+            'download_url' => $signedUrl,
+            'download_expires_at' => now()->addHours(24),
+        ]);
+
+        return $signedUrl;
+    }
+
+    public function isDownloadExpired(): bool
+    {
+        return $this->download_expires_at && $this->download_expires_at->isPast();
     }
 }

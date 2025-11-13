@@ -58,4 +58,12 @@ class Category extends Model
     {
         return $query->whereNull('parent_id');
     }
+
+    // Methods
+
+    public function updatePhotoCount()
+    {
+        $count = $this->photos()->approved()->public()->count();
+        $this->update(['photo_count' => $count]);
+    }
 }
