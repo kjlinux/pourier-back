@@ -1,4 +1,4 @@
-# SPÉCIFICATION COMPLÈTE BACKEND LARAVEL 12 - AFROLENS/POUIRE
+# SPÉCIFICATION COMPLÈTE BACKEND LARAVEL 12 - Pourier/POUIRE
 
 ## 📋 TABLE DES MATIÈRES
 
@@ -29,50 +29,53 @@
 
 ### 1.1 Description
 
-**AfroLens** (anciennement "Pouire") est une plateforme de vente de photos en ligne spécialisée dans la photographie africaine. La plateforme permet aux photographes de vendre leurs photos avec deux types de licences (Standard et Extended) et aux acheteurs d'acheter des photos de haute qualité.
+**Pourier** (anciennement "Pouire") est une plateforme de vente de photos en ligne spécialisée dans la photographie africaine. La plateforme permet aux photographes de vendre leurs photos avec deux types de licences (Standard et Extended) et aux acheteurs d'acheter des photos de haute qualité.
 
 ### 1.2 Acteurs
 
-- **Buyers (Acheteurs)** : Utilisateurs qui achètent des photos
-- **Photographers (Photographes)** : Utilisateurs qui uploadent et vendent des photos
-- **Admins** : Modèrent les photos, valident les photographes, gèrent les retraits
+-   **Buyers (Acheteurs)** : Utilisateurs qui achètent des photos
+-   **Photographers (Photographes)** : Utilisateurs qui uploadent et vendent des photos
+-   **Admins** : Modèrent les photos, valident les photographes, gèrent les retraits
 
 ### 1.3 Fonctionnalités principales
 
 #### Pour les Buyers
-- Inscription/Connexion
-- Recherche et filtrage de photos
-- Ajout au panier
-- Achat de photos (Mobile Money, Carte bancaire)
-- Téléchargement des photos achetées
-- Gestion des favoris
-- Suivi de photographes
+
+-   Inscription/Connexion
+-   Recherche et filtrage de photos
+-   Ajout au panier
+-   Achat de photos (Mobile Money, Carte bancaire)
+-   Téléchargement des photos achetées
+-   Gestion des favoris
+-   Suivi de photographes
 
 #### Pour les Photographers
-- Tout ce que fait un Buyer +
-- Upload de photos (avec métadonnées EXIF)
-- Gestion de portfolio
-- Suivi des revenus et statistiques
-- Demandes de retrait (Mobile Money, Virement bancaire)
-- Analytics avancées
+
+-   Tout ce que fait un Buyer +
+-   Upload de photos (avec métadonnées EXIF)
+-   Gestion de portfolio
+-   Suivi des revenus et statistiques
+-   Demandes de retrait (Mobile Money, Virement bancaire)
+-   Analytics avancées
 
 #### Pour les Admins
-- Modération des photos
-- Validation des demandes de photographes
-- Gestion des utilisateurs
-- Traitement des retraits
-- Vue d'ensemble des statistiques
-- Mise en avant de photos (featured)
+
+-   Modération des photos
+-   Validation des demandes de photographes
+-   Gestion des utilisateurs
+-   Traitement des retraits
+-   Vue d'ensemble des statistiques
+-   Mise en avant de photos (featured)
 
 ### 1.4 Modèle économique
 
-- **Commission plateforme** : 20% sur chaque vente
-- **Revenu photographe** : 80% du prix de vente
-- **Période de sécurité** : 30 jours avant qu'un revenu soit disponible pour retrait
-- **Retrait minimum** : 5000 FCFA (5000 XOF)
-- **Prix minimum photo** : 500 FCFA (500 XOF)
-- **Prix extended minimum** : 2x le prix standard
-- **Devise** : Franc CFA (XOF) - montants en **integer** (pas de décimales)
+-   **Commission plateforme** : 20% sur chaque vente
+-   **Revenu photographe** : 80% du prix de vente
+-   **Période de sécurité** : 30 jours avant qu'un revenu soit disponible pour retrait
+-   **Retrait minimum** : 5000 FCFA (5000 XOF)
+-   **Prix minimum photo** : 500 FCFA (500 XOF)
+-   **Prix extended minimum** : 2x le prix standard
+-   **Devise** : Franc CFA (XOF) - montants en **integer** (pas de décimales)
 
 ---
 
@@ -93,24 +96,24 @@
 
 ```json
 {
-  "require": {
-    "php": "^8.3",
-    "laravel/framework": "^12.0",
-    "tymon/jwt-auth": "^2.1",
-    "intervention/image": "^3.0",
-    "league/flysystem-aws-s3-v3": "^3.0",
-    "spatie/laravel-permission": "^6.0",
-    "barryvdh/laravel-dompdf": "^3.0",
-    "guzzlehttp/guzzle": "^7.8",
-    "stripe/stripe-php": "^13.0"
-  },
-  "require-dev": {
-    "laravel/telescope": "^5.0",
-    "fakerphp/faker": "^1.23",
-    "mockery/mockery": "^1.6",
-    "phpunit/phpunit": "^11.0",
-    "laravel/pint": "^1.13"
-  }
+    "require": {
+        "php": "^8.3",
+        "laravel/framework": "^12.0",
+        "tymon/jwt-auth": "^2.1",
+        "intervention/image": "^3.0",
+        "league/flysystem-aws-s3-v3": "^3.0",
+        "spatie/laravel-permission": "^6.0",
+        "barryvdh/laravel-dompdf": "^3.0",
+        "guzzlehttp/guzzle": "^7.8",
+        "stripe/stripe-php": "^13.0"
+    },
+    "require-dev": {
+        "laravel/telescope": "^5.0",
+        "fakerphp/faker": "^1.23",
+        "mockery/mockery": "^1.6",
+        "phpunit/phpunit": "^11.0",
+        "laravel/pint": "^1.13"
+    }
 }
 ```
 
@@ -129,11 +132,11 @@
 
 ### 2.4 Services externes
 
-- **AWS S3** : Stockage images
-- **AWS CloudFront** (optionnel) : CDN
-- **CinetPay** : Paiements (Mobile Money, Carte bancaire, etc.)
-- **SendGrid ou Mailgun** : Envoi emails
-- **Sentry** : Monitoring erreurs
+-   **AWS S3** : Stockage images
+-   **AWS CloudFront** (optionnel) : CDN
+-   **CinetPay** : Paiements (Mobile Money, Carte bancaire, etc.)
+-   **SendGrid ou Mailgun** : Envoi emails
+-   **Sentry** : Monitoring erreurs
 
 ---
 
@@ -142,7 +145,7 @@
 ### 3.1 Structure du projet Laravel
 
 ```
-laravel-afrolens/
+laravel-Pourier/
 ├── app/
 │   ├── Console/
 │   │   └── Commands/
@@ -272,7 +275,7 @@ laravel-afrolens/
 │   ├── jwt.php
 │   ├── filesystems.php
 │   ├── services.php
-│   └── afrolens.php (custom config)
+│   └── Pourier.php (custom config)
 ├── database/
 │   ├── factories/
 │   ├── migrations/
@@ -2535,8 +2538,8 @@ class AuthService
 AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
 AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=afrolens-photos
-AWS_URL=https://afrolens-photos.s3.amazonaws.com
+AWS_BUCKET=Pourier-photos
+AWS_URL=https://Pourier-photos.s3.amazonaws.com
 AWS_USE_PATH_STYLE_ENDPOINT=false
 
 # Optionnel: CloudFront CDN
@@ -3673,24 +3676,34 @@ class OrderController extends Controller
 
 ---
 
-*Ce document est volontairement long et détaillé. Il continue avec les sections restantes...*
+_Ce document est volontairement long et détaillé. Il continue avec les sections restantes..._
 
 **SECTIONS RESTANTES À INCLURE:**
 
 ## 11. REQUESTS (VALIDATION)
+
 ## 12. MIDDLEWARES
+
 ## 13. SERVICES
+
 ## 14. JOBS & QUEUES
+
 ## 15. NOTIFICATIONS
+
 ## 16. PAIEMENTS
+
 ## 17. EMAILS
+
 ## 18. COMMANDES ARTISAN
+
 ## 19. TESTS
+
 ## 20. CONFIGURATION & DÉPLOIEMENT
 
 **Note**: Le document complet fait environ 8000+ lignes avec toutes les sections détaillées. Je vais créer une version plus condensée mais complète pour ne pas dépasser les limites.
 
 Voulez-vous que je:
+
 1. Continue avec toutes les sections en détail (document très long)
 2. Crée une version condensée mais complète
 3. Sépare en plusieurs fichiers markdown

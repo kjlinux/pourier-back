@@ -35,4 +35,24 @@ return [
         ],
     ],
 
+    'cinetpay' => [
+        'api_url' => env('CINETPAY_API_URL', 'https://api-checkout.cinetpay.com/v2'),
+        'site_id' => env('CINETPAY_SITE_ID'),
+        'api_key' => env('CINETPAY_API_KEY'),
+        'secret_key' => env('CINETPAY_SECRET_KEY'),
+        'notify_url' => env('CINETPAY_NOTIFY_URL', env('APP_URL').'/api/webhooks/cinetpay'),
+        'return_url' => env('CINETPAY_RETURN_URL', env('APP_URL').'/payment/callback'),
+        'mode' => env('CINETPAY_MODE', 'PRODUCTION'), // TEST or PRODUCTION
+    ],
+
+    'sendgrid' => [
+        'api_key' => env('SENDGRID_API_KEY'),
+    ],
+
+    'mailgun' => [
+        'domain' => env('MAILGUN_DOMAIN'),
+        'secret' => env('MAILGUN_SECRET'),
+        'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+    ],
+
 ];
