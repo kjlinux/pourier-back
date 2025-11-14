@@ -14,7 +14,14 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PhotoController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\WebhookController;
+use App\Http\Controllers\Api\Photographer\AnalyticsController as PhotographerAnalyticsController;
+use App\Http\Controllers\Api\Photographer\DashboardController as PhotographerDashboardController;
 use App\Http\Controllers\Api\Photographer\PhotoController as PhotographerPhotoController;
+use App\Http\Controllers\Api\Photographer\RevenueController as PhotographerRevenueController;
+use App\Http\Controllers\Api\Photographer\WithdrawalController as PhotographerWithdrawalController;
+use App\Http\Controllers\Api\User\FavoriteController;
+use App\Http\Controllers\Api\User\NotificationController;
+use App\Http\Controllers\Api\User\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -201,5 +208,71 @@ Route::middleware(['auth:api', 'admin'])->prefix('admin')->group(function () {
         Route::get('/sales', [AdminAnalyticsController::class, 'sales'])->name('admin.analytics.sales');
         Route::get('/photographers', [AdminAnalyticsController::class, 'photographers'])->name('admin.analytics.photographers');
         Route::get('/user-growth', [AdminAnalyticsController::class, 'userGrowth'])->name('admin.analytics.userGrowth');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| PHASE 7: PANEL PHOTOGRAPHE AVANCÉ
+|--------------------------------------------------------------------------
+*/
+
+// Extended Photographer Routes (Protected - requires photographer role)
+Route::middleware(['auth:api', 'photographer'])->prefix('photographer')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [PhotographerDashboardController::class, 'index'])->name('photographer.dashboard');
+    Route::get('/stats', [PhotographerDashboardController::class, 'stats'])->name('photographer.stats');
+
+    // Revenue Management
+    Route::prefix('revenue')->group(function () {
+        Route::get('/', [PhotographerRevenueController::class, 'index'])->name('photographer.revenue.index');
+        Route::get('/available', [PhotographerRevenueController::class, 'available'])->name('photographer.revenue.available');
+        Route::get('/pending', [PhotographerRevenueController::class, 'pending'])->name('photographer.revenue.pending');
+        Route::get('/history', [PhotographerRevenueController::class, 'history'])->name('photographer.revenue.history');
+    });
+
+    // Withdrawal Management
+    Route::prefix('withdrawals')->group(function () {
+        Route::get('/', [PhotographerWithdrawalController::class, 'index'])->name('photographer.withdrawals.index');
+        Route::post('/', [PhotographerWithdrawalController::class, 'store'])->name('photographer.withdrawals.store');
+        Route::get('/{withdrawal}', [PhotographerWithdrawalController::class, 'show'])->name('photographer.withdrawals.show');
+        Route::delete('/{withdrawal}', [PhotographerWithdrawalController::class, 'destroy'])->name('photographer.withdrawals.destroy');
+    });
+
+    // Analytics
+    Route::prefix('analytics')->group(function () {
+        Route::get('/sales', [PhotographerAnalyticsController::class, 'sales'])->name('photographer.analytics.sales');
+        Route::get('/popular-photos', [PhotographerAnalyticsController::class, 'popularPhotos'])->name('photographer.analytics.popularPhotos');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| PHASE 8: FEATURES UTILISATEUR
+|--------------------------------------------------------------------------
+*/
+
+// User Routes (Protected - requires authentication)
+Route::middleware('auth:api')->prefix('user')->group(function () {
+    // Profile Management
+    Route::get('/profile', [ProfileController::class, 'show'])->name('user.profile.show');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('user.profile.update');
+    Route::put('/avatar', [ProfileController::class, 'updateAvatar'])->name('user.profile.updateAvatar');
+    Route::put('/password', [ProfileController::class, 'updatePassword'])->name('user.profile.updatePassword');
+
+    // Notifications
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('user.notifications.index');
+        Route::get('/unread', [NotificationController::class, 'unread'])->name('user.notifications.unread');
+        Route::put('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('user.notifications.markAsRead');
+        Route::put('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('user.notifications.markAllAsRead');
+        Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('user.notifications.destroy');
+    });
+
+    // Favorites
+    Route::prefix('favorites')->group(function () {
+        Route::get('/', [FavoriteController::class, 'index'])->name('user.favorites.index');
+        Route::post('/{photo}', [FavoriteController::class, 'store'])->name('user.favorites.store');
+        Route::delete('/{photo}', [FavoriteController::class, 'destroy'])->name('user.favorites.destroy');
     });
 });
