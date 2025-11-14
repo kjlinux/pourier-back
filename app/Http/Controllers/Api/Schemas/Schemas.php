@@ -2,7 +2,33 @@
 
 namespace App\Http\Controllers\Api\Schemas;
 
+use OpenApi\Annotations as OA;
+
 /**
+ * @OA\Response(
+ *     response="UnauthorizedResponse",
+ *     description="Unauthorized - Authentication required",
+ *     @OA\JsonContent(ref="#/components/schemas/UnauthorizedResponse")
+ * )
+ *
+ * @OA\Response(
+ *     response="ForbiddenResponse",
+ *     description="Forbidden - Insufficient permissions",
+ *     @OA\JsonContent(ref="#/components/schemas/ForbiddenResponse")
+ * )
+ *
+ * @OA\Response(
+ *     response="NotFoundResponse",
+ *     description="Resource not found",
+ *     @OA\JsonContent(ref="#/components/schemas/NotFoundResponse")
+ * )
+ *
+ * @OA\Response(
+ *     response="ValidationErrorResponse",
+ *     description="Validation error",
+ *     @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
+ * )
+ *
  * @OA\Schema(
  *     schema="SuccessResponse",
  *     title="Success Response",

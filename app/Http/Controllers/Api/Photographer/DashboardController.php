@@ -7,11 +7,60 @@ use App\Models\Photo;
 use App\Models\Revenue;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use OpenApi\Annotations as OA;
 
 class DashboardController extends Controller
 {
     /**
-     * Get photographer dashboard statistics
+     * @OA\Get(
+     *     path="/api/photographer/dashboard",
+     *     tags={"Photographer - Dashboard"},
+     *     summary="Get photographer dashboard",
+     *     description="Comprehensive dashboard with photo statistics, revenue (80% photographer share after 20% platform commission), sales data, and recent activity",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Dashboard data retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="photos",
+     *                     type="object",
+     *                     @OA\Property(property="total", type="integer", example=150, description="Total photos uploaded"),
+     *                     @OA\Property(property="approved", type="integer", example=120, description="Approved photos available for sale"),
+     *                     @OA\Property(property="pending", type="integer", example=25, description="Photos pending moderation"),
+     *                     @OA\Property(property="rejected", type="integer", example=5, description="Rejected photos"),
+     *                     @OA\Property(property="views", type="integer", example=15000, description="Total views across all photos")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="revenue",
+     *                     type="object",
+     *                     @OA\Property(property="available", type="number", format="float", example=50000, description="Available balance ready for withdrawal in FCFA"),
+     *                     @OA\Property(property="pending", type="number", format="float", example=20000, description="Pending revenue not yet available in FCFA"),
+     *                     @OA\Property(property="total_earnings", type="number", format="float", example=200000, description="Total lifetime earnings in FCFA"),
+     *                     @OA\Property(property="this_month", type="number", format="float", example=15000, description="Current month earnings in FCFA")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="sales",
+     *                     type="object",
+     *                     @OA\Property(property="total_sales", type="integer", example=80, description="Total number of sales"),
+     *                     @OA\Property(property="total_downloads", type="integer", example=95, description="Total downloads across all sales"),
+     *                     @OA\Property(property="this_month_sales", type="integer", example=12, description="Sales this month")
+     *                 ),
+     *                 @OA\Property(property="recent_sales", type="array", @OA\Items(type="object"), description="5 most recent sales with photo and order details"),
+     *                 @OA\Property(property="recent_photos", type="array", @OA\Items(type="object"), description="5 most recently uploaded photos")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     )
+     * )
      */
     public function index(Request $request): JsonResponse
     {
@@ -76,7 +125,39 @@ class DashboardController extends Controller
     }
 
     /**
-     * Get photographer profile stats
+     * @OA\Get(
+     *     path="/api/photographer/dashboard/stats",
+     *     tags={"Photographer - Dashboard"},
+     *     summary="Get photographer profile statistics",
+     *     description="Get profile completion percentage, average photo pricing, and best-selling photo information",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Profile statistics retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="profile_completion", type="integer", example=83, description="Profile completion percentage (0-100)"),
+     *                 @OA\Property(property="average_photo_price", type="number", format="float", example=7500, description="Average price of approved photos in FCFA"),
+     *                 @OA\Property(
+     *                     property="best_selling_photo",
+     *                     type="object",
+     *                     description="Photo with most sales",
+     *                     @OA\Property(property="id", type="string", format="uuid"),
+     *                     @OA\Property(property="title", type="string", example="Sunset over Ouagadougou"),
+     *                     @OA\Property(property="order_items_count", type="integer", example=25, description="Number of times sold")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     )
+     * )
      */
     public function stats(Request $request): JsonResponse
     {

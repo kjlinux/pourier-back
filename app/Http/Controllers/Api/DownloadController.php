@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use ZipArchive;
+use OpenApi\Annotations as OA;
 
 class DownloadController extends Controller
 {
@@ -21,7 +22,52 @@ class DownloadController extends Controller
     ) {}
 
     /**
-     * Download a single photo
+     * @OA\Get(
+     *     path="/api/downloads/photo/{photo}",
+     *     tags={"Downloads"},
+     *     summary="Download purchased photo (high-resolution)",
+     *     description="Download the high-resolution version of a purchased photo. User must have completed order containing this photo.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="photo",
+     *         in="path",
+     *         description="Photo UUID",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Photo file download (streamed)",
+     *         @OA\MediaType(
+     *             mediaType="image/jpeg",
+     *             @OA\Schema(type="string", format="binary")
+     *         ),
+     *         @OA\Header(
+     *             header="Content-Disposition",
+     *             description="Attachment filename",
+     *             @OA\Schema(type="string", example="attachment; filename=photo.jpg")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - photo not purchased",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You have not purchased this photo")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Photo file not found on server",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Photo file not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     )
+     * )
      */
     public function downloadPhoto(Request $request, Photo $photo): StreamedResponse
     {
@@ -53,7 +99,59 @@ class DownloadController extends Controller
     }
 
     /**
-     * Download all photos from an order
+     * @OA\Get(
+     *     path="/api/downloads/order/{order}",
+     *     tags={"Downloads"},
+     *     summary="Download all photos from order (ZIP)",
+     *     description="Download all high-resolution photos from a completed order as a ZIP archive. User must be order owner.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="order",
+     *         in="path",
+     *         description="Order UUID",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="ZIP file download (streamed)",
+     *         @OA\MediaType(
+     *             mediaType="application/zip",
+     *             @OA\Schema(type="string", format="binary")
+     *         ),
+     *         @OA\Header(
+     *             header="Content-Disposition",
+     *             description="Attachment filename",
+     *             @OA\Schema(type="string", example="attachment; filename=order.zip")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - order not completed or not owner",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Order is not completed yet")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No photos found in order",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No photos found in this order")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error creating ZIP file",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Could not create zip file")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     )
+     * )
      */
     public function downloadOrder(Request $request, Order $order): StreamedResponse
     {
@@ -103,7 +201,50 @@ class DownloadController extends Controller
     }
 
     /**
-     * Download invoice for an order
+     * @OA\Get(
+     *     path="/api/downloads/invoice/{order}",
+     *     tags={"Downloads"},
+     *     summary="Download order invoice (PDF)",
+     *     description="Download the PDF invoice for a completed order. User must be order owner.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="order",
+     *         in="path",
+     *         description="Order UUID",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="PDF invoice download",
+     *         @OA\MediaType(
+     *             mediaType="application/pdf",
+     *             @OA\Schema(type="string", format="binary")
+     *         ),
+     *         @OA\Header(
+     *             header="Content-Disposition",
+     *             description="Attachment filename",
+     *             @OA\Schema(type="string", example="attachment; filename=invoice.pdf")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - not order owner",
+     *         ref="#/components/responses/ForbiddenResponse"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Invoice not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invoice not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     )
+     * )
      */
     public function downloadInvoice(Request $request, Order $order): StreamedResponse
     {
@@ -123,7 +264,39 @@ class DownloadController extends Controller
     }
 
     /**
-     * Download watermarked preview (for non-purchased photos)
+     * @OA\Get(
+     *     path="/api/downloads/preview/{photo}",
+     *     tags={"Downloads"},
+     *     summary="Download watermarked preview (public)",
+     *     description="Download a watermarked preview version of any photo. No authentication required. Useful for demos or sharing.",
+     *     @OA\Parameter(
+     *         name="photo",
+     *         in="path",
+     *         description="Photo UUID",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Watermarked preview image download",
+     *         @OA\MediaType(
+     *             mediaType="image/jpeg",
+     *             @OA\Schema(type="string", format="binary")
+     *         ),
+     *         @OA\Header(
+     *             header="Content-Disposition",
+     *             description="Attachment filename",
+     *             @OA\Schema(type="string", example="attachment; filename=preview.jpg")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Preview not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Preview not found")
+     *         )
+     *     )
+     * )
      */
     public function downloadPreview(Photo $photo): StreamedResponse
     {

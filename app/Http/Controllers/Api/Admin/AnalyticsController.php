@@ -9,11 +9,62 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use OpenApi\Annotations as OA;
 
 class AnalyticsController extends Controller
 {
     /**
-     * Get revenue analytics
+     * @OA\Get(
+     *     path="/api/admin/analytics/revenue",
+     *     tags={"Admin - Analytics"},
+     *     summary="Get revenue analytics",
+     *     description="Retrieve revenue analytics with daily breakdown for a specified time period. Shows total revenue and daily revenue trends. Requires admin role.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="period",
+     *         in="query",
+     *         description="Time period for analytics",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"7days", "30days", "90days", "year"}, default="30days", example="30days")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Revenue analytics retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="period", type="string", example="30days"),
+     *                 @OA\Property(property="start_date", type="string", format="date", example="2024-01-01"),
+     *                 @OA\Property(property="end_date", type="string", format="date", example="2024-01-31"),
+     *                 @OA\Property(property="total_revenue", type="number", format="float", example=750000),
+     *                 @OA\Property(
+     *                     property="daily_revenue",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         @OA\Property(property="date", type="string", format="date", example="2024-01-15"),
+     *                         @OA\Property(property="total_revenue", type="number", format="float", example=25000),
+     *                         @OA\Property(property="order_count", type="integer", example=5)
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Accès non autorisé")
+     *         )
+     *     )
+     * )
      */
     public function revenue(Request $request): JsonResponse
     {
@@ -51,7 +102,54 @@ class AnalyticsController extends Controller
     }
 
     /**
-     * Get sales analytics
+     * @OA\Get(
+     *     path="/api/admin/analytics/sales",
+     *     tags={"Admin - Analytics"},
+     *     summary="Get sales analytics",
+     *     description="Retrieve sales analytics including total orders, photos sold, average order value, and top selling photos for a specified time period. Requires admin role.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="period",
+     *         in="query",
+     *         description="Time period for analytics",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"7days", "30days", "90days", "year"}, default="30days", example="30days")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Sales analytics retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="period", type="string", example="30days"),
+     *                 @OA\Property(property="total_orders", type="integer", example=150),
+     *                 @OA\Property(property="total_photos_sold", type="integer", example=250),
+     *                 @OA\Property(property="average_order_value", type="number", format="float", example=5000),
+     *                 @OA\Property(
+     *                     property="top_selling_photos",
+     *                     type="array",
+     *                     description="Top 10 best-selling photos in the period",
+     *                     @OA\Items(type="object")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Accès non autorisé")
+     *         )
+     *     )
+     * )
      */
     public function sales(Request $request): JsonResponse
     {
@@ -99,7 +197,51 @@ class AnalyticsController extends Controller
     }
 
     /**
-     * Get photographer analytics
+     * @OA\Get(
+     *     path="/api/admin/analytics/photographers",
+     *     tags={"Admin - Analytics"},
+     *     summary="Get photographer analytics",
+     *     description="Retrieve analytics for top 20 photographers ranked by total earnings, including approved photos count and total earnings. Requires admin role.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Photographer analytics retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="top_photographers",
+     *                     type="array",
+     *                     description="Top 20 photographers by earnings",
+     *                     @OA\Items(
+     *                         @OA\Property(property="id", type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac"),
+     *                         @OA\Property(property="first_name", type="string", example="Jean"),
+     *                         @OA\Property(property="last_name", type="string", example="Dupont"),
+     *                         @OA\Property(property="email", type="string", example="jean.dupont@example.com"),
+     *                         @OA\Property(property="created_at", type="string", format="datetime"),
+     *                         @OA\Property(property="approved_photos_count", type="integer", example=125),
+     *                         @OA\Property(property="total_earnings", type="number", format="float", example=450000)
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Accès non autorisé")
+     *         )
+     *     )
+     * )
      */
     public function photographers(Request $request): JsonResponse
     {
@@ -125,7 +267,51 @@ class AnalyticsController extends Controller
     }
 
     /**
-     * Get user growth analytics
+     * @OA\Get(
+     *     path="/api/admin/analytics/user-growth",
+     *     tags={"Admin - Analytics"},
+     *     summary="Get user growth analytics",
+     *     description="Retrieve user growth analytics showing daily new user registrations grouped by account type for a specified time period. Requires admin role.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="period",
+     *         in="query",
+     *         description="Time period for analytics",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"7days", "30days", "90days", "year"}, default="30days", example="30days")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User growth analytics retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="period", type="string", example="30days"),
+     *                 @OA\Property(
+     *                     property="user_growth",
+     *                     type="object",
+     *                     description="User registrations grouped by date and account type",
+     *                     additionalProperties=true
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Accès non autorisé")
+     *         )
+     *     )
+     * )
      */
     public function userGrowth(Request $request): JsonResponse
     {

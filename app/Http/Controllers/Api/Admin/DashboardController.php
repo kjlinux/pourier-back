@@ -9,11 +9,98 @@ use App\Models\User;
 use App\Models\Withdrawal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use OpenApi\Annotations as OA;
 
 class DashboardController extends Controller
 {
     /**
-     * Get admin dashboard statistics
+     * @OA\Get(
+     *     path="/api/admin/dashboard",
+     *     tags={"Admin - Dashboard"},
+     *     summary="Get admin dashboard statistics",
+     *     description="Retrieve comprehensive platform statistics including users, photos, orders, withdrawals, recent activity, and platform health metrics. Requires admin role.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Dashboard statistics retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="users",
+     *                     type="object",
+     *                     @OA\Property(property="total", type="integer", example=1250),
+     *                     @OA\Property(property="buyers", type="integer", example=800),
+     *                     @OA\Property(property="photographers", type="integer", example=400),
+     *                     @OA\Property(property="admins", type="integer", example=5),
+     *                     @OA\Property(property="verified", type="integer", example=950),
+     *                     @OA\Property(property="new_this_month", type="integer", example=45)
+     *                 ),
+     *                 @OA\Property(
+     *                     property="photos",
+     *                     type="object",
+     *                     @OA\Property(property="total", type="integer", example=5000),
+     *                     @OA\Property(property="pending", type="integer", example=120),
+     *                     @OA\Property(property="approved", type="integer", example=4500),
+     *                     @OA\Property(property="rejected", type="integer", example=380),
+     *                     @OA\Property(property="featured", type="integer", example=50),
+     *                     @OA\Property(property="uploaded_this_month", type="integer", example=200)
+     *                 ),
+     *                 @OA\Property(
+     *                     property="orders",
+     *                     type="object",
+     *                     @OA\Property(property="total", type="integer", example=3500),
+     *                     @OA\Property(property="pending", type="integer", example=25),
+     *                     @OA\Property(property="completed", type="integer", example=3400),
+     *                     @OA\Property(property="failed", type="integer", example=75),
+     *                     @OA\Property(property="total_revenue", type="number", format="float", example=17500000),
+     *                     @OA\Property(property="orders_this_month", type="integer", example=150),
+     *                     @OA\Property(property="revenue_this_month", type="number", format="float", example=750000)
+     *                 ),
+     *                 @OA\Property(
+     *                     property="withdrawals",
+     *                     type="object",
+     *                     @OA\Property(property="total", type="integer", example=450),
+     *                     @OA\Property(property="pending", type="integer", example=15),
+     *                     @OA\Property(property="approved", type="integer", example=420),
+     *                     @OA\Property(property="rejected", type="integer", example=15),
+     *                     @OA\Property(property="total_amount", type="number", format="float", example=8400000),
+     *                     @OA\Property(property="pending_amount", type="number", format="float", example=150000)
+     *                 ),
+     *                 @OA\Property(
+     *                     property="recent_activity",
+     *                     type="object",
+     *                     @OA\Property(property="latest_orders", type="array", @OA\Items(type="object")),
+     *                     @OA\Property(property="latest_photos", type="array", @OA\Items(type="object")),
+     *                     @OA\Property(property="latest_users", type="array", @OA\Items(type="object"))
+     *                 ),
+     *                 @OA\Property(
+     *                     property="platform",
+     *                     type="object",
+     *                     @OA\Property(property="active_photographers", type="integer", example=250),
+     *                     @OA\Property(property="average_photo_price", type="number", format="float", example=3500),
+     *                     @OA\Property(property="conversion_rate", type="number", format="float", example=35.5),
+     *                     @OA\Property(property="top_photographers", type="array", @OA\Items(type="object"))
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Accès non autorisé")
+     *         )
+     *     )
+     * )
      */
     public function index(): JsonResponse
     {

@@ -6,11 +6,73 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use OpenApi\Annotations as OA;
 
 class UserController extends Controller
 {
     /**
-     * Get all users with filtering
+     * @OA\Get(
+     *     path="/api/admin/users",
+     *     tags={"Admin - Users"},
+     *     summary="Get all users with filtering",
+     *     description="Retrieve all users with advanced filtering options by account type, active status, and search term. Requires admin role.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="account_type",
+     *         in="query",
+     *         description="Filter by account type",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"buyer", "photographer", "admin"}, example="buyer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="is_active",
+     *         in="query",
+     *         description="Filter by active status",
+     *         required=false,
+     *         @OA\Schema(type="boolean", example=true)
+     *     ),
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Search by name or email",
+     *         required=false,
+     *         @OA\Schema(type="string", example="Jean")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=20, example=20)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Users retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="data", type="array", @OA\Items(type="object")),
+     *                 @OA\Property(property="total", type="integer", example=1250)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Accès non autorisé")
+     *         )
+     *     )
+     * )
      */
     public function index(Request $request): JsonResponse
     {
@@ -46,7 +108,49 @@ class UserController extends Controller
     }
 
     /**
-     * Get user details
+     * @OA\Get(
+     *     path="/api/admin/users/{user}",
+     *     tags={"Admin - Users"},
+     *     summary="Get user details",
+     *     description="Retrieve detailed information about a specific user. For photographers, includes profile and recent photos. Requires admin role.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="user",
+     *         in="path",
+     *         description="User UUID",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User details retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Accès non autorisé")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Utilisateur introuvable")
+     *         )
+     *     )
+     * )
      */
     public function show(User $user): JsonResponse
     {
@@ -64,7 +168,57 @@ class UserController extends Controller
     }
 
     /**
-     * Suspend user account
+     * @OA\Put(
+     *     path="/api/admin/users/{user}/suspend",
+     *     tags={"Admin - Users"},
+     *     summary="Suspend user account",
+     *     description="Suspend a user's account, preventing them from accessing the platform. Requires admin role.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="user",
+     *         in="path",
+     *         description="User UUID",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User account suspended successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Compte suspendu avec succès.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Account already suspended",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Ce compte est déjà suspendu.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Accès non autorisé")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Utilisateur introuvable")
+     *         )
+     *     )
+     * )
      */
     public function suspend(User $user): JsonResponse
     {
@@ -84,7 +238,57 @@ class UserController extends Controller
     }
 
     /**
-     * Activate user account
+     * @OA\Put(
+     *     path="/api/admin/users/{user}/activate",
+     *     tags={"Admin - Users"},
+     *     summary="Activate user account",
+     *     description="Activate a suspended user's account, restoring their access to the platform. Requires admin role.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="user",
+     *         in="path",
+     *         description="User UUID",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User account activated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Compte activé avec succès.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Account already active",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Ce compte est déjà actif.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Admin role required",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Accès non autorisé")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Utilisateur introuvable")
+     *         )
+     *     )
+     * )
      */
     public function activate(User $user): JsonResponse
     {
@@ -104,7 +308,49 @@ class UserController extends Controller
     }
 
     /**
-     * Delete user account (soft delete)
+     * @OA\Delete(
+     *     path="/api/admin/users/{user}",
+     *     tags={"Admin - Users"},
+     *     summary="Delete user account",
+     *     description="Soft delete a user account. Admin accounts cannot be deleted. Requires admin role.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="user",
+     *         in="path",
+     *         description="User UUID",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User account deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Compte supprimé avec succès.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         ref="#/components/responses/UnauthorizedResponse"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Cannot delete admin account or admin role required",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Impossible de supprimer un compte administrateur.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Utilisateur introuvable")
+     *         )
+     *     )
+     * )
      */
     public function destroy(User $user): JsonResponse
     {

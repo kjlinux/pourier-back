@@ -14,6 +14,2429 @@ servers:
     url: 'http://localhost:8000'
     description: 'Serveur API Pourier'
 paths:
+  /api/admin/analytics/revenue:
+    get:
+      tags:
+        - 'Admin - Analytics'
+      summary: 'Get revenue analytics'
+      description: 'Retrieve revenue analytics with daily breakdown for a specified time period. Shows total revenue and daily revenue trends. Requires admin role.'
+      operationId: 6f7e3bbc8333de2385d1e9dc470da368
+      parameters:
+        -
+          name: period
+          in: query
+          description: 'Time period for analytics'
+          required: false
+          schema:
+            type: string
+            default: 30days
+            enum:
+              - 7days
+              - 30days
+              - 90days
+              - year
+            example: 30days
+      responses:
+        200:
+          description: 'Revenue analytics retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      period:
+                        type: string
+                        example: 30days
+                      start_date:
+                        type: string
+                        format: date
+                        example: '2024-01-01'
+                      end_date:
+                        type: string
+                        format: date
+                        example: '2024-01-31'
+                      total_revenue:
+                        type: number
+                        format: float
+                        example: 750000
+                      daily_revenue:
+                        type: array
+                        items:
+                          properties:
+                            date:
+                              type: string
+                              format: date
+                              example: '2024-01-15'
+                            total_revenue:
+                              type: number
+                              format: float
+                              example: 25000
+                            order_count:
+                              type: integer
+                              example: 5
+                          type: object
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  /api/admin/analytics/sales:
+    get:
+      tags:
+        - 'Admin - Analytics'
+      summary: 'Get sales analytics'
+      description: 'Retrieve sales analytics including total orders, photos sold, average order value, and top selling photos for a specified time period. Requires admin role.'
+      operationId: 94da2592b88f216b7d8e6268ab5c9940
+      parameters:
+        -
+          name: period
+          in: query
+          description: 'Time period for analytics'
+          required: false
+          schema:
+            type: string
+            default: 30days
+            enum:
+              - 7days
+              - 30days
+              - 90days
+              - year
+            example: 30days
+      responses:
+        200:
+          description: 'Sales analytics retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      period:
+                        type: string
+                        example: 30days
+                      total_orders:
+                        type: integer
+                        example: 150
+                      total_photos_sold:
+                        type: integer
+                        example: 250
+                      average_order_value:
+                        type: number
+                        format: float
+                        example: 5000
+                      top_selling_photos:
+                        description: 'Top 10 best-selling photos in the period'
+                        type: array
+                        items:
+                          type: object
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  /api/admin/analytics/photographers:
+    get:
+      tags:
+        - 'Admin - Analytics'
+      summary: 'Get photographer analytics'
+      description: 'Retrieve analytics for top 20 photographers ranked by total earnings, including approved photos count and total earnings. Requires admin role.'
+      operationId: 2e6ee5449e4e1af04c79a74037b7adfc
+      responses:
+        200:
+          description: 'Photographer analytics retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      top_photographers:
+                        description: 'Top 20 photographers by earnings'
+                        type: array
+                        items:
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                            first_name:
+                              type: string
+                              example: Jean
+                            last_name:
+                              type: string
+                              example: Dupont
+                            email:
+                              type: string
+                              example: jean.dupont@example.com
+                            created_at:
+                              type: string
+                              format: datetime
+                            approved_photos_count:
+                              type: integer
+                              example: 125
+                            total_earnings:
+                              type: number
+                              format: float
+                              example: 450000
+                          type: object
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  /api/admin/analytics/user-growth:
+    get:
+      tags:
+        - 'Admin - Analytics'
+      summary: 'Get user growth analytics'
+      description: 'Retrieve user growth analytics showing daily new user registrations grouped by account type for a specified time period. Requires admin role.'
+      operationId: c5049326f73fc64dee8b801e754fc4fd
+      parameters:
+        -
+          name: period
+          in: query
+          description: 'Time period for analytics'
+          required: false
+          schema:
+            type: string
+            default: 30days
+            enum:
+              - 7days
+              - 30days
+              - 90days
+              - year
+            example: 30days
+      responses:
+        200:
+          description: 'User growth analytics retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      period:
+                        type: string
+                        example: 30days
+                      user_growth:
+                        description: 'User registrations grouped by date and account type'
+                        type: object
+                        additionalProperties: true
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  /api/admin/dashboard:
+    get:
+      tags:
+        - 'Admin - Dashboard'
+      summary: 'Get admin dashboard statistics'
+      description: 'Retrieve comprehensive platform statistics including users, photos, orders, withdrawals, recent activity, and platform health metrics. Requires admin role.'
+      operationId: f6e3ffeb3c9fb988ca2a77ad48e2c04c
+      responses:
+        200:
+          description: 'Dashboard statistics retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      users:
+                        properties:
+                          total:
+                            type: integer
+                            example: 1250
+                          buyers:
+                            type: integer
+                            example: 800
+                          photographers:
+                            type: integer
+                            example: 400
+                          admins:
+                            type: integer
+                            example: 5
+                          verified:
+                            type: integer
+                            example: 950
+                          new_this_month:
+                            type: integer
+                            example: 45
+                        type: object
+                      photos:
+                        properties:
+                          total:
+                            type: integer
+                            example: 5000
+                          pending:
+                            type: integer
+                            example: 120
+                          approved:
+                            type: integer
+                            example: 4500
+                          rejected:
+                            type: integer
+                            example: 380
+                          featured:
+                            type: integer
+                            example: 50
+                          uploaded_this_month:
+                            type: integer
+                            example: 200
+                        type: object
+                      orders:
+                        properties:
+                          total:
+                            type: integer
+                            example: 3500
+                          pending:
+                            type: integer
+                            example: 25
+                          completed:
+                            type: integer
+                            example: 3400
+                          failed:
+                            type: integer
+                            example: 75
+                          total_revenue:
+                            type: number
+                            format: float
+                            example: 17500000
+                          orders_this_month:
+                            type: integer
+                            example: 150
+                          revenue_this_month:
+                            type: number
+                            format: float
+                            example: 750000
+                        type: object
+                      withdrawals:
+                        properties:
+                          total:
+                            type: integer
+                            example: 450
+                          pending:
+                            type: integer
+                            example: 15
+                          approved:
+                            type: integer
+                            example: 420
+                          rejected:
+                            type: integer
+                            example: 15
+                          total_amount:
+                            type: number
+                            format: float
+                            example: 8400000
+                          pending_amount:
+                            type: number
+                            format: float
+                            example: 150000
+                        type: object
+                      recent_activity:
+                        properties:
+                          latest_orders:
+                            type: array
+                            items:
+                              type: object
+                          latest_photos:
+                            type: array
+                            items:
+                              type: object
+                          latest_users:
+                            type: array
+                            items:
+                              type: object
+                        type: object
+                      platform:
+                        properties:
+                          active_photographers:
+                            type: integer
+                            example: 250
+                          average_photo_price:
+                            type: number
+                            format: float
+                            example: 3500
+                          conversion_rate:
+                            type: number
+                            format: float
+                            example: 35.5
+                          top_photographers:
+                            type: array
+                            items:
+                              type: object
+                        type: object
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  /api/admin/photos/pending:
+    get:
+      tags:
+        - 'Admin - Photo Moderation'
+      summary: 'Get pending photos for moderation'
+      description: 'Retrieve all photos awaiting moderation review with photographer and category information. Requires admin role.'
+      operationId: ca3803521afa22884315f7cb541d776f
+      parameters:
+        -
+          name: per_page
+          in: query
+          description: 'Number of items per page'
+          required: false
+          schema:
+            type: integer
+            default: 20
+            example: 20
+        -
+          name: page
+          in: query
+          description: 'Page number'
+          required: false
+          schema:
+            type: integer
+            default: 1
+            example: 1
+      responses:
+        200:
+          description: 'Pending photos retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      data:
+                        type: array
+                        items:
+                          type: object
+                      total:
+                        type: integer
+                        example: 120
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  /api/admin/photos:
+    get:
+      tags:
+        - 'Admin - Photo Moderation'
+      summary: 'Get all photos with filtering'
+      description: 'Retrieve all photos with advanced filtering options by status, photographer, and search term. Requires admin role.'
+      operationId: 61f63e306e3522b2313047ce38234035
+      parameters:
+        -
+          name: status
+          in: query
+          description: 'Filter by moderation status'
+          required: false
+          schema:
+            type: string
+            enum:
+              - pending
+              - approved
+              - rejected
+            example: pending
+        -
+          name: photographer_id
+          in: query
+          description: 'Filter by photographer UUID'
+          required: false
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+        -
+          name: search
+          in: query
+          description: 'Search by photo title'
+          required: false
+          schema:
+            type: string
+            example: sunset
+        -
+          name: per_page
+          in: query
+          description: 'Number of items per page'
+          required: false
+          schema:
+            type: integer
+            default: 20
+            example: 20
+      responses:
+        200:
+          description: 'Photos retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      data:
+                        type: array
+                        items:
+                          type: object
+                      total:
+                        type: integer
+                        example: 5000
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/photos/{photo}/approve':
+    put:
+      tags:
+        - 'Admin - Photo Moderation'
+      summary: 'Approve a photo'
+      description: "Approve a pending photo, making it publicly visible. The photo's moderation status is set to 'approved' and visibility is changed to 'public'. Requires admin role."
+      operationId: 4981a26bc0dfd6081bee150b4dacb4de
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'Photo UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Photo approved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Photo approuvée avec succès.'
+                  data:
+                    type: object
+                type: object
+        400:
+          description: 'Photo already approved'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Cette photo est déjà approuvée.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'Photo not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Photo introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/photos/{photo}/reject':
+    put:
+      tags:
+        - 'Admin - Photo Moderation'
+      summary: 'Reject a photo'
+      description: "Reject a pending photo with optional rejection reason. The photo's moderation status is set to 'rejected' and visibility is changed to 'private'. Requires admin role."
+      operationId: 975303734e4edbb7d244fab417581ab8
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'Photo UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              properties:
+                rejection_reason:
+                  description: 'Reason for rejection'
+                  type: string
+                  maxLength: 500
+                  example: 'Image quality does not meet platform standards'
+              type: object
+      responses:
+        200:
+          description: 'Photo rejected successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Photo rejetée avec succès.'
+                  data:
+                    type: object
+                type: object
+        400:
+          description: 'Photo already rejected'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Cette photo est déjà rejetée.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'Photo not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Photo introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/photos/{photo}/toggle-featured':
+    put:
+      tags:
+        - 'Admin - Photo Moderation'
+      summary: 'Toggle photo featured status'
+      description: 'Feature or unfeature an approved photo. Only approved photos can be featured. Requires admin role.'
+      operationId: d0ce84b8f87b4a581c2b939a2d02aa58
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'Photo UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Photo featured status toggled successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Photo mise en avant avec succès.'
+                  data:
+                    type: object
+                type: object
+        400:
+          description: 'Photo not approved'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Seules les photos approuvées peuvent être mises en avant.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'Photo not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Photo introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/photos/{photo}':
+    delete:
+      tags:
+        - 'Admin - Photo Moderation'
+      summary: 'Delete a photo'
+      description: 'Permanently delete a photo and its associated files from storage. This action cannot be undone. Requires admin role.'
+      operationId: 42b9eeac24cf97fdab4c53bf9c161cb5
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'Photo UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Photo deleted successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Photo supprimée avec succès.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'Photo not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Photo introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  /api/admin/photos/bulk-approve:
+    post:
+      tags:
+        - 'Admin - Photo Moderation'
+      summary: 'Bulk approve photos'
+      description: "Approve multiple pending photos at once. Only pending photos will be updated. All specified photos will have their moderation status set to 'approved' and visibility changed to 'public'. Requires admin role."
+      operationId: c95344a8ff17c18e1882c07e8218fc6a
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - photo_ids
+              properties:
+                photo_ids:
+                  description: 'Array of photo UUIDs to approve'
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  example:
+                    - 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                    - 9d445a1c-85c5-4b6d-9c38-99a4915d6dad
+              type: object
+      responses:
+        200:
+          description: 'Photos approved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: '5 photo(s) approuvée(s) avec succès.'
+                type: object
+        400:
+          description: 'Validation error'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Validation failed'
+                  errors:
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  /api/admin/photos/bulk-reject:
+    post:
+      tags:
+        - 'Admin - Photo Moderation'
+      summary: 'Bulk reject photos'
+      description: "Reject multiple pending photos at once with optional rejection reason. Only pending photos will be updated. All specified photos will have their moderation status set to 'rejected' and visibility changed to 'private'. Requires admin role."
+      operationId: a1bd48c38cb1a52f39ae01cd4499e0a5
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - photo_ids
+              properties:
+                photo_ids:
+                  description: 'Array of photo UUIDs to reject'
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  example:
+                    - 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                    - 9d445a1c-85c5-4b6d-9c38-99a4915d6dad
+                rejection_reason:
+                  description: 'Reason for rejection applied to all photos'
+                  type: string
+                  maxLength: 500
+                  example: 'Images do not meet quality standards'
+              type: object
+      responses:
+        200:
+          description: 'Photos rejected successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: '5 photo(s) rejetée(s) avec succès.'
+                type: object
+        400:
+          description: 'Validation error'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Validation failed'
+                  errors:
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  /api/admin/photographers:
+    get:
+      tags:
+        - 'Admin - Photographers'
+      summary: 'Get all photographers'
+      description: 'Retrieve all photographers with filtering by status and search capabilities. Requires admin role.'
+      operationId: 784c59e5e3b1be817df2d1c98a41235b
+      parameters:
+        -
+          name: status
+          in: query
+          description: 'Filter by photographer profile status'
+          required: false
+          schema:
+            type: string
+            enum:
+              - pending
+              - approved
+              - rejected
+            example: approved
+        -
+          name: search
+          in: query
+          description: 'Search by name or email'
+          required: false
+          schema:
+            type: string
+            example: Jean
+        -
+          name: per_page
+          in: query
+          description: 'Number of items per page'
+          required: false
+          schema:
+            type: integer
+            default: 20
+            example: 20
+      responses:
+        200:
+          description: 'Photographers retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      data:
+                        type: array
+                        items:
+                          type: object
+                      total:
+                        type: integer
+                        example: 400
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  /api/admin/photographers/pending:
+    get:
+      tags:
+        - 'Admin - Photographers'
+      summary: 'Get pending photographer profiles'
+      description: 'Retrieve all photographer profiles awaiting approval. Requires admin role.'
+      operationId: 5bbc2a32d4a7f9cf2fa0b163c09549d1
+      parameters:
+        -
+          name: per_page
+          in: query
+          description: 'Number of items per page'
+          required: false
+          schema:
+            type: integer
+            default: 20
+            example: 20
+      responses:
+        200:
+          description: 'Pending photographers retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      data:
+                        type: array
+                        items:
+                          type: object
+                      total:
+                        type: integer
+                        example: 25
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/photographers/{photographer}':
+    get:
+      tags:
+        - 'Admin - Photographers'
+      summary: 'Get photographer details'
+      description: 'Retrieve detailed information about a specific photographer including profile, recent photos, and statistics (total photos, sales, downloads). Requires admin role.'
+      operationId: 2cc2307f06c141635430bf4c0ae7871d
+      parameters:
+        -
+          name: photographer
+          in: path
+          description: 'Photographer UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Photographer details retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                type: object
+        400:
+          description: 'User is not a photographer'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Cet utilisateur n'est pas un photographe."
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'Photographer not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Photographe introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/photographers/{photographer}/approve':
+    put:
+      tags:
+        - 'Admin - Photographers'
+      summary: 'Approve photographer profile'
+      description: 'Approve a pending photographer profile, allowing them to upload and sell photos on the platform. Requires admin role.'
+      operationId: 59ce2f612628527cd241df2e3e5e56a3
+      parameters:
+        -
+          name: photographer
+          in: path
+          description: 'Photographer UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Photographer profile approved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Profil photographe approuvé avec succès.'
+                  data:
+                    type: object
+                type: object
+        400:
+          description: 'Invalid request (not a photographer or already approved)'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Ce profil est déjà approuvé.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'Photographer or profile not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Profil photographe introuvable.'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/photographers/{photographer}/reject':
+    put:
+      tags:
+        - 'Admin - Photographers'
+      summary: 'Reject photographer profile'
+      description: 'Reject a pending photographer profile with optional rejection reason. Requires admin role.'
+      operationId: 364ae6a5b7b1d311b060774ddddc4c68
+      parameters:
+        -
+          name: photographer
+          in: path
+          description: 'Photographer UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              properties:
+                rejection_reason:
+                  description: 'Reason for rejection'
+                  type: string
+                  maxLength: 500
+                  example: 'Profile information incomplete or invalid'
+              type: object
+      responses:
+        200:
+          description: 'Photographer profile rejected successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Profil photographe rejeté avec succès.'
+                  data:
+                    type: object
+                type: object
+        400:
+          description: 'Invalid request (not a photographer or already rejected)'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Ce profil est déjà rejeté.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'Photographer or profile not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Profil photographe introuvable.'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/photographers/{photographer}/suspend':
+    put:
+      tags:
+        - 'Admin - Photographers'
+      summary: 'Suspend photographer account'
+      description: "Suspend a photographer's account, preventing them from accessing the platform. Requires admin role."
+      operationId: e5865ccb50849aa283cd2f8c574caba6
+      parameters:
+        -
+          name: photographer
+          in: path
+          description: 'Photographer UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Photographer account suspended successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Compte photographe suspendu avec succès.'
+                type: object
+        400:
+          description: 'User is not a photographer'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Cet utilisateur n'est pas un photographe."
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'Photographer not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Photographe introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/photographers/{photographer}/activate':
+    put:
+      tags:
+        - 'Admin - Photographers'
+      summary: 'Activate photographer account'
+      description: "Activate a suspended photographer's account, restoring their access to the platform. Requires admin role."
+      operationId: ed5e94429c5ccf6bf026b4d6b6ed7c45
+      parameters:
+        -
+          name: photographer
+          in: path
+          description: 'Photographer UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Photographer account activated successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Compte photographe activé avec succès.'
+                type: object
+        400:
+          description: 'User is not a photographer'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Cet utilisateur n'est pas un photographe."
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'Photographer not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Photographe introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  /api/admin/users:
+    get:
+      tags:
+        - 'Admin - Users'
+      summary: 'Get all users with filtering'
+      description: 'Retrieve all users with advanced filtering options by account type, active status, and search term. Requires admin role.'
+      operationId: 9ded17315e13756cd593b5840cd39a26
+      parameters:
+        -
+          name: account_type
+          in: query
+          description: 'Filter by account type'
+          required: false
+          schema:
+            type: string
+            enum:
+              - buyer
+              - photographer
+              - admin
+            example: buyer
+        -
+          name: is_active
+          in: query
+          description: 'Filter by active status'
+          required: false
+          schema:
+            type: boolean
+            example: true
+        -
+          name: search
+          in: query
+          description: 'Search by name or email'
+          required: false
+          schema:
+            type: string
+            example: Jean
+        -
+          name: per_page
+          in: query
+          description: 'Number of items per page'
+          required: false
+          schema:
+            type: integer
+            default: 20
+            example: 20
+      responses:
+        200:
+          description: 'Users retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      data:
+                        type: array
+                        items:
+                          type: object
+                      total:
+                        type: integer
+                        example: 1250
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/users/{user}':
+    get:
+      tags:
+        - 'Admin - Users'
+      summary: 'Get user details'
+      description: 'Retrieve detailed information about a specific user. For photographers, includes profile and recent photos. Requires admin role.'
+      operationId: 1755e6ac1393c92a407ec78308857c0e
+      parameters:
+        -
+          name: user
+          in: path
+          description: 'User UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'User details retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'User not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Utilisateur introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+    delete:
+      tags:
+        - 'Admin - Users'
+      summary: 'Delete user account'
+      description: 'Soft delete a user account. Admin accounts cannot be deleted. Requires admin role.'
+      operationId: 30b96bca56895875c78781639320f633
+      parameters:
+        -
+          name: user
+          in: path
+          description: 'User UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'User account deleted successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Compte supprimé avec succès.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Cannot delete admin account or admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Impossible de supprimer un compte administrateur.'
+                type: object
+        404:
+          description: 'User not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Utilisateur introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/users/{user}/suspend':
+    put:
+      tags:
+        - 'Admin - Users'
+      summary: 'Suspend user account'
+      description: "Suspend a user's account, preventing them from accessing the platform. Requires admin role."
+      operationId: 7503090c42bdb31874134c6cdac109fe
+      parameters:
+        -
+          name: user
+          in: path
+          description: 'User UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'User account suspended successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Compte suspendu avec succès.'
+                type: object
+        400:
+          description: 'Account already suspended'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Ce compte est déjà suspendu.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'User not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Utilisateur introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/users/{user}/activate':
+    put:
+      tags:
+        - 'Admin - Users'
+      summary: 'Activate user account'
+      description: "Activate a suspended user's account, restoring their access to the platform. Requires admin role."
+      operationId: f501f5364ae2acb64c8b709131a923cf
+      parameters:
+        -
+          name: user
+          in: path
+          description: 'User UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'User account activated successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Compte activé avec succès.'
+                type: object
+        400:
+          description: 'Account already active'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Ce compte est déjà actif.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'User not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Utilisateur introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  /api/admin/withdrawals:
+    get:
+      tags:
+        - 'Admin - Withdrawals'
+      summary: 'Get all withdrawals with filtering'
+      description: 'Retrieve all withdrawal requests with filtering by status and photographer. Requires admin role.'
+      operationId: 51d8f8998ec69b7d5f1a365723925573
+      parameters:
+        -
+          name: status
+          in: query
+          description: 'Filter by withdrawal status'
+          required: false
+          schema:
+            type: string
+            enum:
+              - pending
+              - approved
+              - rejected
+              - completed
+            example: pending
+        -
+          name: photographer_id
+          in: query
+          description: 'Filter by photographer UUID'
+          required: false
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+        -
+          name: per_page
+          in: query
+          description: 'Number of items per page'
+          required: false
+          schema:
+            type: integer
+            default: 20
+            example: 20
+      responses:
+        200:
+          description: 'Withdrawals retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      data:
+                        type: array
+                        items:
+                          type: object
+                      total:
+                        type: integer
+                        example: 450
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  /api/admin/withdrawals/pending:
+    get:
+      tags:
+        - 'Admin - Withdrawals'
+      summary: 'Get pending withdrawals'
+      description: 'Retrieve all pending withdrawal requests ordered by creation date. Requires admin role.'
+      operationId: 71dc50e8542a1c1be346b5fb9800c854
+      parameters:
+        -
+          name: per_page
+          in: query
+          description: 'Number of items per page'
+          required: false
+          schema:
+            type: integer
+            default: 20
+            example: 20
+      responses:
+        200:
+          description: 'Pending withdrawals retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      data:
+                        type: array
+                        items:
+                          type: object
+                      total:
+                        type: integer
+                        example: 15
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/withdrawals/{withdrawal}':
+    get:
+      tags:
+        - 'Admin - Withdrawals'
+      summary: 'Get withdrawal details'
+      description: 'Retrieve detailed information about a specific withdrawal request including photographer contact information. Requires admin role.'
+      operationId: 4d7f399cdb7077b992f1cc3edbacf7c7
+      parameters:
+        -
+          name: withdrawal
+          in: path
+          description: 'Withdrawal UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Withdrawal details retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'Withdrawal not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Demande de retrait introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/withdrawals/{withdrawal}/approve':
+    put:
+      tags:
+        - 'Admin - Withdrawals'
+      summary: 'Approve withdrawal request'
+      description: 'Approve a pending withdrawal request with optional transaction reference and admin notes. Only pending requests can be approved. Requires admin role.'
+      operationId: b2af88c84f042e7d124f2f78fd89c6ca
+      parameters:
+        -
+          name: withdrawal
+          in: path
+          description: 'Withdrawal UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              properties:
+                transaction_reference:
+                  description: 'Transaction reference number'
+                  type: string
+                  maxLength: 255
+                  example: TXN-2024-001234
+                admin_notes:
+                  description: 'Admin notes for internal tracking'
+                  type: string
+                  maxLength: 500
+                  example: 'Payment processed via bank transfer'
+              type: object
+      responses:
+        200:
+          description: 'Withdrawal approved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Demande de retrait approuvée avec succès.'
+                  data:
+                    type: object
+                type: object
+        400:
+          description: 'Only pending requests can be approved'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Seules les demandes en attente peuvent être approuvées.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'Withdrawal not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Demande de retrait introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/withdrawals/{withdrawal}/reject':
+    put:
+      tags:
+        - 'Admin - Withdrawals'
+      summary: 'Reject withdrawal request'
+      description: 'Reject a pending withdrawal request with required rejection reason. Only pending requests can be rejected. Requires admin role.'
+      operationId: 3d4fbee7fa32f707035dd8a5b92c8c03
+      parameters:
+        -
+          name: withdrawal
+          in: path
+          description: 'Withdrawal UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - rejection_reason
+              properties:
+                rejection_reason:
+                  description: 'Reason for rejection'
+                  type: string
+                  maxLength: 500
+                  example: 'Insufficient balance or invalid payment details'
+              type: object
+      responses:
+        200:
+          description: 'Withdrawal rejected successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Demande de retrait rejetée avec succès.'
+                  data:
+                    type: object
+                type: object
+        400:
+          description: 'Only pending requests can be rejected or validation error'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Seules les demandes en attente peuvent être rejetées.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'Withdrawal not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Demande de retrait introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/api/admin/withdrawals/{withdrawal}/complete':
+    put:
+      tags:
+        - 'Admin - Withdrawals'
+      summary: 'Mark withdrawal as completed'
+      description: 'Mark an approved withdrawal as completed (payment sent) with required transaction reference. Only approved requests can be marked as completed. Requires admin role.'
+      operationId: bf75f5837afb4a9cafa110f7f74c9305
+      parameters:
+        -
+          name: withdrawal
+          in: path
+          description: 'Withdrawal UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - transaction_reference
+              properties:
+                transaction_reference:
+                  description: 'Transaction reference number confirming payment'
+                  type: string
+                  maxLength: 255
+                  example: TXN-2024-001234
+              type: object
+      responses:
+        200:
+          description: 'Withdrawal marked as completed successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Retrait marqué comme complété avec succès.'
+                  data:
+                    type: object
+                type: object
+        400:
+          description: 'Only approved requests can be marked as completed or validation error'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Seules les demandes approuvées peuvent être marquées comme complétées.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: 'Forbidden - Admin role required'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          description: 'Withdrawal not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Demande de retrait introuvable'
+                type: object
+      security:
+        -
+          bearerAuth: []
   /api/auth/register:
     post:
       tags:
@@ -309,6 +2732,323 @@ paths:
       security:
         -
           bearerAuth: []
+  /api/cart:
+    get:
+      tags:
+        - Cart
+      summary: "Get user's shopping cart"
+      description: "Retrieve all items in the current user's shopping cart with totals"
+      operationId: 7fdb9b40bd4ad2baf12aa15164eab788
+      responses:
+        200:
+          description: 'Cart retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          properties:
+                            photo_id:
+                              type: string
+                              format: uuid
+                              example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                            photo_title:
+                              type: string
+                              example: 'Sunset over Ouagadougou'
+                            photo_thumbnail:
+                              type: string
+                              example: 'https://example.com/photos/thumbnail.jpg'
+                            photographer_id:
+                              type: string
+                              format: uuid
+                            photographer_name:
+                              type: string
+                              example: 'Jean Dupont'
+                            license_type:
+                              type: string
+                              enum:
+                                - standard
+                                - extended
+                              example: standard
+                            price:
+                              type: number
+                              format: float
+                              example: 5000
+                          type: object
+                      subtotal:
+                        type: number
+                        format: float
+                        example: 15000
+                      total:
+                        type: number
+                        format: float
+                        example: 15000
+                      items_count:
+                        type: integer
+                        example: 3
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+    delete:
+      tags:
+        - Cart
+      summary: 'Clear entire cart'
+      description: 'Remove all items from the shopping cart'
+      operationId: 2c37760f7c1c679d2a0c391e6a666105
+      responses:
+        200:
+          description: 'Cart cleared successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Panier vidé'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/cart/items:
+    post:
+      tags:
+        - Cart
+      summary: 'Add item to cart'
+      description: 'Add a photo with specified license type to the shopping cart'
+      operationId: 71655c1ea70dfbb034f059570d0ab4a0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - photo_id
+                - license_type
+              properties:
+                photo_id:
+                  description: 'UUID of the photo'
+                  type: string
+                  format: uuid
+                  example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                license_type:
+                  description: 'License type for the photo'
+                  type: string
+                  enum:
+                    - standard
+                    - extended
+                  example: standard
+              type: object
+      responses:
+        200:
+          description: 'Item added to cart successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Article ajouté au panier'
+                  data:
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          type: object
+                      subtotal:
+                        type: number
+                        format: float
+                        example: 15000
+                      total:
+                        type: number
+                        format: float
+                        example: 15000
+                      items_count:
+                        type: integer
+                        example: 3
+                    type: object
+                type: object
+        400:
+          description: 'Photo not available or already in cart'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Cette photo n'est pas disponible à l'achat"
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        422:
+          $ref: '#/components/responses/ValidationErrorResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/cart/items/{index}':
+    put:
+      tags:
+        - Cart
+      summary: 'Update cart item'
+      description: 'Update the license type of a cart item by its index'
+      operationId: 0dbda638a0efc2d64e70dfd4f01f6979
+      parameters:
+        -
+          name: index
+          in: path
+          description: 'Index of the cart item (0-based)'
+          required: true
+          schema:
+            type: integer
+            example: 0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - license_type
+              properties:
+                license_type:
+                  description: 'New license type for the photo'
+                  type: string
+                  enum:
+                    - standard
+                    - extended
+                  example: extended
+              type: object
+      responses:
+        200:
+          description: 'Cart item updated successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Article mis à jour'
+                  data:
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          type: object
+                      subtotal:
+                        type: number
+                        format: float
+                        example: 20000
+                      total:
+                        type: number
+                        format: float
+                        example: 20000
+                    type: object
+                type: object
+        404:
+          description: 'Cart item not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Article non trouvé'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        422:
+          $ref: '#/components/responses/ValidationErrorResponse'
+      security:
+        -
+          bearerAuth: []
+    delete:
+      tags:
+        - Cart
+      summary: 'Remove item from cart'
+      description: 'Remove a cart item by its index'
+      operationId: eb273e1375182a67df9e585d2222b15f
+      parameters:
+        -
+          name: index
+          in: path
+          description: 'Index of the cart item to remove (0-based)'
+          required: true
+          schema:
+            type: integer
+            example: 0
+      responses:
+        200:
+          description: 'Item removed from cart successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Article retiré du panier'
+                  data:
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          type: object
+                      subtotal:
+                        type: number
+                        format: float
+                        example: 10000
+                      total:
+                        type: number
+                        format: float
+                        example: 10000
+                    type: object
+                type: object
+        404:
+          description: 'Cart item not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Article non trouvé'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
   /api/categories:
     get:
       tags:
@@ -360,6 +3100,575 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotFoundResponse'
+  '/api/downloads/photo/{photo}':
+    get:
+      tags:
+        - Downloads
+      summary: 'Download purchased photo (high-resolution)'
+      description: 'Download the high-resolution version of a purchased photo. User must have completed order containing this photo.'
+      operationId: fb36046a91fbcb13ee86055ea3ff012c
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'Photo UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Photo file download (streamed)'
+          headers:
+            Content-Disposition:
+              description: 'Attachment filename'
+              schema:
+                type: string
+                example: 'attachment; filename=photo.jpg'
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        403:
+          description: 'Forbidden - photo not purchased'
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: 'You have not purchased this photo'
+                type: object
+        404:
+          description: 'Photo file not found on server'
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: 'Photo file not found'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/downloads/order/{order}':
+    get:
+      tags:
+        - Downloads
+      summary: 'Download all photos from order (ZIP)'
+      description: 'Download all high-resolution photos from a completed order as a ZIP archive. User must be order owner.'
+      operationId: e4140b1d9c865e376f28cd1544d4c8e2
+      parameters:
+        -
+          name: order
+          in: path
+          description: 'Order UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'ZIP file download (streamed)'
+          headers:
+            Content-Disposition:
+              description: 'Attachment filename'
+              schema:
+                type: string
+                example: 'attachment; filename=order.zip'
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        403:
+          description: 'Forbidden - order not completed or not owner'
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: 'Order is not completed yet'
+                type: object
+        404:
+          description: 'No photos found in order'
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: 'No photos found in this order'
+                type: object
+        500:
+          description: 'Server error creating ZIP file'
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: 'Could not create zip file'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/downloads/invoice/{order}':
+    get:
+      tags:
+        - Downloads
+      summary: 'Download order invoice (PDF)'
+      description: 'Download the PDF invoice for a completed order. User must be order owner.'
+      operationId: dac631c9621ed5983fc7d1ef6be19d86
+      parameters:
+        -
+          name: order
+          in: path
+          description: 'Order UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'PDF invoice download'
+          headers:
+            Content-Disposition:
+              description: 'Attachment filename'
+              schema:
+                type: string
+                example: 'attachment; filename=invoice.pdf'
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        403:
+          $ref: '#/components/responses/ForbiddenResponse'
+        404:
+          description: 'Invoice not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: 'Invoice not found'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/downloads/preview/{photo}':
+    get:
+      tags:
+        - Downloads
+      summary: 'Download watermarked preview (public)'
+      description: 'Download a watermarked preview version of any photo. No authentication required. Useful for demos or sharing.'
+      operationId: 31adfaff54ee48b5c1e40daa66651339
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'Photo UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Watermarked preview image download'
+          headers:
+            Content-Disposition:
+              description: 'Attachment filename'
+              schema:
+                type: string
+                example: 'attachment; filename=preview.jpg'
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        404:
+          description: 'Preview not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: 'Preview not found'
+                type: object
+  /api/orders:
+    get:
+      tags:
+        - Orders
+      summary: "List user's orders"
+      description: 'Get all orders for the authenticated user with pagination'
+      operationId: 955bb77a45ae173a485fadb8befed93f
+      parameters:
+        -
+          name: per_page
+          in: query
+          description: 'Number of orders per page'
+          required: false
+          schema:
+            type: integer
+            default: 20
+            example: 20
+      responses:
+        200:
+          description: 'Orders retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+    post:
+      tags:
+        - Orders
+      summary: 'Create new order'
+      description: 'Create a new order with items from cart. Platform takes 20% commission.'
+      operationId: 2123ba58dadb22bd6f2c8081af562230
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - items
+                - subtotal
+                - total
+                - payment_method
+                - billing_email
+                - billing_first_name
+                - billing_last_name
+                - billing_phone
+              properties:
+                items:
+                  type: array
+                  items:
+                    properties:
+                      photo_id:
+                        type: string
+                        format: uuid
+                        example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                      license_type:
+                        type: string
+                        enum:
+                          - standard
+                          - extended
+                        example: standard
+                    type: object
+                  example:
+                    -
+                      photo_id: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                      license_type: standard
+                subtotal:
+                  description: 'Sum of all item prices in FCFA'
+                  type: number
+                  format: float
+                  example: 15000
+                tax:
+                  description: 'Tax amount (currently 0)'
+                  type: number
+                  format: float
+                  example: 0
+                discount:
+                  description: 'Discount amount'
+                  type: number
+                  format: float
+                  example: 0
+                total:
+                  description: 'Total amount in FCFA'
+                  type: number
+                  format: float
+                  example: 15000
+                payment_method:
+                  type: string
+                  enum:
+                    - mobile_money
+                    - card
+                  example: mobile_money
+                billing_email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                billing_first_name:
+                  type: string
+                  example: Jean
+                billing_last_name:
+                  type: string
+                  example: Dupont
+                billing_phone:
+                  description: 'Burkinabé phone format'
+                  type: string
+                  example: '+226 70 12 34 56'
+              type: object
+      responses:
+        201:
+          description: 'Order created successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Commande créée avec succès'
+                  data:
+                    $ref: '#/components/schemas/Order'
+                type: object
+        400:
+          description: 'Order creation failed - photo unavailable or validation error'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Erreur lors de la création de la commande: La photo 'xyz' n'est plus disponible"
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        422:
+          $ref: '#/components/responses/ValidationErrorResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/orders/{order}':
+    get:
+      tags:
+        - Orders
+      summary: 'Get order details'
+      description: 'Retrieve detailed information about a specific order (must be order owner)'
+      operationId: 8114ac185cc1bf301d8862617e497098
+      parameters:
+        -
+          name: order
+          in: path
+          description: 'Order UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Order details retrieved successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        403:
+          description: 'Forbidden - user is not order owner'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        404:
+          $ref: '#/components/responses/NotFoundResponse'
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/orders/{order}/pay':
+    post:
+      tags:
+        - Orders
+      summary: 'Initiate payment for order'
+      description: 'Start payment process via CinetPay (Mobile Money or Card). Returns payment URL to redirect user.'
+      operationId: 92174e0a9e0db3e62bbf57ea9e2f7c32
+      parameters:
+        -
+          name: order
+          in: path
+          description: 'Order UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - payment_method
+                - payment_provider
+              properties:
+                payment_method:
+                  description: 'Payment method type'
+                  type: string
+                  enum:
+                    - mobile_money
+                    - card
+                  example: mobile_money
+                payment_provider:
+                  description: 'CinetPay payment provider code'
+                  type: string
+                  enum:
+                    - FLOOZ
+                    - TMONEY
+                    - MOOV
+                    - CARD
+                  example: FLOOZ
+                phone:
+                  description: 'Phone number for mobile money (required for mobile_money)'
+                  type: string
+                  example: '+22670123456'
+              type: object
+      responses:
+        200:
+          description: 'Payment initiated successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Paiement initié avec succès'
+                  data:
+                    properties:
+                      payment_url:
+                        description: 'URL to redirect user for payment'
+                        type: string
+                        format: url
+                        example: 'https://client.cinetpay.com/payment/xyz123'
+                      payment_token:
+                        description: 'CinetPay payment token'
+                        type: string
+                        example: xyz123abc456
+                    type: object
+                type: object
+        400:
+          description: 'Payment initiation failed - order already processed or payment error'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Cette commande a déjà été traitée'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        422:
+          $ref: '#/components/responses/ValidationErrorResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/orders/{order}/status':
+    get:
+      tags:
+        - Orders
+      summary: 'Check order payment status'
+      description: 'Check the current payment status of an order with CinetPay (must be order owner)'
+      operationId: 37e232d86eae57979494d5ab5af016c9
+      parameters:
+        -
+          name: order
+          in: path
+          description: 'Order UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Payment status retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Statut de paiement récupéré'
+                  data:
+                    properties:
+                      payment_status:
+                        type: string
+                        enum:
+                          - pending
+                          - completed
+                          - failed
+                          - cancelled
+                        example: completed
+                      order_status:
+                        type: string
+                        example: completed
+                      transaction_id:
+                        type: string
+                        example: CP123456789
+                    type: object
+                type: object
+        403:
+          description: 'Forbidden - user is not order owner'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Accès non autorisé'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
   /api/photos:
     get:
       tags:
@@ -579,6 +3888,1096 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotFoundResponse'
+  /api/photographer/analytics/sales:
+    get:
+      tags:
+        - 'Photographer - Analytics'
+      summary: 'Get sales analytics'
+      description: "Get sales analytics for a specified period (7, 30, or 90 days). Revenue shown is photographer's 80% share after 20% platform commission."
+      operationId: e337ddc1b9a906cc43e0559d8736bd19
+      parameters:
+        -
+          name: period
+          in: query
+          description: 'Analytics period'
+          required: false
+          schema:
+            type: string
+            default: 30days
+            enum:
+              - 7days
+              - 30days
+              - 90days
+            example: 30days
+      responses:
+        200:
+          description: 'Sales analytics retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      total_sales:
+                        description: 'Total number of sales in the period'
+                        type: integer
+                        example: 45
+                      total_revenue:
+                        description: 'Total photographer revenue (80% share) in FCFA'
+                        type: number
+                        format: float
+                        example: 180000
+                      average_sale:
+                        description: 'Average revenue per sale in FCFA'
+                        type: number
+                        format: float
+                        example: 4000
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/analytics/popular-photos:
+    get:
+      tags:
+        - 'Photographer - Analytics'
+      summary: 'Get popular photos'
+      description: 'Get top 10 best-selling photos ranked by total number of sales'
+      operationId: 359ea198a883cbb2ba0cff5503a4e621
+      responses:
+        200:
+          description: 'Popular photos retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    description: 'Top 10 photos by sales count'
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        title:
+                          type: string
+                          example: 'Sunset over Ouagadougou'
+                        thumbnail_url:
+                          type: string
+                          format: url
+                          example: 'https://pourier.s3.amazonaws.com/thumbnails/xyz.jpg'
+                        price_standard:
+                          type: number
+                          format: float
+                          example: 5000
+                        price_extended:
+                          type: number
+                          format: float
+                          example: 10000
+                        view_count:
+                          type: integer
+                          example: 1500
+                        order_items_count:
+                          description: 'Total number of times this photo was sold'
+                          type: integer
+                          example: 25
+                        created_at:
+                          type: string
+                          format: date-time
+                      type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/dashboard:
+    get:
+      tags:
+        - 'Photographer - Dashboard'
+      summary: 'Get photographer dashboard'
+      description: 'Comprehensive dashboard with photo statistics, revenue (80% photographer share after 20% platform commission), sales data, and recent activity'
+      operationId: 6ca3be02d9ba17cae694a7b0f111575b
+      responses:
+        200:
+          description: 'Dashboard data retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      photos:
+                        properties:
+                          total:
+                            description: 'Total photos uploaded'
+                            type: integer
+                            example: 150
+                          approved:
+                            description: 'Approved photos available for sale'
+                            type: integer
+                            example: 120
+                          pending:
+                            description: 'Photos pending moderation'
+                            type: integer
+                            example: 25
+                          rejected:
+                            description: 'Rejected photos'
+                            type: integer
+                            example: 5
+                          views:
+                            description: 'Total views across all photos'
+                            type: integer
+                            example: 15000
+                        type: object
+                      revenue:
+                        properties:
+                          available:
+                            description: 'Available balance ready for withdrawal in FCFA'
+                            type: number
+                            format: float
+                            example: 50000
+                          pending:
+                            description: 'Pending revenue not yet available in FCFA'
+                            type: number
+                            format: float
+                            example: 20000
+                          total_earnings:
+                            description: 'Total lifetime earnings in FCFA'
+                            type: number
+                            format: float
+                            example: 200000
+                          this_month:
+                            description: 'Current month earnings in FCFA'
+                            type: number
+                            format: float
+                            example: 15000
+                        type: object
+                      sales:
+                        properties:
+                          total_sales:
+                            description: 'Total number of sales'
+                            type: integer
+                            example: 80
+                          total_downloads:
+                            description: 'Total downloads across all sales'
+                            type: integer
+                            example: 95
+                          this_month_sales:
+                            description: 'Sales this month'
+                            type: integer
+                            example: 12
+                        type: object
+                      recent_sales:
+                        description: '5 most recent sales with photo and order details'
+                        type: array
+                        items:
+                          type: object
+                      recent_photos:
+                        description: '5 most recently uploaded photos'
+                        type: array
+                        items:
+                          type: object
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/dashboard/stats:
+    get:
+      tags:
+        - 'Photographer - Dashboard'
+      summary: 'Get photographer profile statistics'
+      description: 'Get profile completion percentage, average photo pricing, and best-selling photo information'
+      operationId: 16d5d3e0a9f0786deea0729b7530daff
+      responses:
+        200:
+          description: 'Profile statistics retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      profile_completion:
+                        description: 'Profile completion percentage (0-100)'
+                        type: integer
+                        example: 83
+                      average_photo_price:
+                        description: 'Average price of approved photos in FCFA'
+                        type: number
+                        format: float
+                        example: 7500
+                      best_selling_photo:
+                        description: 'Photo with most sales'
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          title:
+                            type: string
+                            example: 'Sunset over Ouagadougou'
+                          order_items_count:
+                            description: 'Number of times sold'
+                            type: integer
+                            example: 25
+                        type: object
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/photos:
+    get:
+      tags:
+        - 'Photographer - Photos'
+      summary: "List photographer's photos"
+      description: 'Get all photos uploaded by the authenticated photographer with pagination and category details'
+      operationId: 30a43c817414560a7bdf05afba7963ac
+      parameters:
+        -
+          name: per_page
+          in: query
+          description: 'Number of photos per page'
+          required: false
+          schema:
+            type: integer
+            default: 20
+            example: 20
+      responses:
+        200:
+          description: 'Photos retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Photo'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+    post:
+      tags:
+        - 'Photographer - Photos'
+      summary: 'Upload new photos'
+      description: 'Upload one or multiple photos with metadata. Photos are processed asynchronously. Platform takes 20% commission on all sales.'
+      operationId: cd28b0e25ab4dfee84c3ebe79056b918
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - photos
+                - category_id
+                - title
+                - price_standard
+                - price_extended
+              properties:
+                'photos[]':
+                  description: 'One or more photo files to upload'
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                category_id:
+                  description: 'Category UUID'
+                  type: string
+                  format: uuid
+                  example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                title:
+                  description: 'Photo title'
+                  type: string
+                  example: 'Sunset over Ouagadougou'
+                description:
+                  description: 'Photo description (optional)'
+                  type: string
+                  example: 'Beautiful sunset captured in the capital of Burkina Faso'
+                tags:
+                  description: 'Comma-separated tags'
+                  type: string
+                  example: 'sunset, landscape, burkina faso'
+                price_standard:
+                  description: 'Standard license price in FCFA'
+                  type: number
+                  format: float
+                  example: 5000
+                price_extended:
+                  description: 'Extended license price in FCFA'
+                  type: number
+                  format: float
+                  example: 10000
+                location:
+                  description: 'Photo location (optional)'
+                  type: string
+                  example: 'Ouagadougou, Burkina Faso'
+              type: object
+      responses:
+        201:
+          description: 'Photos uploaded successfully and processing started'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: '3 photo(s) uploadée(s) avec succès. Traitement en cours...'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Photo'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        422:
+          $ref: '#/components/responses/ValidationErrorResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/photographer/photos/{photo}':
+    get:
+      tags:
+        - 'Photographer - Photos'
+      summary: 'Get photo details'
+      description: 'Retrieve detailed information about a specific photo owned by the photographer'
+      operationId: e4c354bd5a1bcd911d275d7ab89dfa92
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'Photo UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Photo details retrieved successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Photo'
+        403:
+          description: 'Forbidden - user is not the photo owner'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Unauthorized action'
+                type: object
+        404:
+          $ref: '#/components/responses/NotFoundResponse'
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+    put:
+      tags:
+        - 'Photographer - Photos'
+      summary: 'Update photo'
+      description: 'Update photo metadata (title, description, tags, pricing, etc.). Only the photo owner can update.'
+      operationId: c9d833ee1174defaf3bcac859eac370b
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'Photo UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                title:
+                  type: string
+                  example: 'Updated Sunset Photo'
+                description:
+                  type: string
+                  example: 'Updated description with more details'
+                tags:
+                  type: string
+                  example: 'sunset, nature, updated'
+                category_id:
+                  type: string
+                  format: uuid
+                  example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                price_standard:
+                  description: 'Standard license price in FCFA'
+                  type: number
+                  format: float
+                  example: 6000
+                price_extended:
+                  description: 'Extended license price in FCFA'
+                  type: number
+                  format: float
+                  example: 12000
+                location:
+                  type: string
+                  example: 'Bobo-Dioulasso, Burkina Faso'
+                is_public:
+                  description: 'Whether photo is public'
+                  type: boolean
+                  example: true
+              type: object
+      responses:
+        200:
+          description: 'Photo updated successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Photo mise à jour avec succès'
+                  data:
+                    $ref: '#/components/schemas/Photo'
+                type: object
+        403:
+          description: 'Forbidden - user is not the photo owner'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Unauthorized action'
+                type: object
+        404:
+          $ref: '#/components/responses/NotFoundResponse'
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        422:
+          $ref: '#/components/responses/ValidationErrorResponse'
+      security:
+        -
+          bearerAuth: []
+    delete:
+      tags:
+        - 'Photographer - Photos'
+      summary: 'Delete photo'
+      description: 'Permanently delete a photo. Only the photo owner can delete. Uploaded files on S3 may be preserved based on policy.'
+      operationId: dcc95e82bb0d61f647375b504dc9fa95
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'Photo UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Photo deleted successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Photo supprimée avec succès'
+                type: object
+        403:
+          description: 'Forbidden - user is not the photo owner'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Unauthorized action'
+                type: object
+        404:
+          $ref: '#/components/responses/NotFoundResponse'
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/revenue:
+    get:
+      tags:
+        - 'Photographer - Revenue'
+      summary: 'List all revenue records'
+      description: 'Get paginated list of all revenue records for the photographer. Each sale generates revenue after 20% platform commission.'
+      operationId: 6bd3f03689b56aab703ed9342a2f4be6
+      responses:
+        200:
+          description: 'Revenue records retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            photographer_id:
+                              type: string
+                              format: uuid
+                            photo_id:
+                              type: string
+                              format: uuid
+                            photo:
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                title:
+                                  type: string
+                                  example: 'Sunset over Ouagadougou'
+                              type: object
+                            photographer_amount:
+                              description: "Photographer's share (80%) in FCFA"
+                              type: number
+                              format: float
+                              example: 4000
+                            platform_commission:
+                              description: 'Platform commission (20%) in FCFA'
+                              type: number
+                              format: float
+                              example: 1000
+                            sold_at:
+                              type: string
+                              format: date-time
+                              example: '2025-11-10T14:30:00Z'
+                            available_at:
+                              description: 'When revenue becomes available for withdrawal'
+                              type: string
+                              format: date-time
+                              example: '2025-11-20T14:30:00Z'
+                          type: object
+                      current_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 20
+                      total:
+                        type: integer
+                        example: 80
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/revenue/available:
+    get:
+      tags:
+        - 'Photographer - Revenue'
+      summary: 'Get available balance'
+      description: "Get the total available balance ready for withdrawal (revenue where available_at <= now). This is the photographer's 80% share after 20% platform commission."
+      operationId: 22c25f98a4da9c9e158526a0f3c31ab9
+      responses:
+        200:
+          description: 'Available balance retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      available_amount:
+                        description: 'Total available balance in FCFA ready for withdrawal'
+                        type: number
+                        format: float
+                        example: 50000
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/revenue/pending:
+    get:
+      tags:
+        - 'Photographer - Revenue'
+      summary: 'Get pending revenue'
+      description: 'Get all revenue records that are not yet available for withdrawal (available_at > now). Typically held for a period before becoming available.'
+      operationId: 78b16db1c03af07e4e7140ee1a05f173
+      responses:
+        200:
+          description: 'Pending revenue retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        photographer_id:
+                          type: string
+                          format: uuid
+                        photo_id:
+                          type: string
+                          format: uuid
+                        photo:
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            title:
+                              type: string
+                              example: 'Mountain Landscape'
+                          type: object
+                        photographer_amount:
+                          description: "Photographer's share (80%) in FCFA"
+                          type: number
+                          format: float
+                          example: 4000
+                        sold_at:
+                          type: string
+                          format: date-time
+                          example: '2025-11-12T10:00:00Z'
+                        available_at:
+                          description: 'When this revenue will become available'
+                          type: string
+                          format: date-time
+                          example: '2025-11-22T10:00:00Z'
+                      type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/revenue/history:
+    get:
+      tags:
+        - 'Photographer - Revenue'
+      summary: 'Get revenue history by date'
+      description: "Get daily revenue summary with total earnings and sales count, grouped by date. Shows photographer's 80% share after 20% platform commission."
+      operationId: a10dbaf5c1bd533c259e1c969c98509e
+      responses:
+        200:
+          description: 'Revenue history retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          properties:
+                            date:
+                              description: 'Date of sales'
+                              type: string
+                              format: date
+                              example: '2025-11-14'
+                            total:
+                              description: 'Total photographer earnings for the day in FCFA'
+                              type: number
+                              format: float
+                              example: 12000
+                            sales:
+                              description: 'Number of sales on this date'
+                              type: integer
+                              example: 3
+                          type: object
+                      current_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 30
+                      total:
+                        description: 'Total number of days with sales'
+                        type: integer
+                        example: 90
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/withdrawals:
+    get:
+      tags:
+        - 'Photographer - Withdrawals'
+      summary: 'List withdrawal requests'
+      description: 'Get all withdrawal requests for the photographer with pagination, ordered by most recent first'
+      operationId: f38e6c8b25031766666792874007a4f8
+      responses:
+        200:
+          description: 'Withdrawal requests retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            photographer_id:
+                              type: string
+                              format: uuid
+                            amount:
+                              description: 'Withdrawal amount in FCFA'
+                              type: number
+                              format: float
+                              example: 50000
+                            payment_method:
+                              type: string
+                              enum:
+                                - mobile_money
+                                - bank_transfer
+                              example: mobile_money
+                            payment_details:
+                              type: object
+                              example:
+                                phone: '+22670123456'
+                                provider: 'Orange Money'
+                            status:
+                              type: string
+                              enum:
+                                - pending
+                                - approved
+                                - completed
+                                - rejected
+                              example: pending
+                            created_at:
+                              type: string
+                              format: date-time
+                              example: '2025-11-14T10:00:00Z'
+                            processed_at:
+                              type: string
+                              format: date-time
+                              example: '2025-11-15T14:30:00Z'
+                              nullable: true
+                          type: object
+                      current_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 20
+                      total:
+                        type: integer
+                        example: 15
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+    post:
+      tags:
+        - 'Photographer - Withdrawals'
+      summary: 'Create withdrawal request'
+      description: 'Request a withdrawal from available balance. Minimum amount: 10,000 FCFA. Amount must not exceed available balance.'
+      operationId: c1bbe4eab25230fecc17373f83f6e109
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - amount
+                - payment_method
+                - payment_details
+              properties:
+                amount:
+                  description: 'Withdrawal amount in FCFA (minimum: 10,000)'
+                  type: integer
+                  example: 50000
+                payment_method:
+                  type: string
+                  enum:
+                    - mobile_money
+                    - bank_transfer
+                  example: mobile_money
+                payment_details:
+                  description: 'Payment details based on method'
+                  type: object
+                  example:
+                    phone: '+22670123456'
+                    provider: 'Orange Money'
+                    account_name: 'Jean Dupont'
+              type: object
+      responses:
+        200:
+          description: 'Withdrawal request created successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Demande créée.'
+                  data:
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      photographer_id:
+                        type: string
+                        format: uuid
+                      amount:
+                        type: number
+                        format: float
+                        example: 50000
+                      payment_method:
+                        type: string
+                        example: mobile_money
+                      payment_details:
+                        type: object
+                      status:
+                        type: string
+                        example: pending
+                    type: object
+                type: object
+        400:
+          description: 'Insufficient balance or validation error'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Montant indisponible.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        422:
+          $ref: '#/components/responses/ValidationErrorResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/photographer/withdrawals/{withdrawal}':
+    get:
+      tags:
+        - 'Photographer - Withdrawals'
+      summary: 'Get withdrawal details'
+      description: 'Retrieve detailed information about a specific withdrawal request. Only the request owner can view.'
+      operationId: bd04836c1fbf54d5c678d35c2b258296
+      parameters:
+        -
+          name: withdrawal
+          in: path
+          description: 'Withdrawal UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Withdrawal details retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      photographer_id:
+                        type: string
+                        format: uuid
+                      amount:
+                        type: number
+                        format: float
+                        example: 50000
+                      payment_method:
+                        type: string
+                        enum:
+                          - mobile_money
+                          - bank_transfer
+                        example: mobile_money
+                      payment_details:
+                        type: object
+                      status:
+                        type: string
+                        enum:
+                          - pending
+                          - approved
+                          - completed
+                          - rejected
+                        example: completed
+                      admin_notes:
+                        type: string
+                        example: 'Payment processed successfully'
+                        nullable: true
+                      created_at:
+                        type: string
+                        format: date-time
+                      processed_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                    type: object
+                type: object
+        403:
+          description: 'Forbidden - user is not the withdrawal owner'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Non autorisé.'
+                type: object
+        404:
+          $ref: '#/components/responses/NotFoundResponse'
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+    delete:
+      tags:
+        - 'Photographer - Withdrawals'
+      summary: 'Cancel withdrawal request'
+      description: 'Cancel a pending withdrawal request. Only pending requests can be cancelled by the owner.'
+      operationId: 9d854fccd76c827379c744c2f5e35a6a
+      parameters:
+        -
+          name: withdrawal
+          in: path
+          description: 'Withdrawal UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Withdrawal request cancelled successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Demande annulée.'
+                type: object
+        400:
+          description: 'Cannot cancel - withdrawal not pending or unauthorized'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Impossible d'annuler."
+                type: object
+        404:
+          $ref: '#/components/responses/NotFoundResponse'
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
   /api/search/photos:
     get:
       tags:
@@ -685,6 +5084,838 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationErrorResponse'
+  /api/user/favorites:
+    get:
+      tags:
+        - Favorites
+      summary: "Get user's favorite photos"
+      description: 'Retrieve all photos marked as favorite by the authenticated user with pagination (20 per page)'
+      operationId: 106119b1fff6f302cbd7a85627321a82
+      parameters:
+        -
+          name: page
+          in: query
+          description: 'Page number for pagination'
+          required: false
+          schema:
+            type: integer
+            default: 1
+            example: 1
+      responses:
+        200:
+          description: 'Favorites retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                            title:
+                              type: string
+                              example: 'Sunset over Ouagadougou'
+                            description:
+                              type: string
+                              example: 'Beautiful sunset captured in downtown'
+                              nullable: true
+                            thumbnail_url:
+                              type: string
+                              example: 'https://example.com/photos/thumbnail.jpg'
+                            watermark_url:
+                              type: string
+                              example: 'https://example.com/photos/watermark.jpg'
+                            price_standard:
+                              type: number
+                              format: float
+                              example: 5000
+                            price_extended:
+                              type: number
+                              format: float
+                              example: 10000
+                            photographer:
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                first_name:
+                                  type: string
+                                  example: Jean
+                                last_name:
+                                  type: string
+                                  example: Dupont
+                              type: object
+                          type: object
+                      current_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 20
+                      total:
+                        type: integer
+                        example: 45
+                      last_page:
+                        type: integer
+                        example: 3
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/user/favorites/{photo}':
+    post:
+      tags:
+        - Favorites
+      summary: 'Add photo to favorites'
+      description: 'Mark a photo as favorite for the authenticated user'
+      operationId: b7e953a0d3b5a08b6916b0cc2328ecb7
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'Photo UUID to add to favorites'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Photo added to favorites successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Photo ajoutée aux favoris.'
+                type: object
+        400:
+          description: 'Photo already in favorites'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Photo déjà dans les favoris.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        404:
+          $ref: '#/components/responses/NotFoundResponse'
+      security:
+        -
+          bearerAuth: []
+    delete:
+      tags:
+        - Favorites
+      summary: 'Remove photo from favorites'
+      description: 'Unmark a photo as favorite for the authenticated user'
+      operationId: 8006ef4f9124f7c756d2d3697fabf4f2
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'Photo UUID to remove from favorites'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Photo removed from favorites successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Photo retirée des favoris.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        404:
+          $ref: '#/components/responses/NotFoundResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/user/notifications:
+    get:
+      tags:
+        - Notifications
+      summary: 'Get all user notifications'
+      description: 'Retrieve all notifications for the authenticated user with pagination (20 per page)'
+      operationId: 9617ee6a891d459ba2173e2a9aeec8f2
+      parameters:
+        -
+          name: page
+          in: query
+          description: 'Page number for pagination'
+          required: false
+          schema:
+            type: integer
+            default: 1
+            example: 1
+      responses:
+        200:
+          description: 'Notifications retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                            user_id:
+                              type: string
+                              format: uuid
+                            type:
+                              type: string
+                              enum:
+                                - order_completed
+                                - new_sale
+                                - withdrawal_processed
+                                - photo_approved
+                                - photo_rejected
+                              example: order_completed
+                            title:
+                              type: string
+                              example: 'Commande terminée'
+                            message:
+                              type: string
+                              example: 'Votre commande #ORD-123456 a été traitée avec succès'
+                            data:
+                              type: object
+                              example:
+                                order_id: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                                amount: 15000
+                              nullable: true
+                            read_at:
+                              type: string
+                              format: date-time
+                              example: '2024-01-15T10:30:00.000000Z'
+                              nullable: true
+                            created_at:
+                              type: string
+                              format: date-time
+                              example: '2024-01-15T10:00:00.000000Z'
+                          type: object
+                      current_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 20
+                      total:
+                        type: integer
+                        example: 50
+                      last_page:
+                        type: integer
+                        example: 3
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/user/notifications/unread:
+    get:
+      tags:
+        - Notifications
+      summary: 'Get unread notifications'
+      description: 'Retrieve only unread notifications for the authenticated user (no pagination)'
+      operationId: d34b6b678e744e1169d84ac475e63cd8
+      responses:
+        200:
+          description: 'Unread notifications retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                        user_id:
+                          type: string
+                          format: uuid
+                        type:
+                          type: string
+                          enum:
+                            - order_completed
+                            - new_sale
+                            - withdrawal_processed
+                            - photo_approved
+                            - photo_rejected
+                          example: new_sale
+                        title:
+                          type: string
+                          example: 'Nouvelle vente'
+                        message:
+                          type: string
+                          example: 'Votre photo a été vendue pour 5000 FCFA'
+                        data:
+                          type: object
+                          example:
+                            photo_id: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                            amount: 5000
+                          nullable: true
+                        read_at:
+                          type: string
+                          example: null
+                          nullable: true
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: '2024-01-15T10:00:00.000000Z'
+                      type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/user/notifications/{notification}/read':
+    put:
+      tags:
+        - Notifications
+      summary: 'Mark notification as read'
+      description: 'Mark a specific notification as read for the authenticated user'
+      operationId: 814b3c173f2963bc54d9d0a541dfd33c
+      parameters:
+        -
+          name: notification
+          in: path
+          description: 'Notification UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Notification marked as read successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Notification marquée comme lue.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: "Forbidden - notification doesn't belong to user"
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Non autorisé.'
+                type: object
+        404:
+          $ref: '#/components/responses/NotFoundResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/user/notifications/read-all:
+    put:
+      tags:
+        - Notifications
+      summary: 'Mark all notifications as read'
+      description: 'Mark all unread notifications as read for the authenticated user'
+      operationId: 5ab4f4c7283d29454f4716c40348fcf6
+      responses:
+        200:
+          description: 'All notifications marked as read successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Toutes les notifications marquées comme lues.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/user/notifications/{notification}':
+    delete:
+      tags:
+        - Notifications
+      summary: 'Delete notification'
+      description: 'Delete a specific notification for the authenticated user'
+      operationId: 101b986b490223c6b35ac535ba8cd3c2
+      parameters:
+        -
+          name: notification
+          in: path
+          description: 'Notification UUID to delete'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        200:
+          description: 'Notification deleted successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Notification supprimée.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        403:
+          description: "Forbidden - notification doesn't belong to user"
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Non autorisé.'
+                type: object
+        404:
+          $ref: '#/components/responses/NotFoundResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/user/profile:
+    get:
+      tags:
+        - 'User Profile'
+      summary: 'Get current user profile'
+      description: "Retrieve the authenticated user's profile information including photographer profile if available"
+      operationId: 7263f982fed939320696f49aae69e0d6
+      responses:
+        200:
+          description: 'Profile retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+                      first_name:
+                        type: string
+                        example: Jean
+                      last_name:
+                        type: string
+                        example: Dupont
+                      email:
+                        type: string
+                        format: email
+                        example: jean.dupont@example.com
+                      phone:
+                        type: string
+                        example: '+226 70 12 34 56'
+                        nullable: true
+                      bio:
+                        type: string
+                        example: 'Passionate photographer from Burkina Faso'
+                        nullable: true
+                      avatar_url:
+                        type: string
+                        example: 'https://example.com/avatars/user.jpg'
+                        nullable: true
+                      role:
+                        type: string
+                        enum:
+                          - user
+                          - photographer
+                          - admin
+                        example: user
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2024-01-15T10:30:00.000000Z'
+                      photographer_profile:
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          status:
+                            type: string
+                            enum:
+                              - pending
+                              - approved
+                              - rejected
+                            example: approved
+                          portfolio_url:
+                            type: string
+                            nullable: true
+                          total_revenue:
+                            type: number
+                            format: float
+                            example: 250000
+                        type: object
+                        nullable: true
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+    put:
+      tags:
+        - 'User Profile'
+      summary: 'Update user profile'
+      description: "Update the authenticated user's profile information (first name, last name, phone, bio)"
+      operationId: ed1eeb1dca260eaf9823a1164a32738c
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                first_name:
+                  description: "User's first name"
+                  type: string
+                  maxLength: 50
+                  example: Jean
+                last_name:
+                  description: "User's last name"
+                  type: string
+                  maxLength: 50
+                  example: Dupont
+                phone:
+                  description: "User's phone number"
+                  type: string
+                  maxLength: 20
+                  example: '+226 70 12 34 56'
+                  nullable: true
+                bio:
+                  description: 'User biography'
+                  type: string
+                  maxLength: 500
+                  example: 'Passionate photographer from Burkina Faso'
+                  nullable: true
+              type: object
+      responses:
+        200:
+          description: 'Profile updated successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Profil mis à jour.'
+                  data:
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      first_name:
+                        type: string
+                        example: Jean
+                      last_name:
+                        type: string
+                        example: Dupont
+                      email:
+                        type: string
+                        format: email
+                        example: jean.dupont@example.com
+                      phone:
+                        type: string
+                        example: '+226 70 12 34 56'
+                        nullable: true
+                      bio:
+                        type: string
+                        example: 'Passionate photographer from Burkina Faso'
+                        nullable: true
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        422:
+          $ref: '#/components/responses/ValidationErrorResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/user/profile/avatar:
+    post:
+      tags:
+        - 'User Profile'
+      summary: 'Update user avatar'
+      description: "Upload and update the authenticated user's avatar image (max 2MB)"
+      operationId: e2d2514a22b7fd00c76d733aba3936a2
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - avatar
+              properties:
+                avatar:
+                  description: 'Avatar image file (JPEG, PNG, GIF, max 2MB)'
+                  type: string
+                  format: binary
+              type: object
+      responses:
+        200:
+          description: 'Avatar updated successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Avatar mis à jour.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        422:
+          $ref: '#/components/responses/ValidationErrorResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/user/profile/password:
+    put:
+      tags:
+        - 'User Profile'
+      summary: 'Update user password'
+      description: "Change the authenticated user's password (requires current password verification)"
+      operationId: 5452a242b9024697a504e108e26a89f2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - current_password
+                - password
+                - password_confirmation
+              properties:
+                current_password:
+                  description: 'Current password for verification'
+                  type: string
+                  format: password
+                  example: OldPassword123!
+                password:
+                  description: 'New password (min 8 characters)'
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: NewPassword123!
+                password_confirmation:
+                  description: 'Password confirmation (must match password)'
+                  type: string
+                  format: password
+                  example: NewPassword123!
+              type: object
+      responses:
+        200:
+          description: 'Password updated successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Mot de passe modifié.'
+                type: object
+        400:
+          description: 'Current password incorrect'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Mot de passe actuel incorrect.'
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+        422:
+          $ref: '#/components/responses/ValidationErrorResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/webhooks/cinetpay:
+    post:
+      tags:
+        - Webhooks
+      summary: 'CinetPay payment webhook (callback)'
+      description: 'Receives payment notifications from CinetPay when payment status changes. Uses HMAC signature verification for security. This endpoint is called by CinetPay servers only.'
+      operationId: 58f9f20c5bba5306e0cb977f9fdaf966
+      requestBody:
+        description: 'CinetPay webhook payload'
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                cpm_trans_id:
+                  description: 'CinetPay transaction ID'
+                  type: string
+                  example: CP123456789
+                cpm_custom:
+                  description: 'Order number (custom field)'
+                  type: string
+                  example: ORD-123456
+                cpm_amount:
+                  description: 'Payment amount in FCFA'
+                  type: number
+                  format: float
+                  example: 15000
+                cpm_result:
+                  description: "Payment result code ('00' = success)"
+                  type: string
+                  example: '00'
+                signature:
+                  description: 'HMAC signature = sha256(site_id + order_number + api_key)'
+                  type: string
+                  example: abc123def456...
+                payment_method:
+                  description: 'Payment provider used'
+                  type: string
+                  example: FLOOZ
+              type: object
+      responses:
+        200:
+          description: 'Webhook processed successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    example: success
+                type: object
+        400:
+          description: 'Invalid signature'
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    example: 'Invalid signature'
+                type: object
+        404:
+          description: 'Order not found'
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                    example: 'Order not found'
+                type: object
+  '/api/webhooks/cinetpay/return/{order}':
+    get:
+      tags:
+        - Webhooks
+      summary: 'CinetPay payment return URL'
+      description: 'User is redirected here after completing payment on CinetPay. Checks payment status and redirects to frontend success/failure page.'
+      operationId: 1c814cac6aa142f6bc1992d112584f2e
+      parameters:
+        -
+          name: order
+          in: path
+          description: 'Order UUID'
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 9d445a1c-85c5-4b6d-9c38-99a4915d6dac
+      responses:
+        302:
+          description: 'Redirect to frontend success or failure page'
+          headers:
+            Location:
+              description: 'Frontend URL'
+              schema:
+                type: string
+                example: 'https://pourier.bf/orders/9d445a1c-85c5-4b6d-9c38-99a4915d6dac/success'
+        404:
+          $ref: '#/components/responses/NotFoundResponse'
 components:
   schemas:
     SuccessResponse:
@@ -1100,6 +6331,31 @@ components:
           type: string
           format: date-time
       type: object
+  responses:
+    UnauthorizedResponse:
+      description: 'Unauthorized - Authentication required'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnauthorizedResponse'
+    ForbiddenResponse:
+      description: 'Forbidden - Insufficient permissions'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ForbiddenResponse'
+    NotFoundResponse:
+      description: 'Resource not found'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NotFoundResponse'
+    ValidationErrorResponse:
+      description: 'Validation error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
   securitySchemes:
     bearerAuth:
       type: http
@@ -1119,6 +6375,60 @@ tags:
   -
     name: Search
     description: 'Recherche de photos par mots-clés, tags et filtres'
+  -
+    name: Cart
+    description: "Gestion du panier d'achat"
+  -
+    name: Orders
+    description: 'Gestion des commandes et paiements'
+  -
+    name: Downloads
+    description: 'Téléchargement de photos achetées et factures'
+  -
+    name: 'User Profile'
+    description: 'Gestion du profil utilisateur'
+  -
+    name: Favorites
+    description: 'Gestion des photos favorites'
+  -
+    name: Notifications
+    description: 'Gestion des notifications utilisateur'
+  -
+    name: 'Photographer - Dashboard'
+    description: 'Tableau de bord et statistiques photographe'
+  -
+    name: 'Photographer - Photos'
+    description: 'Gestion des photos par le photographe'
+  -
+    name: 'Photographer - Revenue'
+    description: 'Gestion des revenus et retraits'
+  -
+    name: 'Photographer - Analytics'
+    description: 'Analyses et statistiques détaillées'
+  -
+    name: 'Admin - Dashboard'
+    description: 'Tableau de bord administrateur'
+  -
+    name: 'Admin - Photographers'
+    description: 'Gestion des photographes'
+  -
+    name: 'Admin - Users'
+    description: 'Gestion des utilisateurs'
+  -
+    name: 'Admin - Withdrawals'
+    description: 'Gestion des demandes de retrait'
+  -
+    name: 'Admin - Analytics'
+    description: 'Analyses et rapports administrateur'
+  -
+    name: Webhooks
+    description: 'Webhooks pour les intégrations tierces (CinetPay)'
+  -
+    name: 'Admin - Photo Moderation'
+    description: 'Admin - Photo Moderation'
+  -
+    name: 'Photographer - Withdrawals'
+    description: 'Photographer - Withdrawals'
 security:
   -
     bearerAuth: []
