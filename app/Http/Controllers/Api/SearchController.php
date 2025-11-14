@@ -9,6 +9,89 @@ use App\Models\Photo;
 
 class SearchController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/search/photos",
+     *     tags={"Search"},
+     *     summary="Rechercher des photos",
+     *     description="Recherche avancée de photos avec filtres multiples (mots-clés, catégorie, prix, orientation, etc.)",
+     *     operationId="searchPhotos",
+     *     @OA\Parameter(
+     *         name="query",
+     *         in="query",
+     *         description="Terme de recherche (recherche dans titre, description et tags)",
+     *         required=false,
+     *         @OA\Schema(type="string", example="coucher de soleil")
+     *     ),
+     *     @OA\Parameter(
+     *         name="categories",
+     *         in="query",
+     *         description="IDs des catégories (séparés par virgule)",
+     *         required=false,
+     *         @OA\Schema(type="array", @OA\Items(type="string", format="uuid"))
+     *     ),
+     *     @OA\Parameter(
+     *         name="photographer_id",
+     *         in="query",
+     *         description="ID du photographe",
+     *         required=false,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Parameter(
+     *         name="min_price",
+     *         in="query",
+     *         description="Prix minimum en FCFA",
+     *         required=false,
+     *         @OA\Schema(type="number", example=1000)
+     *     ),
+     *     @OA\Parameter(
+     *         name="max_price",
+     *         in="query",
+     *         description="Prix maximum en FCFA",
+     *         required=false,
+     *         @OA\Schema(type="number", example=10000)
+     *     ),
+     *     @OA\Parameter(
+     *         name="orientation",
+     *         in="query",
+     *         description="Orientation de la photo",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"landscape", "portrait", "square"})
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort_by",
+     *         in="query",
+     *         description="Critère de tri",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"date", "popularity", "price_asc", "price_desc"}, default="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Nombre de résultats par page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=20, minimum=1, maximum=100)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Résultats de recherche",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(ref="#/components/schemas/Photo")
+     *             ),
+     *             @OA\Property(property="meta", ref="#/components/schemas/PaginationMeta"),
+     *             @OA\Property(property="links", ref="#/components/schemas/PaginationLinks")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation",
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
+     *     )
+     * )
+     */
     public function searchPhotos(SearchPhotoRequest $request)
     {
         $query = Photo::query()

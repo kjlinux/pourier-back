@@ -1,0 +1,1124 @@
+openapi: 3.0.0
+info:
+  title: 'Pourier API'
+  description: "API REST pour la plateforme de vente de photos Pourier. Cette API permet aux utilisateurs d'acheter des photos, aux photographes de vendre leurs créations, et aux administrateurs de gérer la plateforme."
+  contact:
+    name: 'Pourier Support'
+    email: contact@pourier.com
+  license:
+    name: Proprietary
+    url: ''
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost:8000'
+    description: 'Serveur API Pourier'
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: 'Créer un nouveau compte utilisateur'
+      description: "Permet à un nouvel utilisateur de s'inscrire sur la plateforme en tant qu'acheteur ou photographe"
+      operationId: register
+      requestBody:
+        description: "Données d'inscription"
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - first_name
+                - last_name
+                - email
+                - password
+                - password_confirmation
+                - account_type
+              properties:
+                first_name:
+                  description: "Prénom de l'utilisateur"
+                  type: string
+                  maxLength: 50
+                  minLength: 2
+                  example: Jean
+                last_name:
+                  description: "Nom de l'utilisateur"
+                  type: string
+                  maxLength: 50
+                  minLength: 2
+                  example: Dupont
+                email:
+                  description: 'Adresse email (doit être unique)'
+                  type: string
+                  format: email
+                  maxLength: 255
+                  example: jean.dupont@example.com
+                password:
+                  description: 'Mot de passe (minimum 8 caractères, doit contenir lettres, chiffres et symboles)'
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: SecurePass123!
+                password_confirmation:
+                  description: 'Confirmation du mot de passe'
+                  type: string
+                  format: password
+                  example: SecurePass123!
+                account_type:
+                  description: 'Type de compte (buyer=acheteur, photographer=photographe)'
+                  type: string
+                  enum:
+                    - buyer
+                    - photographer
+                  example: buyer
+                phone:
+                  description: 'Numéro de téléphone (format burkinabè optionnel)'
+                  type: string
+                  example: '+226 70 12 34 56'
+                  nullable: true
+              type: object
+      responses:
+        201:
+          description: 'Inscription réussie'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Inscription réussie ! Bienvenue sur Pourier.'
+                  data:
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      access_token:
+                        type: string
+                        example: eyJ0eXAiOiJKV1QiLCJhbGc...
+                      token_type:
+                        type: string
+                        example: bearer
+                      expires_in:
+                        type: integer
+                        example: 3600
+                    type: object
+                type: object
+        422:
+          description: 'Erreur de validation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        500:
+          description: 'Erreur serveur'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: 'Se connecter à un compte existant'
+      description: 'Authentifier un utilisateur et recevoir un token JWT pour les requêtes suivantes'
+      operationId: login
+      requestBody:
+        description: 'Identifiants de connexion'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  description: 'Adresse email du compte'
+                  type: string
+                  format: email
+                  example: jean.dupont@example.com
+                password:
+                  description: 'Mot de passe du compte'
+                  type: string
+                  format: password
+                  example: password123
+                remember_me:
+                  description: 'Maintenir la session active plus longtemps'
+                  type: boolean
+                  example: false
+              type: object
+      responses:
+        200:
+          description: 'Connexion réussie'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Connexion réussie !'
+                  data:
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      access_token:
+                        type: string
+                        example: eyJ0eXAiOiJKV1QiLCJhbGc...
+                      token_type:
+                        type: string
+                        example: bearer
+                      expires_in:
+                        type: integer
+                        example: 3600
+                    type: object
+                type: object
+        401:
+          description: 'Identifiants invalides'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Les identifiants fournis sont incorrects'
+                type: object
+        422:
+          description: 'Erreur de validation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+  /api/auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: 'Se déconnecter'
+      description: "Invalider le token JWT actuel de l'utilisateur"
+      operationId: logout
+      responses:
+        200:
+          description: 'Déconnexion réussie'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Déconnexion réussie !'
+                type: object
+        401:
+          description: 'Non authentifié'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        500:
+          description: 'Erreur serveur'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: 'Rafraîchir le token JWT'
+      description: "Obtenir un nouveau token JWT en utilisant le token actuel (avant qu'il n'expire)"
+      operationId: refreshToken
+      responses:
+        200:
+          description: 'Token rafraîchi avec succès'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Token rafraîchi avec succès !'
+                  data:
+                    properties:
+                      access_token:
+                        type: string
+                        example: eyJ0eXAiOiJKV1QiLCJhbGc...
+                      token_type:
+                        type: string
+                        example: bearer
+                      expires_in:
+                        type: integer
+                        example: 3600
+                    type: object
+                type: object
+        401:
+          description: 'Token invalide ou expiré'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: "Obtenir les informations de l'utilisateur connecté"
+      description: "Récupérer le profil complet de l'utilisateur actuellement authentifié"
+      operationId: me
+      responses:
+        200:
+          description: 'Informations utilisateur récupérées'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+                type: object
+        401:
+          description: 'Non authentifié'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+        500:
+          description: 'Erreur serveur'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/categories:
+    get:
+      tags:
+        - Categories
+      summary: 'Lister toutes les catégories'
+      description: 'Récupérer toutes les catégories actives avec leurs sous-catégories'
+      operationId: indexCategories
+      responses:
+        200:
+          description: 'Liste des catégories récupérée'
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+                type: object
+  '/api/categories/{slugOrId}':
+    get:
+      tags:
+        - Categories
+      summary: 'Afficher une catégorie spécifique'
+      description: 'Récupérer une catégorie par son slug ou son ID'
+      operationId: showCategory
+      parameters:
+        -
+          name: slugOrId
+          in: path
+          description: 'Slug ou ID (UUID) de la catégorie'
+          required: true
+          schema:
+            type: string
+            example: paysages
+      responses:
+        200:
+          description: 'Catégorie trouvée'
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Category'
+                type: object
+        404:
+          description: 'Catégorie non trouvée'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+  /api/photos:
+    get:
+      tags:
+        - Photos
+      summary: 'Lister toutes les photos'
+      description: 'Récupérer une liste paginée de toutes les photos approuvées et publiques'
+      operationId: indexPhotos
+      parameters:
+        -
+          name: per_page
+          in: query
+          description: 'Nombre de photos par page'
+          required: false
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+            minimum: 1
+        -
+          name: page
+          in: query
+          description: 'Numéro de page'
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+      responses:
+        200:
+          description: 'Liste des photos récupérée avec succès'
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Photo'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                type: object
+  '/api/photos/{photo}':
+    get:
+      tags:
+        - Photos
+      summary: 'Afficher une photo spécifique'
+      description: "Récupérer les détails complets d'une photo par son ID"
+      operationId: showPhoto
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'ID de la photo (UUID)'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: 'Photo trouvée'
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Photo'
+                type: object
+        404:
+          description: 'Photo non trouvée'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        403:
+          description: 'Accès non autorisé (photo non publique)'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+  /api/photos/featured:
+    get:
+      tags:
+        - Photos
+      summary: 'Lister les photos mises en avant'
+      description: "Récupérer les photos sélectionnées comme 'featured' par les administrateurs"
+      operationId: featuredPhotos
+      parameters:
+        -
+          name: per_page
+          in: query
+          description: 'Nombre de photos par page'
+          required: false
+          schema:
+            type: integer
+            default: 10
+            maximum: 100
+            minimum: 1
+      responses:
+        200:
+          description: 'Photos featured récupérées'
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Photo'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                type: object
+  /api/photos/recent:
+    get:
+      tags:
+        - Photos
+      summary: 'Lister les photos récentes'
+      description: 'Récupérer les photos les plus récemment ajoutées'
+      operationId: recentPhotos
+      parameters:
+        -
+          name: limit
+          in: query
+          description: 'Nombre maximum de photos à retourner'
+          required: false
+          schema:
+            type: integer
+            default: 12
+            maximum: 50
+            minimum: 1
+      responses:
+        200:
+          description: 'Photos récentes récupérées'
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Photo'
+                type: object
+  /api/photos/popular:
+    get:
+      tags:
+        - Photos
+      summary: 'Lister les photos populaires'
+      description: 'Récupérer les photos les plus populaires (par vues et ventes)'
+      operationId: popularPhotos
+      parameters:
+        -
+          name: limit
+          in: query
+          description: 'Nombre maximum de photos à retourner'
+          required: false
+          schema:
+            type: integer
+            default: 12
+            maximum: 50
+            minimum: 1
+      responses:
+        200:
+          description: 'Photos populaires récupérées'
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Photo'
+                type: object
+  '/api/photos/{photo}/similar':
+    get:
+      tags:
+        - Photos
+      summary: 'Trouver des photos similaires'
+      description: 'Récupérer des photos similaires basées sur la catégorie et le photographe'
+      operationId: similarPhotos
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'ID de la photo de référence (UUID)'
+          required: true
+          schema:
+            type: string
+            format: uuid
+        -
+          name: limit
+          in: query
+          description: 'Nombre maximum de photos similaires à retourner'
+          required: false
+          schema:
+            type: integer
+            default: 6
+            maximum: 20
+            minimum: 1
+      responses:
+        200:
+          description: 'Photos similaires trouvées'
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Photo'
+                type: object
+        404:
+          description: 'Photo de référence non trouvée'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+  /api/search/photos:
+    get:
+      tags:
+        - Search
+      summary: 'Rechercher des photos'
+      description: 'Recherche avancée de photos avec filtres multiples (mots-clés, catégorie, prix, orientation, etc.)'
+      operationId: searchPhotos
+      parameters:
+        -
+          name: query
+          in: query
+          description: 'Terme de recherche (recherche dans titre, description et tags)'
+          required: false
+          schema:
+            type: string
+            example: 'coucher de soleil'
+        -
+          name: categories
+          in: query
+          description: 'IDs des catégories (séparés par virgule)'
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+        -
+          name: photographer_id
+          in: query
+          description: 'ID du photographe'
+          required: false
+          schema:
+            type: string
+            format: uuid
+        -
+          name: min_price
+          in: query
+          description: 'Prix minimum en FCFA'
+          required: false
+          schema:
+            type: number
+            example: 1000
+        -
+          name: max_price
+          in: query
+          description: 'Prix maximum en FCFA'
+          required: false
+          schema:
+            type: number
+            example: 10000
+        -
+          name: orientation
+          in: query
+          description: 'Orientation de la photo'
+          required: false
+          schema:
+            type: string
+            enum:
+              - landscape
+              - portrait
+              - square
+        -
+          name: sort_by
+          in: query
+          description: 'Critère de tri'
+          required: false
+          schema:
+            type: string
+            default: date
+            enum:
+              - date
+              - popularity
+              - price_asc
+              - price_desc
+        -
+          name: per_page
+          in: query
+          description: 'Nombre de résultats par page'
+          required: false
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+            minimum: 1
+      responses:
+        200:
+          description: 'Résultats de recherche'
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Photo'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                type: object
+        422:
+          description: 'Erreur de validation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+components:
+  schemas:
+    SuccessResponse:
+      title: 'Success Response'
+      description: 'Réponse standard pour une opération réussie'
+      properties:
+        success:
+          description: 'Indicateur de succès'
+          type: boolean
+          example: true
+        message:
+          description: 'Message de succès'
+          type: string
+          example: 'Opération réussie'
+        data:
+          description: 'Données retournées'
+          type: object
+      type: object
+    ErrorResponse:
+      title: 'Error Response'
+      description: 'Réponse standard pour une erreur'
+      properties:
+        success:
+          description: "Indicateur d'échec"
+          type: boolean
+          example: false
+        message:
+          description: "Message d'erreur"
+          type: string
+          example: "Une erreur s'est produite"
+        error:
+          description: "Détails supplémentaires de l'erreur (optionnel)"
+          type: string
+          example: "Détails de l'erreur"
+      type: object
+    ValidationErrorResponse:
+      title: 'Validation Error Response'
+      description: 'Réponse pour une erreur de validation'
+      properties:
+        message:
+          type: string
+          example: 'Les données fournies sont invalides'
+        errors:
+          description: 'Détails des erreurs de validation par champ'
+          type: object
+          example:
+            email:
+              - "L'email est invalide"
+            password:
+              - 'Le mot de passe est requis'
+      type: object
+    UnauthorizedResponse:
+      title: 'Unauthorized Response'
+      description: 'Réponse pour une authentification requise'
+      properties:
+        message:
+          type: string
+          example: 'Non authentifié'
+      type: object
+    ForbiddenResponse:
+      title: 'Forbidden Response'
+      description: 'Réponse pour un accès non autorisé'
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: 'Accès non autorisé'
+      type: object
+    NotFoundResponse:
+      title: 'Not Found Response'
+      description: 'Réponse pour une ressource non trouvée'
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: 'Ressource non trouvée'
+      type: object
+    PaginationMeta:
+      title: 'Pagination Metadata'
+      description: 'Métadonnées de pagination Laravel'
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        from:
+          type: integer
+          example: 1
+        last_page:
+          type: integer
+          example: 10
+        per_page:
+          type: integer
+          example: 15
+        to:
+          type: integer
+          example: 15
+        total:
+          type: integer
+          example: 150
+      type: object
+    PaginationLinks:
+      title: 'Pagination Links'
+      description: 'Liens de pagination Laravel'
+      properties:
+        first:
+          type: string
+          example: 'http://api.pourier.com/api/photos?page=1'
+        last:
+          type: string
+          example: 'http://api.pourier.com/api/photos?page=10'
+        prev:
+          type: string
+          example: null
+          nullable: true
+        next:
+          type: string
+          example: 'http://api.pourier.com/api/photos?page=2'
+      type: object
+    User:
+      title: User
+      description: 'Modèle utilisateur'
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          example: 'Jean Dupont'
+        email:
+          type: string
+          format: email
+          example: jean.dupont@example.com
+        account_type:
+          type: string
+          enum:
+            - user
+            - photographer
+            - admin
+          example: user
+        profile_picture:
+          type: string
+          example: 'https://storage.pourier.com/profiles/profile.jpg'
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          example: '2024-01-15T10:30:00.000000Z'
+        updated_at:
+          type: string
+          format: date-time
+          example: '2024-01-15T10:30:00.000000Z'
+      type: object
+    Category:
+      title: Category
+      description: 'Catégorie de photos'
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          example: Paysages
+        slug:
+          type: string
+          example: paysages
+        description:
+          type: string
+          example: 'Photos de paysages magnifiques'
+          nullable: true
+        icon:
+          type: string
+          example: landscape
+          nullable: true
+        photos_count:
+          type: integer
+          example: 1250
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      type: object
+    Photo:
+      title: Photo
+      description: 'Modèle photo complet'
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        title:
+          type: string
+          example: 'Coucher de soleil sur la plage'
+        description:
+          type: string
+          example: 'Un magnifique coucher de soleil capturé à Assinie'
+          nullable: true
+        slug:
+          type: string
+          example: coucher-de-soleil-sur-la-plage
+        tags:
+          type: array
+          items:
+            type: string
+          example:
+            - plage
+            - 'coucher de soleil'
+            - océan
+            - nature
+        preview_url:
+          type: string
+          example: 'https://storage.pourier.com/photos/preview.jpg'
+        thumbnail_url:
+          type: string
+          example: 'https://storage.pourier.com/photos/thumbnail.jpg'
+        watermarked_url:
+          type: string
+          example: 'https://storage.pourier.com/photos/watermarked.jpg'
+        width:
+          type: integer
+          example: 4000
+        height:
+          type: integer
+          example: 3000
+        file_size:
+          description: 'Taille en octets'
+          type: integer
+          example: 5242880
+        format:
+          type: string
+          example: jpg
+        exif_data:
+          type: object
+          example:
+            camera: 'Canon EOS 5D'
+            aperture: f/2.8
+            iso: '100'
+            shutter_speed: 1/500
+          nullable: true
+        color_palette:
+          type: array
+          items:
+            type: string
+          example:
+            - '#FF6B35'
+            - '#004E89'
+            - '#1A659E'
+        location:
+          type: string
+          example: "Assinie, Côte d'Ivoire"
+          nullable: true
+        price_standard:
+          description: 'Prix en FCFA'
+          type: number
+          format: float
+          example: 5000
+        price_extended:
+          description: 'Prix en FCFA'
+          type: number
+          format: float
+          example: 15000
+        status:
+          type: string
+          enum:
+            - pending
+            - approved
+            - rejected
+          example: approved
+        views_count:
+          type: integer
+          example: 1250
+        downloads_count:
+          type: integer
+          example: 45
+        favorites_count:
+          type: integer
+          example: 89
+        is_featured:
+          type: boolean
+          example: false
+        category_id:
+          type: string
+          format: uuid
+        photographer_id:
+          type: string
+          format: uuid
+        photographer:
+          $ref: '#/components/schemas/PhotographerProfile'
+        category:
+          $ref: '#/components/schemas/Category'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      type: object
+    PhotographerProfile:
+      title: 'Photographer Profile'
+      description: "Profil public d'un photographe"
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: 'Marie Kouassi'
+        profile_picture:
+          type: string
+          nullable: true
+        bio:
+          type: string
+          example: 'Photographe professionnelle basée à Abidjan'
+          nullable: true
+        photos_count:
+          type: integer
+          example: 125
+        total_sales:
+          type: integer
+          example: 450
+      type: object
+    OrderItem:
+      title: 'Order Item'
+      description: "Article d'une commande"
+      properties:
+        id:
+          type: string
+          format: uuid
+        photo_id:
+          type: string
+          format: uuid
+        license_type:
+          type: string
+          enum:
+            - standard
+            - extended
+          example: standard
+        price:
+          type: number
+          format: float
+          example: 5000
+        photo:
+          $ref: '#/components/schemas/Photo'
+      type: object
+    Order:
+      title: Order
+      description: 'Commande complète'
+      properties:
+        id:
+          type: string
+          format: uuid
+        order_number:
+          type: string
+          example: ORD-20240115-001
+        user_id:
+          type: string
+          format: uuid
+        subtotal:
+          type: number
+          format: float
+          example: 15000
+        commission:
+          description: '20% de commission'
+          type: number
+          format: float
+          example: 3000
+        total:
+          type: number
+          format: float
+          example: 15000
+        payment_status:
+          type: string
+          enum:
+            - pending
+            - completed
+            - failed
+            - refunded
+          example: pending
+        payment_method:
+          type: string
+          example: mobile_money
+          nullable: true
+        transaction_id:
+          type: string
+          example: CPAY-123456789
+          nullable: true
+        invoice_number:
+          type: string
+          example: INV-20240115-001
+          nullable: true
+        invoice_date:
+          type: string
+          format: date-time
+          nullable: true
+        invoice_path:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      type: object
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'Enter JWT Bearer token obtained from /api/auth/login endpoint'
+tags:
+  -
+    name: Authentication
+    description: "Endpoints d'authentification et de gestion de session"
+  -
+    name: Photos
+    description: 'Endpoints publics pour parcourir et consulter les photos'
+  -
+    name: Categories
+    description: 'Gestion des catégories de photos'
+  -
+    name: Search
+    description: 'Recherche de photos par mots-clés, tags et filtres'
+security:
+  -
+    bearerAuth: []

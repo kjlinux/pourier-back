@@ -12,6 +12,7 @@
         "php": "^8.2",
         "aws/aws-sdk-php": "*",
         "barryvdh/laravel-dompdf": "*",
+        "darkaonline/l5-swagger": "*",
         "guzzlehttp/guzzle": "*",
         "intervention/image": "*",
         "intervention/image-laravel": "*",
