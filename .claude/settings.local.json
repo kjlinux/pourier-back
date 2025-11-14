@@ -9,7 +9,12 @@
       "Bash(php artisan:*)",
       "Bash(composer show:*)",
       "Bash(/c/laragon/bin/php/php-8.4.12-nts-Win32-vs17-x64/php.exe /c/ProgramData/ComposerSetup/bin/composer:*)",
-      "Bash(/c/laragon/bin/php/php-8.4.12-nts-Win32-vs17-x64/php.exe /c/ProgramData/ComposerSetup/bin/composer.phar show:*)"
+      "Bash(/c/laragon/bin/php/php-8.4.12-nts-Win32-vs17-x64/php.exe /c/ProgramData/ComposerSetup/bin/composer.phar show:*)",
+      "Bash(psql:*)",
+      "Bash(\"/c/laragon/bin/php/php-8.4.12-nts-Win32-vs17-x64/php.exe\" -r \"unlink(''c:\\laragon\\www\\pourier-back\\database\\migrations\\2025_11_13_150458_create_orders_table.php'');\")",
+      "Bash(\"/c/laragon/bin/php/php-8.4.12-nts-Win32-vs17-x64/php.exe\" -r \"unlink(''c:\\laragon\\www\\pourier-back\\database\\migrations\\2025_11_13_150505_create_order_items_table.php'');\")",
+      "Bash(curl:*)",
+      "Bash(\"/c/laragon/bin/php/php-8.4.12-nts-Win32-vs17-x64/php.exe\" -r \"echo json_encode(json_decode(file_get_contents(''''php://stdin'''')), JSON_PRETTY_PRINT);\")"
     ],
     "deny": [],
     "ask": []

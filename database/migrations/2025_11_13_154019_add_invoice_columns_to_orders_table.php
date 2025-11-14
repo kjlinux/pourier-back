@@ -9,9 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('invoice_path')->nullable()->after('status');
+            $table->string('invoice_path')->nullable()->after('invoice_url');
             $table->timestamp('invoice_generated_at')->nullable()->after('invoice_path');
-            $table->timestamp('completed_at')->nullable()->after('invoice_generated_at');
+            $table->timestamp('completed_at')->nullable()->after('paid_at');
         });
     }
 

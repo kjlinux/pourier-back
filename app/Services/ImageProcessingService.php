@@ -120,19 +120,50 @@ class ImageProcessingService
 
     private function extractColorPalette($image): array
     {
-        // Redimensionner pour analyse plus rapide
+        // Redimensionner pour analyse plus rapide (50x50 pixels suffisent)
         $temp = clone $image;
-        $temp->scale(width: 100);
+        $temp->scale(width: 50);
 
-        // Récupérer les pixels dominants (simplifié)
-        // Note: L'extraction complète de palette nécessiterait une bibliothèque supplémentaire
-        // Pour l'instant, on retourne un tableau vide ou des couleurs par défaut
-        $colors = [];
+        // Encoder en format brut pour accéder aux pixels
+        $encodedImage = $temp->toPng();
 
-        // TODO: Implémenter une vraie extraction de palette de couleurs
-        // Peut utiliser une bibliothèque comme ColorThief ou un algorithme K-means
+        // Créer une image GD depuis le contenu encodé
+        $gdImage = imagecreatefromstring($encodedImage->toString());
+        if (!$gdImage) {
+            return [];
+        }
 
-        return $colors;
+        $width = imagesx($gdImage);
+        $height = imagesy($gdImage);
+
+        // Échantillonner les couleurs (tous les 5 pixels pour performance)
+        $colorMap = [];
+        for ($x = 0; $x < $width; $x += 5) {
+            for ($y = 0; $y < $height; $y += 5) {
+                $rgb = imagecolorat($gdImage, $x, $y);
+                $r = ($rgb >> 16) & 0xFF;
+                $g = ($rgb >> 8) & 0xFF;
+                $b = $rgb & 0xFF;
+
+                // Quantifier les couleurs en groupes de 32 (réduire variations)
+                $r = (int)(floor($r / 32) * 32);
+                $g = (int)(floor($g / 32) * 32);
+                $b = (int)(floor($b / 32) * 32);
+
+                $hex = sprintf('#%02x%02x%02x', $r, $g, $b);
+
+                if (!isset($colorMap[$hex])) {
+                    $colorMap[$hex] = 0;
+                }
+                $colorMap[$hex]++;
+            }
+        }
+
+        imagedestroy($gdImage);
+
+        // Trier par fréquence et retourner top 5
+        arsort($colorMap);
+        return array_keys(array_slice($colorMap, 0, 5, true));
     }
 
     public function extractExifData(string $filePath): array

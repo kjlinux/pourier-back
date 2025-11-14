@@ -1,8 +1,15 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AnalyticsController as AdminAnalyticsController;
+use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Api\Admin\PhotoModerationController;
+use App\Http\Controllers\Api\Admin\PhotographerController as AdminPhotographerController;
+use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Api\Admin\WithdrawalController as AdminWithdrawalController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\DownloadController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PhotoController;
 use App\Http\Controllers\Api\SearchController;
@@ -114,4 +121,85 @@ Route::middleware('auth:api')->prefix('orders')->group(function () {
 Route::prefix('webhooks')->group(function () {
     Route::post('/cinetpay', [WebhookController::class, 'handleCinetPayWebhook'])->name('webhooks.cinetpay');
     Route::get('/cinetpay/return/{order}', [WebhookController::class, 'handleCinetPayReturn'])->name('webhooks.cinetpay.return');
+});
+
+/*
+|--------------------------------------------------------------------------
+| DOWNLOADS
+|--------------------------------------------------------------------------
+*/
+
+// Downloads (Protected & Public)
+Route::prefix('downloads')->group(function () {
+    // Protected downloads (require authentication and purchase verification)
+    Route::middleware('auth:api')->group(function () {
+        Route::get('/photo/{photo}', [DownloadController::class, 'downloadPhoto'])->name('downloads.photo');
+        Route::get('/order/{order}', [DownloadController::class, 'downloadOrder'])->name('downloads.order');
+        Route::get('/invoice/{order}', [DownloadController::class, 'downloadInvoice'])->name('downloads.invoice');
+    });
+
+    // Public preview download (watermarked)
+    Route::get('/preview/{photo}', [DownloadController::class, 'downloadPreview'])->name('downloads.preview');
+});
+
+/*
+|--------------------------------------------------------------------------
+| PHASE 6: PANEL ADMIN
+|--------------------------------------------------------------------------
+*/
+
+// Admin Routes (Protected - requires admin role)
+Route::middleware(['auth:api', 'admin'])->prefix('admin')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
+    // Photo Moderation
+    Route::prefix('photos')->group(function () {
+        Route::get('/', [PhotoModerationController::class, 'index'])->name('admin.photos.index');
+        Route::get('/pending', [PhotoModerationController::class, 'pending'])->name('admin.photos.pending');
+        Route::post('/{photo}/approve', [PhotoModerationController::class, 'approve'])->name('admin.photos.approve');
+        Route::post('/{photo}/reject', [PhotoModerationController::class, 'reject'])->name('admin.photos.reject');
+        Route::put('/{photo}/toggle-featured', [PhotoModerationController::class, 'toggleFeatured'])->name('admin.photos.toggleFeatured');
+        Route::delete('/{photo}', [PhotoModerationController::class, 'destroy'])->name('admin.photos.destroy');
+        Route::post('/bulk-approve', [PhotoModerationController::class, 'bulkApprove'])->name('admin.photos.bulkApprove');
+        Route::post('/bulk-reject', [PhotoModerationController::class, 'bulkReject'])->name('admin.photos.bulkReject');
+    });
+
+    // Photographer Management
+    Route::prefix('photographers')->group(function () {
+        Route::get('/', [AdminPhotographerController::class, 'index'])->name('admin.photographers.index');
+        Route::get('/pending', [AdminPhotographerController::class, 'pending'])->name('admin.photographers.pending');
+        Route::get('/{photographer}', [AdminPhotographerController::class, 'show'])->name('admin.photographers.show');
+        Route::post('/{photographer}/approve', [AdminPhotographerController::class, 'approve'])->name('admin.photographers.approve');
+        Route::post('/{photographer}/reject', [AdminPhotographerController::class, 'reject'])->name('admin.photographers.reject');
+        Route::put('/{photographer}/suspend', [AdminPhotographerController::class, 'suspend'])->name('admin.photographers.suspend');
+        Route::put('/{photographer}/activate', [AdminPhotographerController::class, 'activate'])->name('admin.photographers.activate');
+    });
+
+    // Withdrawal Management
+    Route::prefix('withdrawals')->group(function () {
+        Route::get('/', [AdminWithdrawalController::class, 'index'])->name('admin.withdrawals.index');
+        Route::get('/pending', [AdminWithdrawalController::class, 'pending'])->name('admin.withdrawals.pending');
+        Route::get('/{withdrawal}', [AdminWithdrawalController::class, 'show'])->name('admin.withdrawals.show');
+        Route::post('/{withdrawal}/approve', [AdminWithdrawalController::class, 'approve'])->name('admin.withdrawals.approve');
+        Route::post('/{withdrawal}/reject', [AdminWithdrawalController::class, 'reject'])->name('admin.withdrawals.reject');
+        Route::post('/{withdrawal}/complete', [AdminWithdrawalController::class, 'complete'])->name('admin.withdrawals.complete');
+    });
+
+    // User Management
+    Route::prefix('users')->group(function () {
+        Route::get('/', [AdminUserController::class, 'index'])->name('admin.users.index');
+        Route::get('/{user}', [AdminUserController::class, 'show'])->name('admin.users.show');
+        Route::put('/{user}/suspend', [AdminUserController::class, 'suspend'])->name('admin.users.suspend');
+        Route::put('/{user}/activate', [AdminUserController::class, 'activate'])->name('admin.users.activate');
+        Route::delete('/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
+    });
+
+    // Analytics
+    Route::prefix('analytics')->group(function () {
+        Route::get('/revenue', [AdminAnalyticsController::class, 'revenue'])->name('admin.analytics.revenue');
+        Route::get('/sales', [AdminAnalyticsController::class, 'sales'])->name('admin.analytics.sales');
+        Route::get('/photographers', [AdminAnalyticsController::class, 'photographers'])->name('admin.analytics.photographers');
+        Route::get('/user-growth', [AdminAnalyticsController::class, 'userGrowth'])->name('admin.analytics.userGrowth');
+    });
 });
