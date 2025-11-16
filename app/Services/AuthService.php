@@ -32,8 +32,11 @@ class AuthService
             'is_active' => true,
         ]);
 
-        // If user is a photographer, create a photographer profile automatically
+        // Assign role based on account type
         if ($user->isPhotographer()) {
+            $user->assignRole('photographer');
+
+            // Create photographer profile automatically
             $username = $this->generateUniqueUsername($data['first_name'], $data['last_name']);
 
             PhotographerProfile::create([
@@ -43,7 +46,10 @@ class AuthService
                 'status' => 'pending', // Requires admin approval
                 'commission_rate' => 80.00, // 80% for photographer, 20% for platform
             ]);
+        } elseif ($user->isBuyer()) {
+            $user->assignRole('buyer');
         }
+        // Note: Admin role should be assigned manually via Tinker
 
         // Generate JWT token
         $token = JWTAuth::fromUser($user);
@@ -56,8 +62,11 @@ class AuthService
             \Log::error('Failed to send welcome email: ' . $e->getMessage());
         }
 
+        // Load relationships including roles and permissions
+        $user->load(['photographerProfile', 'roles', 'permissions']);
+
         return [
-            'user' => $user->load('photographerProfile'),
+            'user' => $user,
             'token' => $token,
             'token_type' => 'bearer',
             'expires_in' => config('jwt.ttl') * 60, // Convert minutes to seconds
@@ -99,8 +108,11 @@ class AuthService
             JWTAuth::factory()->setTTL($ttl);
         }
 
+        // Load relationships including roles and permissions
+        $user->load(['photographerProfile', 'roles', 'permissions']);
+
         return [
-            'user' => $user->load('photographerProfile'),
+            'user' => $user,
             'token' => $token,
             'token_type' => 'bearer',
             'expires_in' => config('jwt.ttl') * 60,
@@ -134,7 +146,7 @@ class AuthService
      */
     public function me(): User
     {
-        return auth()->user()->load('photographerProfile');
+        return auth()->user()->load(['photographerProfile', 'roles', 'permissions']);
     }
 
     /**

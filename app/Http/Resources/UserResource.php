@@ -28,7 +28,16 @@ class UserResource extends JsonResource
             'is_active' => $this->is_active,
             'email_verified_at' => $this->email_verified_at?->toIso8601String(),
             'last_login' => $this->last_login?->toIso8601String(),
+
+            // Roles and Permissions
+            'roles' => $this->getRoleNames(),
+            'permissions' => $this->getAllPermissions()->pluck('name'),
+
+            // Photographer specific data
             'photographer_profile' => new PhotographerProfileResource($this->whenLoaded('photographerProfile')),
+            'photographer_status' => $this->getPhotographerStatus(),
+            'is_approved_photographer' => $this->isApprovedPhotographer(),
+
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
         ];

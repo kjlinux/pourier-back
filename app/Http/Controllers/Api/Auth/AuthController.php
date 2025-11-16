@@ -335,4 +335,93 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get user abilities (roles, permissions, and capability flags).
+     *
+     * @OA\Get(
+     *     path="/api/auth/abilities",
+     *     tags={"Authentication"},
+     *     summary="Obtenir les capacités de l'utilisateur connecté",
+     *     description="Récupérer les rôles, permissions et drapeaux de capacité pour l'utilisateur authentifié (utile pour le frontend)",
+     *     operationId="abilities",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Capacités utilisateur récupérées",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="account_type", type="string", example="photographer", description="Type de compte"),
+     *                 @OA\Property(
+     *                     property="roles",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="photographer"),
+     *                     description="Liste des rôles assignés"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="permissions",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="upload-photos"),
+     *                     description="Liste des permissions assignées"
+     *                 ),
+     *                 @OA\Property(property="photographer_status", type="string", nullable=true, example="approved", description="Statut du profil photographe (pending, approved, rejected, suspended)"),
+     *                 @OA\Property(property="can_upload_photos", type="boolean", example=true, description="Peut uploader des photos"),
+     *                 @OA\Property(property="can_moderate", type="boolean", example=false, description="Peut modérer du contenu"),
+     *                 @OA\Property(property="can_manage_users", type="boolean", example=false, description="Peut gérer les utilisateurs"),
+     *                 @OA\Property(property="is_verified", type="boolean", example=true, description="Email vérifié"),
+     *                 @OA\Property(property="is_active", type="boolean", example=true, description="Compte actif")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non authentifié",
+     *         @OA\JsonContent(ref="#/components/schemas/UnauthorizedResponse")
+     *     )
+     * )
+     *
+     * @return JsonResponse
+     */
+    public function abilities(): JsonResponse
+    {
+        try {
+            $user = auth()->user();
+
+            // Load relationships if not already loaded
+            if (!$user->relationLoaded('roles')) {
+                $user->load(['roles', 'permissions', 'photographerProfile']);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'account_type' => $user->account_type,
+                    'roles' => $user->getRoleNames(),
+                    'permissions' => $user->getAllPermissions()->pluck('name'),
+                    'photographer_status' => $user->getPhotographerStatus(),
+
+                    // Capability flags for frontend convenience
+                    'can_upload_photos' => $user->can('upload-photos') && $user->isApprovedPhotographer(),
+                    'can_moderate' => $user->can('moderate-photos'),
+                    'can_manage_users' => $user->can('view-users'),
+                    'can_approve_withdrawals' => $user->can('approve-withdrawals'),
+                    'can_view_platform_analytics' => $user->can('view-platform-analytics'),
+
+                    // Account status
+                    'is_verified' => $user->is_verified,
+                    'is_active' => $user->is_active,
+                    'is_approved_photographer' => $user->isApprovedPhotographer(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Impossible de récupérer les capacités utilisateur.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

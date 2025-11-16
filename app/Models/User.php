@@ -15,6 +15,11 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory, Notifiable, HasUuids, SoftDeletes, HasRoles;
 
     /**
+     * Guard name for Spatie Permission
+     */
+    protected $guard_name = 'api';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -221,5 +226,27 @@ class User extends Authenticatable implements JWTSubject
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
+    }
+
+    /**
+     * Check if photographer is approved and can perform photographer actions.
+     */
+    public function isApprovedPhotographer(): bool
+    {
+        return $this->isPhotographer() &&
+               $this->photographerProfile &&
+               $this->photographerProfile->status === 'approved';
+    }
+
+    /**
+     * Get photographer approval status if user is a photographer.
+     */
+    public function getPhotographerStatus(): ?string
+    {
+        if (!$this->isPhotographer()) {
+            return null;
+        }
+
+        return $this->photographerProfile?->status;
     }
 }

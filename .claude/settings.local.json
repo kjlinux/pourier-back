@@ -15,7 +15,8 @@
       "Bash(\"/c/laragon/bin/php/php-8.4.12-nts-Win32-vs17-x64/php.exe\" -r \"unlink(''c:\\laragon\\www\\pourier-back\\database\\migrations\\2025_11_13_150505_create_order_items_table.php'');\")",
       "Bash(curl:*)",
       "Bash(\"/c/laragon/bin/php/php-8.4.12-nts-Win32-vs17-x64/php.exe\" -r \"echo json_encode(json_decode(file_get_contents(''''php://stdin'''')), JSON_PRETTY_PRINT);\")",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

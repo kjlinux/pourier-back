@@ -46,6 +46,7 @@ Route::middleware('auth:api')->prefix('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
     Route::post('/refresh', [AuthController::class, 'refresh'])->name('auth.refresh');
     Route::get('/me', [AuthController::class, 'me'])->name('auth.me');
+    Route::get('/abilities', [AuthController::class, 'abilities'])->name('auth.abilities');
 });
 
 // Test route to verify API is working
