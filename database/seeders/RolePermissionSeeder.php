@@ -16,7 +16,7 @@ class RolePermissionSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create permissions
+        // Define permissions
         $permissions = [
             // Photo Management
             'upload-photos',
@@ -68,21 +68,24 @@ class RolePermissionSeeder extends Seeder
             'view-dashboard',
         ];
 
+        // Create permissions (skip if already exists)
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission, 'guard_name' => 'api']);
+            Permission::firstOrCreate(
+                ['name' => $permission, 'guard_name' => 'api']
+            );
         }
 
         // Create roles and assign permissions
 
         // Buyer Role
-        $buyerRole = Role::create(['name' => 'buyer', 'guard_name' => 'api']);
-        $buyerRole->givePermissionTo([
+        $buyerRole = Role::firstOrCreate(['name' => 'buyer', 'guard_name' => 'api']);
+        $buyerRole->syncPermissions([
             'view-own-orders',
         ]);
 
         // Photographer Role
-        $photographerRole = Role::create(['name' => 'photographer', 'guard_name' => 'api']);
-        $photographerRole->givePermissionTo([
+        $photographerRole = Role::firstOrCreate(['name' => 'photographer', 'guard_name' => 'api']);
+        $photographerRole->syncPermissions([
             'upload-photos',
             'edit-own-photos',
             'delete-own-photos',
@@ -93,8 +96,8 @@ class RolePermissionSeeder extends Seeder
         ]);
 
         // Moderator Role (new - for delegated moderation)
-        $moderatorRole = Role::create(['name' => 'moderator', 'guard_name' => 'api']);
-        $moderatorRole->givePermissionTo([
+        $moderatorRole = Role::firstOrCreate(['name' => 'moderator', 'guard_name' => 'api']);
+        $moderatorRole->syncPermissions([
             'view-all-photos',
             'moderate-photos',
             'approve-photos',
@@ -106,11 +109,11 @@ class RolePermissionSeeder extends Seeder
         ]);
 
         // Admin Role (all permissions)
-        $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'api']);
-        $adminRole->givePermissionTo(Permission::all());
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'api']);
+        $adminRole->syncPermissions(Permission::all());
 
-        $this->command->info('Roles and permissions created successfully!');
-        $this->command->info('Created roles: buyer, photographer, moderator, admin');
-        $this->command->info('Created ' . count($permissions) . ' permissions');
+        $this->command->info('✅ Roles and permissions seeded successfully!');
+        $this->command->info('   Roles: buyer, photographer, moderator, admin');
+        $this->command->info('   Permissions: ' . count($permissions) . ' total');
     }
 }
