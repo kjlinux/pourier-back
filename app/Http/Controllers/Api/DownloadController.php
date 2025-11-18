@@ -24,6 +24,7 @@ class DownloadController extends Controller
     /**
      * @OA\Get(
      *     path="/api/downloads/photo/{photo}",
+     *     operationId="getDownloadsPhoto",
      *     tags={"Downloads"},
      *     summary="Download purchased photo (high-resolution)",
      *     description="Download the high-resolution version of a purchased photo. User must have completed order containing this photo.",
@@ -101,6 +102,7 @@ class DownloadController extends Controller
     /**
      * @OA\Get(
      *     path="/api/downloads/order/{order}",
+     *     operationId="getDownloadsOrder",
      *     tags={"Downloads"},
      *     summary="Download all photos from order (ZIP)",
      *     description="Download all high-resolution photos from a completed order as a ZIP archive. User must be order owner.",
@@ -203,6 +205,7 @@ class DownloadController extends Controller
     /**
      * @OA\Get(
      *     path="/api/downloads/invoice/{order}",
+     *     operationId="getDownloadsInvoice",
      *     tags={"Downloads"},
      *     summary="Download order invoice (PDF)",
      *     description="Download the PDF invoice for a completed order. User must be order owner.",
@@ -266,6 +269,7 @@ class DownloadController extends Controller
     /**
      * @OA\Get(
      *     path="/api/downloads/preview/{photo}",
+     *     operationId="getDownloadsPreview",
      *     tags={"Downloads"},
      *     summary="Download watermarked preview (public)",
      *     description="Download a watermarked preview version of any photo. No authentication required. Useful for demos or sharing.",

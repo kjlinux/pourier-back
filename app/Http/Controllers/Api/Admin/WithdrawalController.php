@@ -13,6 +13,7 @@ class WithdrawalController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/withdrawals",
+     *     operationId="getAdminWithdrawals",
      *     tags={"Admin - Withdrawals"},
      *     summary="Get all withdrawals with filtering",
      *     description="Retrieve all withdrawal requests with filtering by status and photographer. Requires admin role.",
@@ -93,6 +94,7 @@ class WithdrawalController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/withdrawals/pending",
+     *     operationId="getAdminWithdrawalsPending",
      *     tags={"Admin - Withdrawals"},
      *     summary="Get pending withdrawals",
      *     description="Retrieve all pending withdrawal requests ordered by creation date. Requires admin role.",
@@ -149,6 +151,7 @@ class WithdrawalController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/withdrawals/{withdrawal}",
+     *     operationId="getAdminWithdrawal",
      *     tags={"Admin - Withdrawals"},
      *     summary="Get withdrawal details",
      *     description="Retrieve detailed information about a specific withdrawal request including photographer contact information. Requires admin role.",
@@ -204,6 +207,7 @@ class WithdrawalController extends Controller
     /**
      * @OA\Put(
      *     path="/api/admin/withdrawals/{withdrawal}/approve",
+     *     operationId="approveAdminWithdrawal",
      *     tags={"Admin - Withdrawals"},
      *     summary="Approve withdrawal request",
      *     description="Approve a pending withdrawal request with optional transaction reference and admin notes. Only pending requests can be approved. Requires admin role.",
@@ -293,6 +297,7 @@ class WithdrawalController extends Controller
     /**
      * @OA\Put(
      *     path="/api/admin/withdrawals/{withdrawal}/reject",
+     *     operationId="rejectAdminWithdrawal",
      *     tags={"Admin - Withdrawals"},
      *     summary="Reject withdrawal request",
      *     description="Reject a pending withdrawal request with required rejection reason. Only pending requests can be rejected. Requires admin role.",
@@ -380,6 +385,7 @@ class WithdrawalController extends Controller
     /**
      * @OA\Put(
      *     path="/api/admin/withdrawals/{withdrawal}/complete",
+     *     operationId="completeAdminWithdrawal",
      *     tags={"Admin - Withdrawals"},
      *     summary="Mark withdrawal as completed",
      *     description="Mark an approved withdrawal as completed (payment sent) with required transaction reference. Only approved requests can be marked as completed. Requires admin role.",

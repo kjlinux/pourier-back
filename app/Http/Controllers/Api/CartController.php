@@ -3,25 +3,30 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CartItemResource;
+use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Photo;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use OpenApi\Annotations as OA;
 
 class CartController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:api');
-    }
-
     /**
      * @OA\Get(
      *     path="/api/cart",
+     *     operationId="getCart",
      *     tags={"Cart"},
      *     summary="Get user's shopping cart",
-     *     description="Retrieve all items in the current user's shopping cart with totals",
-     *     security={{"bearerAuth":{}}},
+     *     description="Retrieve all items in the current user's shopping cart with totals. Works for both authenticated and guest users.",
+     *     @OA\Parameter(
+     *         name="cart_session_id",
+     *         in="query",
+     *         description="Session ID for guest cart (optional, generated automatically if not provided)",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Cart retrieved successfully",
@@ -34,6 +39,7 @@ class CartController extends Controller
      *                     property="items",
      *                     type="array",
      *                     @OA\Items(
+     *                         @OA\Property(property="id", type="string", format="uuid"),
      *                         @OA\Property(property="photo_id", type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac"),
      *                         @OA\Property(property="photo_title", type="string", example="Sunset over Ouagadougou"),
      *                         @OA\Property(property="photo_thumbnail", type="string", example="https://example.com/photos/thumbnail.jpg"),
@@ -45,28 +51,25 @@ class CartController extends Controller
      *                 ),
      *                 @OA\Property(property="subtotal", type="number", format="float", example=15000),
      *                 @OA\Property(property="total", type="number", format="float", example=15000),
-     *                 @OA\Property(property="items_count", type="integer", example=3)
+     *                 @OA\Property(property="items_count", type="integer", example=3),
+     *                 @OA\Property(property="cart_session_id", type="string", description="Session ID for guest cart")
      *             )
      *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized",
-     *         ref="#/components/responses/UnauthorizedResponse"
      *     )
      * )
      */
     public function index(Request $request)
     {
-        $cart = $this->getCart();
+        $cart = $this->getOrCreateCart($request);
 
         return response()->json([
             'success' => true,
             'data' => [
-                'items' => $cart['items'],
-                'subtotal' => $cart['subtotal'],
-                'total' => $cart['total'],
-                'items_count' => count($cart['items']),
+                'items' => CartItemResource::collection($cart->items()->with(['photo.photographer'])->get()),
+                'subtotal' => $cart->subtotal,
+                'total' => $cart->total,
+                'items_count' => $cart->items_count,
+                'cart_session_id' => $cart->session_id,
             ],
         ]);
     }
@@ -74,16 +77,17 @@ class CartController extends Controller
     /**
      * @OA\Post(
      *     path="/api/cart/items",
+     *     operationId="addCartItem",
      *     tags={"Cart"},
      *     summary="Add item to cart",
-     *     description="Add a photo with specified license type to the shopping cart",
-     *     security={{"bearerAuth":{}}},
+     *     description="Add a photo with specified license type to the shopping cart. Works for both authenticated and guest users.",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             required={"photo_id", "license_type"},
      *             @OA\Property(property="photo_id", type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac", description="UUID of the photo"),
-     *             @OA\Property(property="license_type", type="string", enum={"standard", "extended"}, example="standard", description="License type for the photo")
+     *             @OA\Property(property="license_type", type="string", enum={"standard", "extended"}, example="standard", description="License type for the photo"),
+     *             @OA\Property(property="cart_session_id", type="string", description="Session ID for guest cart (optional)")
      *         )
      *     ),
      *     @OA\Response(
@@ -98,7 +102,8 @@ class CartController extends Controller
      *                 @OA\Property(property="items", type="array", @OA\Items(type="object")),
      *                 @OA\Property(property="subtotal", type="number", format="float", example=15000),
      *                 @OA\Property(property="total", type="number", format="float", example=15000),
-     *                 @OA\Property(property="items_count", type="integer", example=3)
+     *                 @OA\Property(property="items_count", type="integer", example=3),
+     *                 @OA\Property(property="cart_session_id", type="string", description="Session ID for guest cart")
      *             )
      *         )
      *     ),
@@ -109,11 +114,6 @@ class CartController extends Controller
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Cette photo n'est pas disponible à l'achat")
      *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized",
-     *         ref="#/components/responses/UnauthorizedResponse"
      *     ),
      *     @OA\Response(
      *         response=422,
@@ -127,6 +127,7 @@ class CartController extends Controller
         $request->validate([
             'photo_id' => ['required', 'exists:photos,id'],
             'license_type' => ['required', 'in:standard,extended'],
+            'cart_session_id' => ['nullable', 'string'],
         ]);
 
         $photo = Photo::findOrFail($request->photo_id);
@@ -139,18 +140,15 @@ class CartController extends Controller
             ], 400);
         }
 
-        $cart = $this->getCart();
+        $cart = $this->getOrCreateCart($request);
 
-        // Vérifier si l'item existe déjà
-        $existingKey = null;
-        foreach ($cart['items'] as $key => $item) {
-            if ($item['photo_id'] === $request->photo_id && $item['license_type'] === $request->license_type) {
-                $existingKey = $key;
-                break;
-            }
-        }
+        // Vérifier si l'item existe déjà (la contrainte unique dans la DB empêchera les doublons)
+        $existingItem = $cart->items()
+            ->where('photo_id', $request->photo_id)
+            ->where('license_type', $request->license_type)
+            ->first();
 
-        if ($existingKey !== null) {
+        if ($existingItem) {
             return response()->json([
                 'success' => false,
                 'message' => 'Cet article est déjà dans votre panier',
@@ -160,50 +158,48 @@ class CartController extends Controller
         // Ajouter l'item
         $price = $request->license_type === 'standard' ? $photo->price_standard : $photo->price_extended;
 
-        $cart['items'][] = [
+        $cart->items()->create([
             'photo_id' => $photo->id,
-            'photo_title' => $photo->title,
-            'photo_thumbnail' => $photo->thumbnail_url,
-            'photographer_id' => $photo->photographer_id,
-            'photographer_name' => $photo->photographer->first_name . ' ' . $photo->photographer->last_name,
             'license_type' => $request->license_type,
             'price' => $price,
-        ];
+        ]);
 
-        $this->updateCartTotals($cart);
-        $this->saveCart($cart);
+        // Recharger le cart avec les items
+        $cart->load(['items.photo.photographer']);
 
         return response()->json([
             'success' => true,
             'message' => 'Article ajouté au panier',
             'data' => [
-                'items' => $cart['items'],
-                'subtotal' => $cart['subtotal'],
-                'total' => $cart['total'],
-                'items_count' => count($cart['items']),
+                'items' => CartItemResource::collection($cart->items),
+                'subtotal' => $cart->subtotal,
+                'total' => $cart->total,
+                'items_count' => $cart->items_count,
+                'cart_session_id' => $cart->session_id,
             ],
         ]);
     }
 
     /**
      * @OA\Put(
-     *     path="/api/cart/items/{index}",
+     *     path="/api/cart/items/{item}",
+     *     operationId="updateCartItem",
      *     tags={"Cart"},
      *     summary="Update cart item",
-     *     description="Update the license type of a cart item by its index",
-     *     security={{"bearerAuth":{}}},
+     *     description="Update the license type of a cart item by its ID",
      *     @OA\Parameter(
-     *         name="index",
+     *         name="item",
      *         in="path",
-     *         description="Index of the cart item (0-based)",
+     *         description="UUID of the cart item",
      *         required=true,
-     *         @OA\Schema(type="integer", example=0)
+     *         @OA\Schema(type="string", format="uuid")
      *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             required={"license_type"},
-     *             @OA\Property(property="license_type", type="string", enum={"standard", "extended"}, example="extended", description="New license type for the photo")
+     *             @OA\Property(property="license_type", type="string", enum={"standard", "extended"}, example="extended", description="New license type for the photo"),
+     *             @OA\Property(property="cart_session_id", type="string", description="Session ID for guest cart (optional)")
      *         )
      *     ),
      *     @OA\Response(
@@ -230,65 +226,67 @@ class CartController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized",
-     *         ref="#/components/responses/UnauthorizedResponse"
-     *     ),
-     *     @OA\Response(
      *         response=422,
      *         description="Validation error",
      *         ref="#/components/responses/ValidationErrorResponse"
      *     )
      * )
      */
-    public function updateItem(Request $request, $index)
+    public function updateItem(Request $request, string $itemId)
     {
         $request->validate([
             'license_type' => ['required', 'in:standard,extended'],
+            'cart_session_id' => ['nullable', 'string'],
         ]);
 
-        $cart = $this->getCart();
+        $cart = $this->getOrCreateCart($request);
 
-        if (!isset($cart['items'][$index])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Article non trouvé',
-            ], 404);
-        }
+        $item = $cart->items()->with('photo')->findOrFail($itemId);
 
-        $photo = Photo::findOrFail($cart['items'][$index]['photo_id']);
-        $price = $request->license_type === 'standard' ? $photo->price_standard : $photo->price_extended;
+        $price = $request->license_type === 'standard'
+            ? $item->photo->price_standard
+            : $item->photo->price_extended;
 
-        $cart['items'][$index]['license_type'] = $request->license_type;
-        $cart['items'][$index]['price'] = $price;
+        $item->update([
+            'license_type' => $request->license_type,
+            'price' => $price,
+        ]);
 
-        $this->updateCartTotals($cart);
-        $this->saveCart($cart);
+        // Recharger le cart avec les items
+        $cart->load(['items.photo.photographer']);
 
         return response()->json([
             'success' => true,
             'message' => 'Article mis à jour',
             'data' => [
-                'items' => $cart['items'],
-                'subtotal' => $cart['subtotal'],
-                'total' => $cart['total'],
+                'items' => CartItemResource::collection($cart->items),
+                'subtotal' => $cart->subtotal,
+                'total' => $cart->total,
+                'items_count' => $cart->items_count,
             ],
         ]);
     }
 
     /**
      * @OA\Delete(
-     *     path="/api/cart/items/{index}",
+     *     path="/api/cart/items/{item}",
+     *     operationId="removeCartItem",
      *     tags={"Cart"},
      *     summary="Remove item from cart",
-     *     description="Remove a cart item by its index",
-     *     security={{"bearerAuth":{}}},
+     *     description="Remove a cart item by its ID",
      *     @OA\Parameter(
-     *         name="index",
+     *         name="item",
      *         in="path",
-     *         description="Index of the cart item to remove (0-based)",
+     *         description="UUID of the cart item to remove",
      *         required=true,
-     *         @OA\Schema(type="integer", example=0)
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Parameter(
+     *         name="cart_session_id",
+     *         in="query",
+     *         description="Session ID for guest cart (optional)",
+     *         required=false,
+     *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -312,38 +310,27 @@ class CartController extends Controller
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Article non trouvé")
      *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized",
-     *         ref="#/components/responses/UnauthorizedResponse"
      *     )
      * )
      */
-    public function removeItem($index)
+    public function removeItem(Request $request, string $itemId)
     {
-        $cart = $this->getCart();
+        $cart = $this->getOrCreateCart($request);
 
-        if (!isset($cart['items'][$index])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Article non trouvé',
-            ], 404);
-        }
+        $item = $cart->items()->findOrFail($itemId);
+        $item->delete();
 
-        array_splice($cart['items'], $index, 1);
-        $cart['items'] = array_values($cart['items']); // Réindexer
-
-        $this->updateCartTotals($cart);
-        $this->saveCart($cart);
+        // Recharger le cart avec les items
+        $cart->load(['items.photo.photographer']);
 
         return response()->json([
             'success' => true,
             'message' => 'Article retiré du panier',
             'data' => [
-                'items' => $cart['items'],
-                'subtotal' => $cart['subtotal'],
-                'total' => $cart['total'],
+                'items' => CartItemResource::collection($cart->items),
+                'subtotal' => $cart->subtotal,
+                'total' => $cart->total,
+                'items_count' => $cart->items_count,
             ],
         ]);
     }
@@ -351,10 +338,17 @@ class CartController extends Controller
     /**
      * @OA\Delete(
      *     path="/api/cart",
+     *     operationId="clearCart",
      *     tags={"Cart"},
      *     summary="Clear entire cart",
      *     description="Remove all items from the shopping cart",
-     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="cart_session_id",
+     *         in="query",
+     *         description="Session ID for guest cart (optional)",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Cart cleared successfully",
@@ -362,17 +356,13 @@ class CartController extends Controller
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Panier vidé")
      *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized",
-     *         ref="#/components/responses/UnauthorizedResponse"
      *     )
      * )
      */
-    public function clear()
+    public function clear(Request $request)
     {
-        Session::forget('cart');
+        $cart = $this->getOrCreateCart($request);
+        $cart->items()->delete();
 
         return response()->json([
             'success' => true,
@@ -380,24 +370,33 @@ class CartController extends Controller
         ]);
     }
 
-    private function getCart(): array
+    /**
+     * Get or create cart for the current user or session
+     */
+    private function getOrCreateCart(Request $request): Cart
     {
-        return Session::get('cart', [
-            'items' => [],
-            'subtotal' => 0,
-            'total' => 0,
-        ]);
-    }
+        $user = auth('api')->user();
 
-    private function saveCart(array $cart): void
-    {
-        Session::put('cart', $cart);
-    }
+        if ($user) {
+            // Authenticated user - find or create cart by user_id
+            $cart = Cart::firstOrCreate(
+                ['user_id' => $user->id],
+                ['session_id' => null]
+            );
+        } else {
+            // Guest user - find or create cart by session_id
+            $sessionId = $request->input('cart_session_id') ?? $request->query('cart_session_id');
 
-    private function updateCartTotals(array &$cart): void
-    {
-        $subtotal = array_sum(array_column($cart['items'], 'price'));
-        $cart['subtotal'] = $subtotal;
-        $cart['total'] = $subtotal; // Pas de taxes pour l'instant
+            if (!$sessionId) {
+                $sessionId = Str::uuid()->toString();
+            }
+
+            $cart = Cart::firstOrCreate(
+                ['session_id' => $sessionId],
+                ['user_id' => null]
+            );
+        }
+
+        return $cart;
     }
 }

@@ -13,6 +13,7 @@ class ProfileController extends Controller
     /**
      * @OA\Get(
      *     path="/api/user/profile",
+     *     operationId="getUserProfile",
      *     tags={"User Profile"},
      *     summary="Get current user profile",
      *     description="Retrieve the authenticated user's profile information including photographer profile if available",
@@ -61,6 +62,7 @@ class ProfileController extends Controller
     /**
      * @OA\Put(
      *     path="/api/user/profile",
+     *     operationId="updateUserProfile",
      *     tags={"User Profile"},
      *     summary="Update user profile",
      *     description="Update the authenticated user's profile information (first name, last name, phone, bio)",
@@ -121,6 +123,7 @@ class ProfileController extends Controller
     /**
      * @OA\Post(
      *     path="/api/user/profile/avatar",
+     *     operationId="avatarUserProfile",
      *     tags={"User Profile"},
      *     summary="Update user avatar",
      *     description="Upload and update the authenticated user's avatar image (max 2MB)",
@@ -174,6 +177,7 @@ class ProfileController extends Controller
     /**
      * @OA\Put(
      *     path="/api/user/profile/password",
+     *     operationId="passwordUserProfile",
      *     tags={"User Profile"},
      *     summary="Update user password",
      *     description="Change the authenticated user's password (requires current password verification)",

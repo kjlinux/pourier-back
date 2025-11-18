@@ -14,6 +14,7 @@ class DashboardController extends Controller
     /**
      * @OA\Get(
      *     path="/api/photographer/dashboard",
+     *     operationId="getPhotographerDashboard",
      *     tags={"Photographer - Dashboard"},
      *     summary="Get photographer dashboard",
      *     description="Comprehensive dashboard with photo statistics, revenue (80% photographer share after 20% platform commission), sales data, and recent activity",
@@ -127,6 +128,7 @@ class DashboardController extends Controller
     /**
      * @OA\Get(
      *     path="/api/photographer/dashboard/stats",
+     *     operationId="getPhotographerDashboardStats",
      *     tags={"Photographer - Dashboard"},
      *     summary="Get photographer profile statistics",
      *     description="Get profile completion percentage, average photo pricing, and best-selling photo information",

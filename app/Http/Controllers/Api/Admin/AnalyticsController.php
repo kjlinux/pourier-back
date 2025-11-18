@@ -16,6 +16,7 @@ class AnalyticsController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/analytics/revenue",
+     *     operationId="getAdminAnalyticsRevenue",
      *     tags={"Admin - Analytics"},
      *     summary="Get revenue analytics",
      *     description="Retrieve revenue analytics with daily breakdown for a specified time period. Shows total revenue and daily revenue trends. Requires admin role.",
@@ -104,6 +105,7 @@ class AnalyticsController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/analytics/sales",
+     *     operationId="getAdminAnalyticsSales",
      *     tags={"Admin - Analytics"},
      *     summary="Get sales analytics",
      *     description="Retrieve sales analytics including total orders, photos sold, average order value, and top selling photos for a specified time period. Requires admin role.",
@@ -199,6 +201,7 @@ class AnalyticsController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/analytics/photographers",
+     *     operationId="getAdminAnalyticsPhotographers",
      *     tags={"Admin - Analytics"},
      *     summary="Get photographer analytics",
      *     description="Retrieve analytics for top 20 photographers ranked by total earnings, including approved photos count and total earnings. Requires admin role.",
@@ -269,6 +272,7 @@ class AnalyticsController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/analytics/user-growth",
+     *     operationId="getAdminAnalyticsUserGrowth",
      *     tags={"Admin - Analytics"},
      *     summary="Get user growth analytics",
      *     description="Retrieve user growth analytics showing daily new user registrations grouped by account type for a specified time period. Requires admin role.",

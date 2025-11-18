@@ -14,6 +14,7 @@ class WithdrawalController extends Controller
     /**
      * @OA\Get(
      *     path="/api/photographer/withdrawals",
+     *     operationId="getPhotographerWithdrawals",
      *     tags={"Photographer - Withdrawals"},
      *     summary="List withdrawal requests",
      *     description="Get all withdrawal requests for the photographer with pagination, ordered by most recent first",
@@ -69,6 +70,7 @@ class WithdrawalController extends Controller
     /**
      * @OA\Post(
      *     path="/api/photographer/withdrawals",
+     *     operationId="storePhotographerWithdrawals",
      *     tags={"Photographer - Withdrawals"},
      *     summary="Create withdrawal request",
      *     description="Request a withdrawal from available balance. Minimum amount: 10,000 FCFA. Amount must not exceed available balance.",
@@ -155,6 +157,7 @@ class WithdrawalController extends Controller
     /**
      * @OA\Get(
      *     path="/api/photographer/withdrawals/{withdrawal}",
+     *     operationId="getPhotographerWithdrawal",
      *     tags={"Photographer - Withdrawals"},
      *     summary="Get withdrawal details",
      *     description="Retrieve detailed information about a specific withdrawal request. Only the request owner can view.",
@@ -218,6 +221,7 @@ class WithdrawalController extends Controller
     /**
      * @OA\Delete(
      *     path="/api/photographer/withdrawals/{withdrawal}",
+     *     operationId="deletePhotographerWithdrawals",
      *     tags={"Photographer - Withdrawals"},
      *     summary="Cancel withdrawal request",
      *     description="Cancel a pending withdrawal request. Only pending requests can be cancelled by the owner.",

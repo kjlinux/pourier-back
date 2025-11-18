@@ -22,6 +22,7 @@ class PhotoController extends Controller
     /**
      * @OA\Get(
      *     path="/api/photographer/photos",
+     *     operationId="getPhotographerPhotos",
      *     tags={"Photographer - Photos"},
      *     summary="List photographer's photos",
      *     description="Get all photos uploaded by the authenticated photographer with pagination and category details",
@@ -63,6 +64,7 @@ class PhotoController extends Controller
     /**
      * @OA\Post(
      *     path="/api/photographer/photos",
+     *     operationId="storePhotographerPhotos",
      *     tags={"Photographer - Photos"},
      *     summary="Upload new photos",
      *     description="Upload one or multiple photos with metadata. Photos are processed asynchronously. Platform takes 20% commission on all sales.",
@@ -155,6 +157,7 @@ class PhotoController extends Controller
     /**
      * @OA\Get(
      *     path="/api/photographer/photos/{photo}",
+     *     operationId="getPhotographerPhoto",
      *     tags={"Photographer - Photos"},
      *     summary="Get photo details",
      *     description="Retrieve detailed information about a specific photo owned by the photographer",
@@ -203,6 +206,7 @@ class PhotoController extends Controller
     /**
      * @OA\Put(
      *     path="/api/photographer/photos/{photo}",
+     *     operationId="updatePhotographerPhotos",
      *     tags={"Photographer - Photos"},
      *     summary="Update photo",
      *     description="Update photo metadata (title, description, tags, pricing, etc.). Only the photo owner can update.",
@@ -275,6 +279,7 @@ class PhotoController extends Controller
     /**
      * @OA\Delete(
      *     path="/api/photographer/photos/{photo}",
+     *     operationId="deletePhotographerPhotos",
      *     tags={"Photographer - Photos"},
      *     summary="Delete photo",
      *     description="Permanently delete a photo. Only the photo owner can delete. Uploaded files on S3 may be preserved based on policy.",

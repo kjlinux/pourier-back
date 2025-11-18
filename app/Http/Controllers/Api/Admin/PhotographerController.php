@@ -14,6 +14,7 @@ class PhotographerController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/photographers",
+     *     operationId="getAdminPhotographers",
      *     tags={"Admin - Photographers"},
      *     summary="Get all photographers",
      *     description="Retrieve all photographers with filtering by status and search capabilities. Requires admin role.",
@@ -102,6 +103,7 @@ class PhotographerController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/photographers/pending",
+     *     operationId="getAdminPhotographersPending",
      *     tags={"Admin - Photographers"},
      *     summary="Get pending photographer profiles",
      *     description="Retrieve all photographer profiles awaiting approval. Requires admin role.",
@@ -161,6 +163,7 @@ class PhotographerController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/photographers/{photographer}",
+     *     operationId="getAdminPhotographer",
      *     tags={"Admin - Photographers"},
      *     summary="Get photographer details",
      *     description="Retrieve detailed information about a specific photographer including profile, recent photos, and statistics (total photos, sales, downloads). Requires admin role.",
@@ -244,6 +247,7 @@ class PhotographerController extends Controller
     /**
      * @OA\Put(
      *     path="/api/admin/photographers/{photographer}/approve",
+     *     operationId="approveAdminPhotographer",
      *     tags={"Admin - Photographers"},
      *     summary="Approve photographer profile",
      *     description="Approve a pending photographer profile, allowing them to upload and sell photos on the platform. Requires admin role.",
@@ -335,6 +339,7 @@ class PhotographerController extends Controller
     /**
      * @OA\Put(
      *     path="/api/admin/photographers/{photographer}/reject",
+     *     operationId="rejectAdminPhotographer",
      *     tags={"Admin - Photographers"},
      *     summary="Reject photographer profile",
      *     description="Reject a pending photographer profile with optional rejection reason. Requires admin role.",
@@ -437,6 +442,7 @@ class PhotographerController extends Controller
     /**
      * @OA\Put(
      *     path="/api/admin/photographers/{photographer}/suspend",
+     *     operationId="suspendAdminPhotographer",
      *     tags={"Admin - Photographers"},
      *     summary="Suspend photographer account",
      *     description="Suspend a photographer's account, preventing them from accessing the platform. Requires admin role.",
@@ -507,6 +513,7 @@ class PhotographerController extends Controller
     /**
      * @OA\Put(
      *     path="/api/admin/photographers/{photographer}/activate",
+     *     operationId="activateAdminPhotographer",
      *     tags={"Admin - Photographers"},
      *     summary="Activate photographer account",
      *     description="Activate a suspended photographer's account, restoring their access to the platform. Requires admin role.",

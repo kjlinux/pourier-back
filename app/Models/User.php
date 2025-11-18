@@ -137,6 +137,14 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * Get the user's shopping cart.
+     */
+    public function cart()
+    {
+        return $this->hasOne(Cart::class);
+    }
+
+    /**
      * Get the photographers that the user is following.
      */
     public function following()

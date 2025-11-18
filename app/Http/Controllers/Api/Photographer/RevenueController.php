@@ -13,6 +13,7 @@ class RevenueController extends Controller
     /**
      * @OA\Get(
      *     path="/api/photographer/revenue",
+     *     operationId="getPhotographerRevenue",
      *     tags={"Photographer - Revenue"},
      *     summary="List all revenue records",
      *     description="Get paginated list of all revenue records for the photographer. Each sale generates revenue after 20% platform commission.",
@@ -70,6 +71,7 @@ class RevenueController extends Controller
     /**
      * @OA\Get(
      *     path="/api/photographer/revenue/available",
+     *     operationId="getPhotographerRevenueAvailable",
      *     tags={"Photographer - Revenue"},
      *     summary="Get available balance",
      *     description="Get the total available balance ready for withdrawal (revenue where available_at <= now). This is the photographer's 80% share after 20% platform commission.",
@@ -105,6 +107,7 @@ class RevenueController extends Controller
     /**
      * @OA\Get(
      *     path="/api/photographer/revenue/pending",
+     *     operationId="getPhotographerRevenuePending",
      *     tags={"Photographer - Revenue"},
      *     summary="Get pending revenue",
      *     description="Get all revenue records that are not yet available for withdrawal (available_at > now). Typically held for a period before becoming available.",
@@ -154,6 +157,7 @@ class RevenueController extends Controller
     /**
      * @OA\Get(
      *     path="/api/photographer/revenue/history",
+     *     operationId="getPhotographerRevenueHistory",
      *     tags={"Photographer - Revenue"},
      *     summary="Get revenue history by date",
      *     description="Get daily revenue summary with total earnings and sales count, grouped by date. Shows photographer's 80% share after 20% platform commission.",

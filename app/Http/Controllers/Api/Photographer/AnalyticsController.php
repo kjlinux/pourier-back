@@ -12,6 +12,7 @@ class AnalyticsController extends Controller
     /**
      * @OA\Get(
      *     path="/api/photographer/analytics/sales",
+     *     operationId="getPhotographerAnalyticsSales",
      *     tags={"Photographer - Analytics"},
      *     summary="Get sales analytics",
      *     description="Get sales analytics for a specified period (7, 30, or 90 days). Revenue shown is photographer's 80% share after 20% platform commission.",
@@ -74,6 +75,7 @@ class AnalyticsController extends Controller
     /**
      * @OA\Get(
      *     path="/api/photographer/analytics/popular-photos",
+     *     operationId="getPhotographerAnalyticsPopularPhotos",
      *     tags={"Photographer - Analytics"},
      *     summary="Get popular photos",
      *     description="Get top 10 best-selling photos ranked by total number of sales",

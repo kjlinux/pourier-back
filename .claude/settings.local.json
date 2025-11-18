@@ -16,7 +16,11 @@
       "Bash(curl:*)",
       "Bash(\"/c/laragon/bin/php/php-8.4.12-nts-Win32-vs17-x64/php.exe\" -r \"echo json_encode(json_decode(file_get_contents(''''php://stdin'''')), JSON_PRETTY_PRINT);\")",
       "Bash(findstr:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(/c/laragon/bin/php/php-8.4.12-nts-Win32-vs17-x64/php.exe:*)",
+      "Bash(cat:*)",
+      "Bash(python -c:*)",
+      "Bash(dir /B)"
     ],
     "deny": [],
     "ask": []

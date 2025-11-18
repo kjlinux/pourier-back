@@ -13,6 +13,7 @@ class FavoriteController extends Controller
     /**
      * @OA\Get(
      *     path="/api/user/favorites",
+     *     operationId="getUserFavorites",
      *     tags={"Favorites"},
      *     summary="Get user's favorite photos",
      *     description="Retrieve all photos marked as favorite by the authenticated user with pagination (20 per page)",
@@ -79,6 +80,7 @@ class FavoriteController extends Controller
     /**
      * @OA\Post(
      *     path="/api/user/favorites/{photo}",
+     *     operationId="storeUserFavorites",
      *     tags={"Favorites"},
      *     summary="Add photo to favorites",
      *     description="Mark a photo as favorite for the authenticated user",
@@ -132,6 +134,7 @@ class FavoriteController extends Controller
     /**
      * @OA\Delete(
      *     path="/api/user/favorites/{photo}",
+     *     operationId="deleteUserFavorites",
      *     tags={"Favorites"},
      *     summary="Remove photo from favorites",
      *     description="Unmark a photo as favorite for the authenticated user",

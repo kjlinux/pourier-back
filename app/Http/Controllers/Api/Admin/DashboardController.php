@@ -16,6 +16,7 @@ class DashboardController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/dashboard",
+     *     operationId="getAdminDashboard",
      *     tags={"Admin - Dashboard"},
      *     summary="Get admin dashboard statistics",
      *     description="Retrieve comprehensive platform statistics including users, photos, orders, withdrawals, recent activity, and platform health metrics. Requires admin role.",

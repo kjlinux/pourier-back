@@ -14,6 +14,7 @@ class PhotoModerationController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/photos/pending",
+     *     operationId="getAdminPhotosPending",
      *     tags={"Admin - Photo Moderation"},
      *     summary="Get pending photos for moderation",
      *     description="Retrieve all photos awaiting moderation review with photographer and category information. Requires admin role.",
@@ -77,6 +78,7 @@ class PhotoModerationController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/photos",
+     *     operationId="getAdminPhotos",
      *     tags={"Admin - Photo Moderation"},
      *     summary="Get all photos with filtering",
      *     description="Retrieve all photos with advanced filtering options by status, photographer, and search term. Requires admin role.",
@@ -169,6 +171,7 @@ class PhotoModerationController extends Controller
     /**
      * @OA\Put(
      *     path="/api/admin/photos/{photo}/approve",
+     *     operationId="approveAdminPhoto",
      *     tags={"Admin - Photo Moderation"},
      *     summary="Approve a photo",
      *     description="Approve a pending photo, making it publicly visible. The photo's moderation status is set to 'approved' and visibility is changed to 'public'. Requires admin role.",
@@ -250,6 +253,7 @@ class PhotoModerationController extends Controller
     /**
      * @OA\Put(
      *     path="/api/admin/photos/{photo}/reject",
+     *     operationId="rejectAdminPhoto",
      *     tags={"Admin - Photo Moderation"},
      *     summary="Reject a photo",
      *     description="Reject a pending photo with optional rejection reason. The photo's moderation status is set to 'rejected' and visibility is changed to 'private'. Requires admin role.",
@@ -342,6 +346,7 @@ class PhotoModerationController extends Controller
     /**
      * @OA\Put(
      *     path="/api/admin/photos/{photo}/toggle-featured",
+     *     operationId="toggleAdminPhotoFeatured",
      *     tags={"Admin - Photo Moderation"},
      *     summary="Toggle photo featured status",
      *     description="Feature or unfeature an approved photo. Only approved photos can be featured. Requires admin role.",
@@ -420,6 +425,7 @@ class PhotoModerationController extends Controller
     /**
      * @OA\Delete(
      *     path="/api/admin/photos/{photo}",
+     *     operationId="deleteAdminPhoto",
      *     tags={"Admin - Photo Moderation"},
      *     summary="Delete a photo",
      *     description="Permanently delete a photo and its associated files from storage. This action cannot be undone. Requires admin role.",
@@ -481,6 +487,7 @@ class PhotoModerationController extends Controller
     /**
      * @OA\Post(
      *     path="/api/admin/photos/bulk-approve",
+     *     operationId="bulkApproveAdminPhotos",
      *     tags={"Admin - Photo Moderation"},
      *     summary="Bulk approve photos",
      *     description="Approve multiple pending photos at once. Only pending photos will be updated. All specified photos will have their moderation status set to 'approved' and visibility changed to 'public'. Requires admin role.",
@@ -556,6 +563,7 @@ class PhotoModerationController extends Controller
     /**
      * @OA\Post(
      *     path="/api/admin/photos/bulk-reject",
+     *     operationId="bulkRejectAdminPhotos",
      *     tags={"Admin - Photo Moderation"},
      *     summary="Bulk reject photos",
      *     description="Reject multiple pending photos at once with optional rejection reason. Only pending photos will be updated. All specified photos will have their moderation status set to 'rejected' and visibility changed to 'private'. Requires admin role.",

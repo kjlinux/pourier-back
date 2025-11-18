@@ -27,7 +27,7 @@
                 ],
                 "summary": "Get revenue analytics",
                 "description": "Retrieve revenue analytics with daily breakdown for a specified time period. Shows total revenue and daily revenue trends. Requires admin role.",
-                "operationId": "6f7e3bbc8333de2385d1e9dc470da368",
+                "operationId": "getAdminAnalyticsRevenue",
                 "parameters": [
                     {
                         "name": "period",
@@ -148,7 +148,7 @@
                 ],
                 "summary": "Get sales analytics",
                 "description": "Retrieve sales analytics including total orders, photos sold, average order value, and top selling photos for a specified time period. Requires admin role.",
-                "operationId": "94da2592b88f216b7d8e6268ab5c9940",
+                "operationId": "getAdminAnalyticsSales",
                 "parameters": [
                     {
                         "name": "period",
@@ -252,7 +252,7 @@
                 ],
                 "summary": "Get photographer analytics",
                 "description": "Retrieve analytics for top 20 photographers ranked by total earnings, including approved photos count and total earnings. Requires admin role.",
-                "operationId": "2e6ee5449e4e1af04c79a74037b7adfc",
+                "operationId": "getAdminAnalyticsPhotographers",
                 "responses": {
                     "200": {
                         "description": "Photographer analytics retrieved successfully",
@@ -352,7 +352,7 @@
                 ],
                 "summary": "Get user growth analytics",
                 "description": "Retrieve user growth analytics showing daily new user registrations grouped by account type for a specified time period. Requires admin role.",
-                "operationId": "c5049326f73fc64dee8b801e754fc4fd",
+                "operationId": "getAdminAnalyticsUserGrowth",
                 "parameters": [
                     {
                         "name": "period",
@@ -441,7 +441,7 @@
                 ],
                 "summary": "Get admin dashboard statistics",
                 "description": "Retrieve comprehensive platform statistics including users, photos, orders, withdrawals, recent activity, and platform health metrics. Requires admin role.",
-                "operationId": "f6e3ffeb3c9fb988ca2a77ad48e2c04c",
+                "operationId": "getAdminDashboard",
                 "responses": {
                     "200": {
                         "description": "Dashboard statistics retrieved successfully",
@@ -674,7 +674,7 @@
                 ],
                 "summary": "Get pending photos for moderation",
                 "description": "Retrieve all photos awaiting moderation review with photographer and category information. Requires admin role.",
-                "operationId": "ca3803521afa22884315f7cb541d776f",
+                "operationId": "getAdminPhotosPending",
                 "parameters": [
                     {
                         "name": "per_page",
@@ -773,7 +773,7 @@
                 ],
                 "summary": "Get all photos with filtering",
                 "description": "Retrieve all photos with advanced filtering options by status, photographer, and search term. Requires admin role.",
-                "operationId": "61f63e306e3522b2313047ce38234035",
+                "operationId": "getAdminPhotos",
                 "parameters": [
                     {
                         "name": "status",
@@ -897,7 +897,7 @@
                 ],
                 "summary": "Approve a photo",
                 "description": "Approve a pending photo, making it publicly visible. The photo's moderation status is set to 'approved' and visibility is changed to 'public'. Requires admin role.",
-                "operationId": "4981a26bc0dfd6081bee150b4dacb4de",
+                "operationId": "approveAdminPhoto",
                 "parameters": [
                     {
                         "name": "photo",
@@ -1013,7 +1013,7 @@
                 ],
                 "summary": "Reject a photo",
                 "description": "Reject a pending photo with optional rejection reason. The photo's moderation status is set to 'rejected' and visibility is changed to 'private'. Requires admin role.",
-                "operationId": "975303734e4edbb7d244fab417581ab8",
+                "operationId": "rejectAdminPhoto",
                 "parameters": [
                     {
                         "name": "photo",
@@ -1147,7 +1147,7 @@
                 ],
                 "summary": "Toggle photo featured status",
                 "description": "Feature or unfeature an approved photo. Only approved photos can be featured. Requires admin role.",
-                "operationId": "d0ce84b8f87b4a581c2b939a2d02aa58",
+                "operationId": "toggleAdminPhotoFeatured",
                 "parameters": [
                     {
                         "name": "photo",
@@ -1263,7 +1263,7 @@
                 ],
                 "summary": "Delete a photo",
                 "description": "Permanently delete a photo and its associated files from storage. This action cannot be undone. Requires admin role.",
-                "operationId": "42b9eeac24cf97fdab4c53bf9c161cb5",
+                "operationId": "deleteAdminPhoto",
                 "parameters": [
                     {
                         "name": "photo",
@@ -1356,7 +1356,7 @@
                 ],
                 "summary": "Bulk approve photos",
                 "description": "Approve multiple pending photos at once. Only pending photos will be updated. All specified photos will have their moderation status set to 'approved' and visibility changed to 'public'. Requires admin role.",
-                "operationId": "c95344a8ff17c18e1882c07e8218fc6a",
+                "operationId": "bulkApproveAdminPhotos",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1466,7 +1466,7 @@
                 ],
                 "summary": "Bulk reject photos",
                 "description": "Reject multiple pending photos at once with optional rejection reason. Only pending photos will be updated. All specified photos will have their moderation status set to 'rejected' and visibility changed to 'private'. Requires admin role.",
-                "operationId": "a1bd48c38cb1a52f39ae01cd4499e0a5",
+                "operationId": "bulkRejectAdminPhotos",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1582,7 +1582,7 @@
                 ],
                 "summary": "Get all photographers",
                 "description": "Retrieve all photographers with filtering by status and search capabilities. Requires admin role.",
-                "operationId": "784c59e5e3b1be817df2d1c98a41235b",
+                "operationId": "getAdminPhotographers",
                 "parameters": [
                     {
                         "name": "status",
@@ -1695,7 +1695,7 @@
                 ],
                 "summary": "Get pending photographer profiles",
                 "description": "Retrieve all photographer profiles awaiting approval. Requires admin role.",
-                "operationId": "5bbc2a32d4a7f9cf2fa0b163c09549d1",
+                "operationId": "getAdminPhotographersPending",
                 "parameters": [
                     {
                         "name": "per_page",
@@ -1783,7 +1783,7 @@
                 ],
                 "summary": "Get photographer details",
                 "description": "Retrieve detailed information about a specific photographer including profile, recent photos, and statistics (total photos, sales, downloads). Requires admin role.",
-                "operationId": "2cc2307f06c141635430bf4c0ae7871d",
+                "operationId": "getAdminPhotographer",
                 "parameters": [
                     {
                         "name": "photographer",
@@ -1895,7 +1895,7 @@
                 ],
                 "summary": "Approve photographer profile",
                 "description": "Approve a pending photographer profile, allowing them to upload and sell photos on the platform. Requires admin role.",
-                "operationId": "59ce2f612628527cd241df2e3e5e56a3",
+                "operationId": "approveAdminPhotographer",
                 "parameters": [
                     {
                         "name": "photographer",
@@ -2011,7 +2011,7 @@
                 ],
                 "summary": "Reject photographer profile",
                 "description": "Reject a pending photographer profile with optional rejection reason. Requires admin role.",
-                "operationId": "364ae6a5b7b1d311b060774ddddc4c68",
+                "operationId": "rejectAdminPhotographer",
                 "parameters": [
                     {
                         "name": "photographer",
@@ -2145,7 +2145,7 @@
                 ],
                 "summary": "Suspend photographer account",
                 "description": "Suspend a photographer's account, preventing them from accessing the platform. Requires admin role.",
-                "operationId": "e5865ccb50849aa283cd2f8c574caba6",
+                "operationId": "suspendAdminPhotographer",
                 "parameters": [
                     {
                         "name": "photographer",
@@ -2258,7 +2258,7 @@
                 ],
                 "summary": "Activate photographer account",
                 "description": "Activate a suspended photographer's account, restoring their access to the platform. Requires admin role.",
-                "operationId": "ed5e94429c5ccf6bf026b4d6b6ed7c45",
+                "operationId": "activateAdminPhotographer",
                 "parameters": [
                     {
                         "name": "photographer",
@@ -2371,7 +2371,7 @@
                 ],
                 "summary": "Get all users with filtering",
                 "description": "Retrieve all users with advanced filtering options by account type, active status, and search term. Requires admin role.",
-                "operationId": "9ded17315e13756cd593b5840cd39a26",
+                "operationId": "getAdminUsers",
                 "parameters": [
                     {
                         "name": "account_type",
@@ -2494,7 +2494,7 @@
                 ],
                 "summary": "Get user details",
                 "description": "Retrieve detailed information about a specific user. For photographers, includes profile and recent photos. Requires admin role.",
-                "operationId": "1755e6ac1393c92a407ec78308857c0e",
+                "operationId": "getAdminUser",
                 "parameters": [
                     {
                         "name": "user",
@@ -2584,7 +2584,7 @@
                 ],
                 "summary": "Delete user account",
                 "description": "Soft delete a user account. Admin accounts cannot be deleted. Requires admin role.",
-                "operationId": "30b96bca56895875c78781639320f633",
+                "operationId": "deleteAdminUser",
                 "parameters": [
                     {
                         "name": "user",
@@ -2677,7 +2677,7 @@
                 ],
                 "summary": "Suspend user account",
                 "description": "Suspend a user's account, preventing them from accessing the platform. Requires admin role.",
-                "operationId": "7503090c42bdb31874134c6cdac109fe",
+                "operationId": "suspendAdminUser",
                 "parameters": [
                     {
                         "name": "user",
@@ -2790,7 +2790,7 @@
                 ],
                 "summary": "Activate user account",
                 "description": "Activate a suspended user's account, restoring their access to the platform. Requires admin role.",
-                "operationId": "f501f5364ae2acb64c8b709131a923cf",
+                "operationId": "activateAdminUser",
                 "parameters": [
                     {
                         "name": "user",
@@ -2903,7 +2903,7 @@
                 ],
                 "summary": "Get all withdrawals with filtering",
                 "description": "Retrieve all withdrawal requests with filtering by status and photographer. Requires admin role.",
-                "operationId": "51d8f8998ec69b7d5f1a365723925573",
+                "operationId": "getAdminWithdrawals",
                 "parameters": [
                     {
                         "name": "status",
@@ -3018,7 +3018,7 @@
                 ],
                 "summary": "Get pending withdrawals",
                 "description": "Retrieve all pending withdrawal requests ordered by creation date. Requires admin role.",
-                "operationId": "71dc50e8542a1c1be346b5fb9800c854",
+                "operationId": "getAdminWithdrawalsPending",
                 "parameters": [
                     {
                         "name": "per_page",
@@ -3106,7 +3106,7 @@
                 ],
                 "summary": "Get withdrawal details",
                 "description": "Retrieve detailed information about a specific withdrawal request including photographer contact information. Requires admin role.",
-                "operationId": "4d7f399cdb7077b992f1cc3edbacf7c7",
+                "operationId": "getAdminWithdrawal",
                 "parameters": [
                     {
                         "name": "withdrawal",
@@ -3198,7 +3198,7 @@
                 ],
                 "summary": "Approve withdrawal request",
                 "description": "Approve a pending withdrawal request with optional transaction reference and admin notes. Only pending requests can be approved. Requires admin role.",
-                "operationId": "b2af88c84f042e7d124f2f78fd89c6ca",
+                "operationId": "approveAdminWithdrawal",
                 "parameters": [
                     {
                         "name": "withdrawal",
@@ -3338,7 +3338,7 @@
                 ],
                 "summary": "Reject withdrawal request",
                 "description": "Reject a pending withdrawal request with required rejection reason. Only pending requests can be rejected. Requires admin role.",
-                "operationId": "3d4fbee7fa32f707035dd8a5b92c8c03",
+                "operationId": "rejectAdminWithdrawal",
                 "parameters": [
                     {
                         "name": "withdrawal",
@@ -3475,7 +3475,7 @@
                 ],
                 "summary": "Mark withdrawal as completed",
                 "description": "Mark an approved withdrawal as completed (payment sent) with required transaction reference. Only approved requests can be marked as completed. Requires admin role.",
-                "operationId": "bf75f5837afb4a9cafa110f7f74c9305",
+                "operationId": "completeAdminWithdrawal",
                 "parameters": [
                     {
                         "name": "withdrawal",
@@ -4040,14 +4040,125 @@
                 ]
             }
         },
+        "/api/auth/abilities": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Obtenir les capacités de l'utilisateur connecté",
+                "description": "Récupérer les rôles, permissions et drapeaux de capacité pour l'utilisateur authentifié (utile pour le frontend)",
+                "operationId": "abilities",
+                "responses": {
+                    "200": {
+                        "description": "Capacités utilisateur récupérées",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "account_type": {
+                                                    "description": "Type de compte",
+                                                    "type": "string",
+                                                    "example": "photographer"
+                                                },
+                                                "roles": {
+                                                    "description": "Liste des rôles assignés",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "photographer"
+                                                    }
+                                                },
+                                                "permissions": {
+                                                    "description": "Liste des permissions assignées",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "upload-photos"
+                                                    }
+                                                },
+                                                "photographer_status": {
+                                                    "description": "Statut du profil photographe (pending, approved, rejected, suspended)",
+                                                    "type": "string",
+                                                    "example": "approved",
+                                                    "nullable": true
+                                                },
+                                                "can_upload_photos": {
+                                                    "description": "Peut uploader des photos",
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "can_moderate": {
+                                                    "description": "Peut modérer du contenu",
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "can_manage_users": {
+                                                    "description": "Peut gérer les utilisateurs",
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "is_verified": {
+                                                    "description": "Email vérifié",
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "is_active": {
+                                                    "description": "Compte actif",
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/cart": {
             "get": {
                 "tags": [
                     "Cart"
                 ],
                 "summary": "Get user's shopping cart",
-                "description": "Retrieve all items in the current user's shopping cart with totals",
-                "operationId": "7fdb9b40bd4ad2baf12aa15164eab788",
+                "description": "Retrieve all items in the current user's shopping cart with totals. Works for both authenticated and guest users.",
+                "operationId": "getCart",
+                "parameters": [
+                    {
+                        "name": "cart_session_id",
+                        "in": "query",
+                        "description": "Session ID for guest cart (optional, generated automatically if not provided)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Cart retrieved successfully",
@@ -4065,6 +4176,10 @@
                                                     "type": "array",
                                                     "items": {
                                                         "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "format": "uuid"
+                                                            },
                                                             "photo_id": {
                                                                 "type": "string",
                                                                 "format": "uuid",
@@ -4116,6 +4231,10 @@
                                                 "items_count": {
                                                     "type": "integer",
                                                     "example": 3
+                                                },
+                                                "cart_session_id": {
+                                                    "description": "Session ID for guest cart",
+                                                    "type": "string"
                                                 }
                                             },
                                             "type": "object"
@@ -4125,16 +4244,8 @@
                                 }
                             }
                         }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/UnauthorizedResponse"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             },
             "delete": {
                 "tags": [
@@ -4142,7 +4253,18 @@
                 ],
                 "summary": "Clear entire cart",
                 "description": "Remove all items from the shopping cart",
-                "operationId": "2c37760f7c1c679d2a0c391e6a666105",
+                "operationId": "clearCart",
+                "parameters": [
+                    {
+                        "name": "cart_session_id",
+                        "in": "query",
+                        "description": "Session ID for guest cart (optional)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Cart cleared successfully",
@@ -4163,16 +4285,8 @@
                                 }
                             }
                         }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/UnauthorizedResponse"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
         "/api/cart/items": {
@@ -4181,8 +4295,8 @@
                     "Cart"
                 ],
                 "summary": "Add item to cart",
-                "description": "Add a photo with specified license type to the shopping cart",
-                "operationId": "71655c1ea70dfbb034f059570d0ab4a0",
+                "description": "Add a photo with specified license type to the shopping cart. Works for both authenticated and guest users.",
+                "operationId": "addCartItem",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -4207,6 +4321,10 @@
                                             "extended"
                                         ],
                                         "example": "standard"
+                                    },
+                                    "cart_session_id": {
+                                        "description": "Session ID for guest cart (optional)",
+                                        "type": "string"
                                     }
                                 },
                                 "type": "object"
@@ -4250,6 +4368,10 @@
                                                 "items_count": {
                                                     "type": "integer",
                                                     "example": 3
+                                                },
+                                                "cart_session_id": {
+                                                    "description": "Session ID for guest cart",
+                                                    "type": "string"
                                                 }
                                             },
                                             "type": "object"
@@ -4280,37 +4402,29 @@
                             }
                         }
                     },
-                    "401": {
-                        "$ref": "#/components/responses/UnauthorizedResponse"
-                    },
                     "422": {
                         "$ref": "#/components/responses/ValidationErrorResponse"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
-        "/api/cart/items/{index}": {
+        "/api/cart/items/{item}": {
             "put": {
                 "tags": [
                     "Cart"
                 ],
                 "summary": "Update cart item",
-                "description": "Update the license type of a cart item by its index",
-                "operationId": "0dbda638a0efc2d64e70dfd4f01f6979",
+                "description": "Update the license type of a cart item by its ID",
+                "operationId": "updateCartItem",
                 "parameters": [
                     {
-                        "name": "index",
+                        "name": "item",
                         "in": "path",
-                        "description": "Index of the cart item (0-based)",
+                        "description": "UUID of the cart item",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "example": 0
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
                 ],
@@ -4331,6 +4445,10 @@
                                             "extended"
                                         ],
                                         "example": "extended"
+                                    },
+                                    "cart_session_id": {
+                                        "description": "Session ID for guest cart (optional)",
+                                        "type": "string"
                                     }
                                 },
                                 "type": "object"
@@ -4400,35 +4518,36 @@
                             }
                         }
                     },
-                    "401": {
-                        "$ref": "#/components/responses/UnauthorizedResponse"
-                    },
                     "422": {
                         "$ref": "#/components/responses/ValidationErrorResponse"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             },
             "delete": {
                 "tags": [
                     "Cart"
                 ],
                 "summary": "Remove item from cart",
-                "description": "Remove a cart item by its index",
-                "operationId": "eb273e1375182a67df9e585d2222b15f",
+                "description": "Remove a cart item by its ID",
+                "operationId": "removeCartItem",
                 "parameters": [
                     {
-                        "name": "index",
+                        "name": "item",
                         "in": "path",
-                        "description": "Index of the cart item to remove (0-based)",
+                        "description": "UUID of the cart item to remove",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "example": 0
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "cart_session_id",
+                        "in": "query",
+                        "description": "Session ID for guest cart (optional)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 ],
@@ -4493,16 +4612,8 @@
                                 }
                             }
                         }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/UnauthorizedResponse"
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
         "/api/categories": {
@@ -4591,7 +4702,7 @@
                 ],
                 "summary": "Download purchased photo (high-resolution)",
                 "description": "Download the high-resolution version of a purchased photo. User must have completed order containing this photo.",
-                "operationId": "fb36046a91fbcb13ee86055ea3ff012c",
+                "operationId": "getDownloadsPhoto",
                 "parameters": [
                     {
                         "name": "photo",
@@ -4676,7 +4787,7 @@
                 ],
                 "summary": "Download all photos from order (ZIP)",
                 "description": "Download all high-resolution photos from a completed order as a ZIP archive. User must be order owner.",
-                "operationId": "e4140b1d9c865e376f28cd1544d4c8e2",
+                "operationId": "getDownloadsOrder",
                 "parameters": [
                     {
                         "name": "order",
@@ -4777,7 +4888,7 @@
                 ],
                 "summary": "Download order invoice (PDF)",
                 "description": "Download the PDF invoice for a completed order. User must be order owner.",
-                "operationId": "dac631c9621ed5983fc7d1ef6be19d86",
+                "operationId": "getDownloadsInvoice",
                 "parameters": [
                     {
                         "name": "order",
@@ -4849,7 +4960,7 @@
                 ],
                 "summary": "Download watermarked preview (public)",
                 "description": "Download a watermarked preview version of any photo. No authentication required. Useful for demos or sharing.",
-                "operationId": "31adfaff54ee48b5c1e40daa66651339",
+                "operationId": "getDownloadsPreview",
                 "parameters": [
                     {
                         "name": "photo",
@@ -4910,7 +5021,7 @@
                 ],
                 "summary": "List user's orders",
                 "description": "Get all orders for the authenticated user with pagination",
-                "operationId": "955bb77a45ae173a485fadb8befed93f",
+                "operationId": "getOrders",
                 "parameters": [
                     {
                         "name": "per_page",
@@ -4965,7 +5076,7 @@
                 ],
                 "summary": "Create new order",
                 "description": "Create a new order with items from cart. Platform takes 20% commission.",
-                "operationId": "2123ba58dadb22bd6f2c8081af562230",
+                "operationId": "storeOrders",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -5130,7 +5241,7 @@
                 ],
                 "summary": "Get order details",
                 "description": "Retrieve detailed information about a specific order (must be order owner)",
-                "operationId": "8114ac185cc1bf301d8862617e497098",
+                "operationId": "getOrder",
                 "parameters": [
                     {
                         "name": "order",
@@ -5196,7 +5307,7 @@
                 ],
                 "summary": "Initiate payment for order",
                 "description": "Start payment process via CinetPay (Mobile Money or Card). Returns payment URL to redirect user.",
-                "operationId": "92174e0a9e0db3e62bbf57ea9e2f7c32",
+                "operationId": "payOrders",
                 "parameters": [
                     {
                         "name": "order",
@@ -5329,7 +5440,7 @@
                 ],
                 "summary": "Check order payment status",
                 "description": "Check the current payment status of an order with CinetPay (must be order owner)",
-                "operationId": "37e232d86eae57979494d5ab5af016c9",
+                "operationId": "getOrdersStatus",
                 "parameters": [
                     {
                         "name": "order",
@@ -5747,7 +5858,7 @@
                 ],
                 "summary": "Get sales analytics",
                 "description": "Get sales analytics for a specified period (7, 30, or 90 days). Revenue shown is photographer's 80% share after 20% platform commission.",
-                "operationId": "e337ddc1b9a906cc43e0559d8736bd19",
+                "operationId": "getPhotographerAnalyticsSales",
                 "parameters": [
                     {
                         "name": "period",
@@ -5823,7 +5934,7 @@
                 ],
                 "summary": "Get popular photos",
                 "description": "Get top 10 best-selling photos ranked by total number of sales",
-                "operationId": "359ea198a883cbb2ba0cff5503a4e621",
+                "operationId": "getPhotographerAnalyticsPopularPhotos",
                 "responses": {
                     "200": {
                         "description": "Popular photos retrieved successfully",
@@ -5904,7 +6015,7 @@
                 ],
                 "summary": "Get photographer dashboard",
                 "description": "Comprehensive dashboard with photo statistics, revenue (80% photographer share after 20% platform commission), sales data, and recent activity",
-                "operationId": "6ca3be02d9ba17cae694a7b0f111575b",
+                "operationId": "getPhotographerDashboard",
                 "responses": {
                     "200": {
                         "description": "Dashboard data retrieved successfully",
@@ -6038,7 +6149,7 @@
                 ],
                 "summary": "Get photographer profile statistics",
                 "description": "Get profile completion percentage, average photo pricing, and best-selling photo information",
-                "operationId": "16d5d3e0a9f0786deea0729b7530daff",
+                "operationId": "getPhotographerDashboardStats",
                 "responses": {
                     "200": {
                         "description": "Profile statistics retrieved successfully",
@@ -6109,7 +6220,7 @@
                 ],
                 "summary": "List photographer's photos",
                 "description": "Get all photos uploaded by the authenticated photographer with pagination and category details",
-                "operationId": "30a43c817414560a7bdf05afba7963ac",
+                "operationId": "getPhotographerPhotos",
                 "parameters": [
                     {
                         "name": "per_page",
@@ -6164,7 +6275,7 @@
                 ],
                 "summary": "Upload new photos",
                 "description": "Upload one or multiple photos with metadata. Photos are processed asynchronously. Platform takes 20% commission on all sales.",
-                "operationId": "cd28b0e25ab4dfee84c3ebe79056b918",
+                "operationId": "storePhotographerPhotos",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -6278,7 +6389,7 @@
                 ],
                 "summary": "Get photo details",
                 "description": "Retrieve detailed information about a specific photo owned by the photographer",
-                "operationId": "e4c354bd5a1bcd911d275d7ab89dfa92",
+                "operationId": "getPhotographerPhoto",
                 "parameters": [
                     {
                         "name": "photo",
@@ -6342,7 +6453,7 @@
                 ],
                 "summary": "Update photo",
                 "description": "Update photo metadata (title, description, tags, pricing, etc.). Only the photo owner can update.",
-                "operationId": "c9d833ee1174defaf3bcac859eac370b",
+                "operationId": "updatePhotographerPhotos",
                 "parameters": [
                     {
                         "name": "photo",
@@ -6472,7 +6583,7 @@
                 ],
                 "summary": "Delete photo",
                 "description": "Permanently delete a photo. Only the photo owner can delete. Uploaded files on S3 may be preserved based on policy.",
-                "operationId": "dcc95e82bb0d61f647375b504dc9fa95",
+                "operationId": "deletePhotographerPhotos",
                 "parameters": [
                     {
                         "name": "photo",
@@ -6548,7 +6659,7 @@
                 ],
                 "summary": "List all revenue records",
                 "description": "Get paginated list of all revenue records for the photographer. Each sale generates revenue after 20% platform commission.",
-                "operationId": "6bd3f03689b56aab703ed9342a2f4be6",
+                "operationId": "getPhotographerRevenue",
                 "responses": {
                     "200": {
                         "description": "Revenue records retrieved successfully",
@@ -6657,7 +6768,7 @@
                 ],
                 "summary": "Get available balance",
                 "description": "Get the total available balance ready for withdrawal (revenue where available_at <= now). This is the photographer's 80% share after 20% platform commission.",
-                "operationId": "22c25f98a4da9c9e158526a0f3c31ab9",
+                "operationId": "getPhotographerRevenueAvailable",
                 "responses": {
                     "200": {
                         "description": "Available balance retrieved successfully",
@@ -6704,7 +6815,7 @@
                 ],
                 "summary": "Get pending revenue",
                 "description": "Get all revenue records that are not yet available for withdrawal (available_at > now). Typically held for a period before becoming available.",
-                "operationId": "78b16db1c03af07e4e7140ee1a05f173",
+                "operationId": "getPhotographerRevenuePending",
                 "responses": {
                     "200": {
                         "description": "Pending revenue retrieved successfully",
@@ -6790,7 +6901,7 @@
                 ],
                 "summary": "Get revenue history by date",
                 "description": "Get daily revenue summary with total earnings and sales count, grouped by date. Shows photographer's 80% share after 20% platform commission.",
-                "operationId": "a10dbaf5c1bd533c259e1c969c98509e",
+                "operationId": "getPhotographerRevenueHistory",
                 "responses": {
                     "200": {
                         "description": "Revenue history retrieved successfully",
@@ -6869,7 +6980,7 @@
                 ],
                 "summary": "List withdrawal requests",
                 "description": "Get all withdrawal requests for the photographer with pagination, ordered by most recent first",
-                "operationId": "f38e6c8b25031766666792874007a4f8",
+                "operationId": "getPhotographerWithdrawals",
                 "responses": {
                     "200": {
                         "description": "Withdrawal requests retrieved successfully",
@@ -6978,7 +7089,7 @@
                 ],
                 "summary": "Create withdrawal request",
                 "description": "Request a withdrawal from available balance. Minimum amount: 10,000 FCFA. Amount must not exceed available balance.",
-                "operationId": "c1bbe4eab25230fecc17373f83f6e109",
+                "operationId": "storePhotographerWithdrawals",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -7109,7 +7220,7 @@
                 ],
                 "summary": "Get withdrawal details",
                 "description": "Retrieve detailed information about a specific withdrawal request. Only the request owner can view.",
-                "operationId": "bd04836c1fbf54d5c678d35c2b258296",
+                "operationId": "getPhotographerWithdrawal",
                 "parameters": [
                     {
                         "name": "withdrawal",
@@ -7232,7 +7343,7 @@
                 ],
                 "summary": "Cancel withdrawal request",
                 "description": "Cancel a pending withdrawal request. Only pending requests can be cancelled by the owner.",
-                "operationId": "9d854fccd76c827379c744c2f5e35a6a",
+                "operationId": "deletePhotographerWithdrawals",
                 "parameters": [
                     {
                         "name": "withdrawal",
@@ -7451,7 +7562,7 @@
                 ],
                 "summary": "Get user's favorite photos",
                 "description": "Retrieve all photos marked as favorite by the authenticated user with pagination (20 per page)",
-                "operationId": "106119b1fff6f302cbd7a85627321a82",
+                "operationId": "getUserFavorites",
                 "parameters": [
                     {
                         "name": "page",
@@ -7578,7 +7689,7 @@
                 ],
                 "summary": "Add photo to favorites",
                 "description": "Mark a photo as favorite for the authenticated user",
-                "operationId": "b7e953a0d3b5a08b6916b0cc2328ecb7",
+                "operationId": "storeUserFavorites",
                 "parameters": [
                     {
                         "name": "photo",
@@ -7652,7 +7763,7 @@
                 ],
                 "summary": "Remove photo from favorites",
                 "description": "Unmark a photo as favorite for the authenticated user",
-                "operationId": "8006ef4f9124f7c756d2d3697fabf4f2",
+                "operationId": "deleteUserFavorites",
                 "parameters": [
                     {
                         "name": "photo",
@@ -7708,7 +7819,7 @@
                 ],
                 "summary": "Get all user notifications",
                 "description": "Retrieve all notifications for the authenticated user with pagination (20 per page)",
-                "operationId": "9617ee6a891d459ba2173e2a9aeec8f2",
+                "operationId": "getUserNotifications",
                 "parameters": [
                     {
                         "name": "page",
@@ -7833,7 +7944,7 @@
                 ],
                 "summary": "Get unread notifications",
                 "description": "Retrieve only unread notifications for the authenticated user (no pagination)",
-                "operationId": "d34b6b678e744e1169d84ac475e63cd8",
+                "operationId": "getUserNotificationsUnread",
                 "responses": {
                     "200": {
                         "description": "Unread notifications retrieved successfully",
@@ -7923,7 +8034,7 @@
                 ],
                 "summary": "Mark notification as read",
                 "description": "Mark a specific notification as read for the authenticated user",
-                "operationId": "814b3c173f2963bc54d9d0a541dfd33c",
+                "operationId": "updateUserNotificationsRead",
                 "parameters": [
                     {
                         "name": "notification",
@@ -7999,7 +8110,7 @@
                 ],
                 "summary": "Mark all notifications as read",
                 "description": "Mark all unread notifications as read for the authenticated user",
-                "operationId": "5ab4f4c7283d29454f4716c40348fcf6",
+                "operationId": "readAllUserNotifications",
                 "responses": {
                     "200": {
                         "description": "All notifications marked as read successfully",
@@ -8039,7 +8150,7 @@
                 ],
                 "summary": "Delete notification",
                 "description": "Delete a specific notification for the authenticated user",
-                "operationId": "101b986b490223c6b35ac535ba8cd3c2",
+                "operationId": "deleteUserNotifications",
                 "parameters": [
                     {
                         "name": "notification",
@@ -8115,7 +8226,7 @@
                 ],
                 "summary": "Get current user profile",
                 "description": "Retrieve the authenticated user's profile information including photographer profile if available",
-                "operationId": "7263f982fed939320696f49aae69e0d6",
+                "operationId": "getUserProfile",
                 "responses": {
                     "200": {
                         "description": "Profile retrieved successfully",
@@ -8229,7 +8340,7 @@
                 ],
                 "summary": "Update user profile",
                 "description": "Update the authenticated user's profile information (first name, last name, phone, bio)",
-                "operationId": "ed1eeb1dca260eaf9823a1164a32738c",
+                "operationId": "updateUserProfile",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -8342,7 +8453,7 @@
                 ],
                 "summary": "Update user avatar",
                 "description": "Upload and update the authenticated user's avatar image (max 2MB)",
-                "operationId": "e2d2514a22b7fd00c76d733aba3936a2",
+                "operationId": "avatarUserProfile",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -8405,7 +8516,7 @@
                 ],
                 "summary": "Update user password",
                 "description": "Change the authenticated user's password (requires current password verification)",
-                "operationId": "5452a242b9024697a504e108e26a89f2",
+                "operationId": "passwordUserProfile",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -8504,7 +8615,7 @@
                 ],
                 "summary": "CinetPay payment webhook (callback)",
                 "description": "Receives payment notifications from CinetPay when payment status changes. Uses HMAC signature verification for security. This endpoint is called by CinetPay servers only.",
-                "operationId": "58f9f20c5bba5306e0cb977f9fdaf966",
+                "operationId": "storeWebhooksCinetpay",
                 "requestBody": {
                     "description": "CinetPay webhook payload",
                     "required": true,
@@ -8608,7 +8719,7 @@
                 ],
                 "summary": "CinetPay payment return URL",
                 "description": "User is redirected here after completing payment on CinetPay. Checks payment status and redirects to frontend success/failure page.",
-                "operationId": "1c814cac6aa142f6bc1992d112584f2e",
+                "operationId": "getWebhooksCinetpayReturn",
                 "parameters": [
                     {
                         "name": "order",

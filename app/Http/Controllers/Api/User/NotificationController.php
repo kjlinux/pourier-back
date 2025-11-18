@@ -13,6 +13,7 @@ class NotificationController extends Controller
     /**
      * @OA\Get(
      *     path="/api/user/notifications",
+     *     operationId="getUserNotifications",
      *     tags={"Notifications"},
      *     summary="Get all user notifications",
      *     description="Retrieve all notifications for the authenticated user with pagination (20 per page)",
@@ -72,6 +73,7 @@ class NotificationController extends Controller
     /**
      * @OA\Get(
      *     path="/api/user/notifications/unread",
+     *     operationId="getUserNotificationsUnread",
      *     tags={"Notifications"},
      *     summary="Get unread notifications",
      *     description="Retrieve only unread notifications for the authenticated user (no pagination)",
@@ -117,6 +119,7 @@ class NotificationController extends Controller
     /**
      * @OA\Put(
      *     path="/api/user/notifications/{notification}/read",
+     *     operationId="updateUserNotificationsRead",
      *     tags={"Notifications"},
      *     summary="Mark notification as read",
      *     description="Mark a specific notification as read for the authenticated user",
@@ -170,6 +173,7 @@ class NotificationController extends Controller
     /**
      * @OA\Put(
      *     path="/api/user/notifications/read-all",
+     *     operationId="readAllUserNotifications",
      *     tags={"Notifications"},
      *     summary="Mark all notifications as read",
      *     description="Mark all unread notifications as read for the authenticated user",
@@ -201,6 +205,7 @@ class NotificationController extends Controller
     /**
      * @OA\Delete(
      *     path="/api/user/notifications/{notification}",
+     *     operationId="deleteUserNotifications",
      *     tags={"Notifications"},
      *     summary="Delete notification",
      *     description="Delete a specific notification for the authenticated user",

@@ -101,12 +101,12 @@ Route::middleware('auth:api')->prefix('photographer')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-// Cart (Protected)
-Route::middleware('auth:api')->prefix('cart')->group(function () {
+// Cart (Works for both authenticated and guest users)
+Route::prefix('cart')->group(function () {
     Route::get('/', [CartController::class, 'index'])->name('cart.index');
     Route::post('/items', [CartController::class, 'addItem'])->name('cart.addItem');
-    Route::put('/items/{index}', [CartController::class, 'updateItem'])->name('cart.updateItem');
-    Route::delete('/items/{index}', [CartController::class, 'removeItem'])->name('cart.removeItem');
+    Route::put('/items/{item}', [CartController::class, 'updateItem'])->name('cart.updateItem');
+    Route::delete('/items/{item}', [CartController::class, 'removeItem'])->name('cart.removeItem');
     Route::delete('/', [CartController::class, 'clear'])->name('cart.clear');
 });
 

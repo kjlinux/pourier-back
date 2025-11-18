@@ -18,6 +18,7 @@ class WebhookController extends Controller
     /**
      * @OA\Post(
      *     path="/api/webhooks/cinetpay",
+     *     operationId="storeWebhooksCinetpay",
      *     tags={"Webhooks"},
      *     summary="CinetPay payment webhook (callback)",
      *     description="Receives payment notifications from CinetPay when payment status changes. Uses HMAC signature verification for security. This endpoint is called by CinetPay servers only.",
@@ -125,6 +126,7 @@ class WebhookController extends Controller
     /**
      * @OA\Get(
      *     path="/api/webhooks/cinetpay/return/{order}",
+     *     operationId="getWebhooksCinetpayReturn",
      *     tags={"Webhooks"},
      *     summary="CinetPay payment return URL",
      *     description="User is redirected here after completing payment on CinetPay. Checks payment status and redirects to frontend success/failure page.",

@@ -13,6 +13,7 @@ class UserController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/users",
+     *     operationId="getAdminUsers",
      *     tags={"Admin - Users"},
      *     summary="Get all users with filtering",
      *     description="Retrieve all users with advanced filtering options by account type, active status, and search term. Requires admin role.",
@@ -110,6 +111,7 @@ class UserController extends Controller
     /**
      * @OA\Get(
      *     path="/api/admin/users/{user}",
+     *     operationId="getAdminUser",
      *     tags={"Admin - Users"},
      *     summary="Get user details",
      *     description="Retrieve detailed information about a specific user. For photographers, includes profile and recent photos. Requires admin role.",
@@ -170,6 +172,7 @@ class UserController extends Controller
     /**
      * @OA\Put(
      *     path="/api/admin/users/{user}/suspend",
+     *     operationId="suspendAdminUser",
      *     tags={"Admin - Users"},
      *     summary="Suspend user account",
      *     description="Suspend a user's account, preventing them from accessing the platform. Requires admin role.",
@@ -240,6 +243,7 @@ class UserController extends Controller
     /**
      * @OA\Put(
      *     path="/api/admin/users/{user}/activate",
+     *     operationId="activateAdminUser",
      *     tags={"Admin - Users"},
      *     summary="Activate user account",
      *     description="Activate a suspended user's account, restoring their access to the platform. Requires admin role.",
@@ -310,6 +314,7 @@ class UserController extends Controller
     /**
      * @OA\Delete(
      *     path="/api/admin/users/{user}",
+     *     operationId="deleteAdminUser",
      *     tags={"Admin - Users"},
      *     summary="Delete user account",
      *     description="Soft delete a user account. Admin accounts cannot be deleted. Requires admin role.",

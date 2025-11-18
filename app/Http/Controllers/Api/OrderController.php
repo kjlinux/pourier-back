@@ -27,6 +27,7 @@ class OrderController extends Controller
     /**
      * @OA\Get(
      *     path="/api/orders",
+     *     operationId="getOrders",
      *     tags={"Orders"},
      *     summary="List user's orders",
      *     description="Get all orders for the authenticated user with pagination",
@@ -68,6 +69,7 @@ class OrderController extends Controller
     /**
      * @OA\Post(
      *     path="/api/orders",
+     *     operationId="storeOrders",
      *     tags={"Orders"},
      *     summary="Create new order",
      *     description="Create a new order with items from cart. Platform takes 20% commission.",
@@ -195,6 +197,7 @@ class OrderController extends Controller
     /**
      * @OA\Get(
      *     path="/api/orders/{order}",
+     *     operationId="getOrder",
      *     tags={"Orders"},
      *     summary="Get order details",
      *     description="Retrieve detailed information about a specific order (must be order owner)",
@@ -249,6 +252,7 @@ class OrderController extends Controller
     /**
      * @OA\Post(
      *     path="/api/orders/{order}/pay",
+     *     operationId="payOrders",
      *     tags={"Orders"},
      *     summary="Initiate payment for order",
      *     description="Start payment process via CinetPay (Mobile Money or Card). Returns payment URL to redirect user.",
@@ -341,6 +345,7 @@ class OrderController extends Controller
     /**
      * @OA\Get(
      *     path="/api/orders/{order}/status",
+     *     operationId="getOrdersStatus",
      *     tags={"Orders"},
      *     summary="Check order payment status",
      *     description="Check the current payment status of an order with CinetPay (must be order owner)",
