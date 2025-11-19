@@ -250,7 +250,7 @@ class AnalyticsController extends Controller
     {
         $topPhotographers = User::where('account_type', 'photographer')
             ->withCount(['photos as approved_photos_count' => function ($query) {
-                $query->where('moderation_status', 'approved');
+                $query->where('status', 'approved');
             }])
             ->withSum(['orderItems as total_earnings' => function ($query) {
                 $query->whereHas('order', function ($q) {

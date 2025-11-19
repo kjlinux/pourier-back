@@ -8,7 +8,6 @@ use App\Models\Photo;
 use App\Models\User;
 use App\Models\Withdrawal;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use OpenApi\Annotations as OA;
 
 class DashboardController extends Controller
@@ -119,10 +118,10 @@ class DashboardController extends Controller
             // Photo statistics
             'photos' => [
                 'total' => Photo::count(),
-                'pending' => Photo::where('moderation_status', 'pending')->count(),
-                'approved' => Photo::where('moderation_status', 'approved')->count(),
-                'rejected' => Photo::where('moderation_status', 'rejected')->count(),
-                'featured' => Photo::where('is_featured', true)->count(),
+                'pending' => Photo::where('status', 'pending')->count(),
+                'approved' => Photo::where('status', 'approved')->count(),
+                'rejected' => Photo::where('status', 'rejected')->count(),
+                'featured' => Photo::where('featured', true)->count(),
                 'uploaded_this_month' => Photo::whereMonth('created_at', now()->month)->count(),
             ],
 
@@ -159,7 +158,7 @@ class DashboardController extends Controller
                 'latest_photos' => Photo::with('photographer:id,first_name,last_name')
                     ->latest()
                     ->take(5)
-                    ->get(['id', 'title', 'photographer_id', 'moderation_status', 'created_at']),
+                    ->get(['id', 'title', 'photographer_id', 'status', 'created_at']),
 
                 'latest_users' => User::latest()
                     ->take(5)
@@ -171,12 +170,12 @@ class DashboardController extends Controller
                 'active_photographers' => User::where('account_type', 'photographer')
                     ->where('is_active', true)
                     ->whereHas('photos', function ($query) {
-                        $query->where('moderation_status', 'approved');
+                        $query->where('status', 'approved');
                     })
                     ->count(),
 
-                'average_photo_price' => Photo::where('moderation_status', 'approved')
-                    ->avg('price'),
+                'average_photo_price' => Photo::where('status', 'approved')
+                    ->avg('price_standard'),
 
                 'conversion_rate' => $this->calculateConversionRate(),
 
@@ -215,7 +214,7 @@ class DashboardController extends Controller
     {
         return User::where('account_type', 'photographer')
             ->withCount(['photos' => function ($query) {
-                $query->where('moderation_status', 'approved');
+                $query->where('status', 'approved');
             }])
             ->withSum(['orderItems as total_sales' => function ($query) {
                 $query->whereHas('order', function ($q) {

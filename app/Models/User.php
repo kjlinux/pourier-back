@@ -113,6 +113,14 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * Get the order items for photos sold by this photographer.
+     */
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class, 'photographer_id');
+    }
+
+    /**
      * Get the withdrawals requested by the photographer.
      */
     public function withdrawals()

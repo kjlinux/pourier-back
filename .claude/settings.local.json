@@ -20,7 +20,9 @@
       "Bash(/c/laragon/bin/php/php-8.4.12-nts-Win32-vs17-x64/php.exe:*)",
       "Bash(cat:*)",
       "Bash(python -c:*)",
-      "Bash(dir /B)"
+      "Bash(dir /B)",
+      "Bash(nul)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

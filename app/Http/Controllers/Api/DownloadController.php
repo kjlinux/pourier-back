@@ -76,7 +76,7 @@ class DownloadController extends Controller
 
         // Vérifier si l'utilisateur a acheté cette photo
         $hasPurchased = Order::where('user_id', $request->user()->id)
-            ->where('status', 'completed')
+            ->where('payment_status', 'completed')
             ->whereHas('items', function ($query) use ($photo) {
                 $query->where('photo_id', $photo->id);
             })
@@ -159,7 +159,7 @@ class DownloadController extends Controller
     {
         Gate::authorize('view', $order);
 
-        if ($order->status !== 'completed') {
+        if ($order->payment_status !== 'completed') {
             abort(403, 'Order is not completed yet');
         }
 

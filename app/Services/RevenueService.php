@@ -26,7 +26,7 @@ class RevenueService
                 $query->where('photographer_id', $photographer->id);
             })
             ->whereHas('order', function ($query) use ($securityDate) {
-                $query->where('status', 'completed')
+                $query->where('payment_status', 'completed')
                     ->where('completed_at', '<=', $securityDate);
             })
             ->where('photographer_paid', false)
@@ -44,7 +44,7 @@ class RevenueService
                 $query->where('photographer_id', $photographer->id);
             })
             ->whereHas('order', function ($query) use ($securityDate) {
-                $query->where('status', 'completed')
+                $query->where('payment_status', 'completed')
                     ->where('completed_at', '>', $securityDate);
             })
             ->where('photographer_paid', false)
@@ -60,12 +60,12 @@ class RevenueService
                 $query->where('photographer_id', $photographer->id);
             })
             ->whereHas('order', function ($query) use ($startDate, $endDate) {
-                $query->where('status', 'completed');
-                
+                $query->where('payment_status', 'completed');
+
                 if ($startDate) {
                     $query->where('completed_at', '>=', $startDate);
                 }
-                
+
                 if ($endDate) {
                     $query->where('completed_at', '<=', $endDate);
                 }
@@ -100,7 +100,7 @@ class RevenueService
                 $query->where('photographer_id', $photographer->id);
             })
             ->whereHas('order', function ($query) {
-                $query->where('status', 'completed');
+                $query->where('payment_status', 'completed');
             })
             ->where('photographer_paid', true)
             ->sum('photographer_amount');
@@ -117,7 +117,7 @@ class RevenueService
                 $query->where('photographer_id', $photographer->id);
             })
             ->whereHas('order', function ($query) use ($securityDate) {
-                $query->where('status', 'completed')
+                $query->where('payment_status', 'completed')
                     ->where('completed_at', '<=', $securityDate);
             })
             ->where('photographer_paid', false);
@@ -144,7 +144,7 @@ class RevenueService
                 $query->where('photographer_id', $photographer->id);
             })
             ->whereHas('order', function ($query) use ($securityDate) {
-                $query->where('status', 'completed')
+                $query->where('payment_status', 'completed')
                     ->where('completed_at', '<=', $securityDate);
             })
             ->where('photographer_paid', false)
@@ -162,7 +162,7 @@ class RevenueService
                 $query->where('photographer_id', $photographer->id);
             })
             ->whereHas('order', function ($query) {
-                $query->where('status', 'completed');
+                $query->where('payment_status', 'completed');
             })
             ->count();
 

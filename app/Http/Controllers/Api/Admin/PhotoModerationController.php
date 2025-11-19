@@ -65,7 +65,7 @@ class PhotoModerationController extends Controller
     public function pending(Request $request): JsonResponse
     {
         $photos = Photo::with(['photographer:id,first_name,last_name,email', 'category:id,name'])
-            ->where('moderation_status', 'pending')
+            ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->paginate($request->input('per_page', 20));
 
@@ -146,7 +146,7 @@ class PhotoModerationController extends Controller
 
         // Filter by moderation status
         if ($request->has('status')) {
-            $query->where('moderation_status', $request->input('status'));
+            $query->where('status', $request->input('status'));
         }
 
         // Filter by photographer
@@ -225,7 +225,7 @@ class PhotoModerationController extends Controller
      */
     public function approve(Photo $photo): JsonResponse
     {
-        if ($photo->moderation_status === 'approved') {
+        if ($photo->status === 'approved') {
             return response()->json([
                 'success' => false,
                 'message' => 'Cette photo est déjà approuvée.',
@@ -234,9 +234,9 @@ class PhotoModerationController extends Controller
 
         DB::transaction(function () use ($photo) {
             $photo->update([
-                'moderation_status' => 'approved',
+                'status' => 'approved',
                 'moderated_at' => now(),
-                'visibility' => 'public', // Rendre la photo publique
+                'is_public' => true, // Rendre la photo publique
             ]);
 
             // Envoyer notification au photographe (via Job)
@@ -317,7 +317,7 @@ class PhotoModerationController extends Controller
             'rejection_reason' => 'nullable|string|max:500',
         ]);
 
-        if ($photo->moderation_status === 'rejected') {
+        if ($photo->status === 'rejected') {
             return response()->json([
                 'success' => false,
                 'message' => 'Cette photo est déjà rejetée.',
@@ -326,10 +326,10 @@ class PhotoModerationController extends Controller
 
         DB::transaction(function () use ($photo, $request) {
             $photo->update([
-                'moderation_status' => 'rejected',
+                'status' => 'rejected',
                 'moderated_at' => now(),
                 'rejection_reason' => $request->input('rejection_reason'),
-                'visibility' => 'private',
+                'is_public' => false,
             ]);
 
             // Envoyer notification au photographe (via Job)
@@ -400,7 +400,7 @@ class PhotoModerationController extends Controller
      */
     public function toggleFeatured(Photo $photo): JsonResponse
     {
-        if ($photo->moderation_status !== 'approved') {
+        if ($photo->status !== 'approved') {
             return response()->json([
                 'success' => false,
                 'message' => 'Seules les photos approuvées peuvent être mises en avant.',
@@ -408,10 +408,10 @@ class PhotoModerationController extends Controller
         }
 
         $photo->update([
-            'is_featured' => !$photo->is_featured,
+            'featured' => !$photo->featured,
         ]);
 
-        $message = $photo->is_featured
+        $message = $photo->featured
             ? 'Photo mise en avant avec succès.'
             : 'Photo retirée des photos en avant.';
 
@@ -547,11 +547,11 @@ class PhotoModerationController extends Controller
         $photoIds = $request->input('photo_ids');
 
         $updated = Photo::whereIn('id', $photoIds)
-            ->where('moderation_status', 'pending')
+            ->where('status', 'pending')
             ->update([
-                'moderation_status' => 'approved',
+                'status' => 'approved',
                 'moderated_at' => now(),
-                'visibility' => 'public',
+                'is_public' => true,
             ]);
 
         return response()->json([
@@ -626,12 +626,12 @@ class PhotoModerationController extends Controller
         $reason = $request->input('rejection_reason');
 
         $updated = Photo::whereIn('id', $photoIds)
-            ->where('moderation_status', 'pending')
+            ->where('status', 'pending')
             ->update([
-                'moderation_status' => 'rejected',
+                'status' => 'rejected',
                 'moderated_at' => now(),
                 'rejection_reason' => $reason,
-                'visibility' => 'private',
+                'is_public' => false,
             ]);
 
         return response()->json([

@@ -230,8 +230,8 @@ class PhotographerController extends Controller
         // Add statistics
         $photographer->stats = [
             'total_photos' => $photographer->photos()->count(),
-            'approved_photos' => $photographer->photos()->where('moderation_status', 'approved')->count(),
-            'pending_photos' => $photographer->photos()->where('moderation_status', 'pending')->count(),
+            'approved_photos' => $photographer->photos()->where('status', 'approved')->count(),
+            'pending_photos' => $photographer->photos()->where('status', 'pending')->count(),
             'total_sales' => $photographer->orderItems()->whereHas('order', function ($q) {
                 $q->where('payment_status', 'completed');
             })->sum('photographer_amount'),

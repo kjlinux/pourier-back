@@ -92,6 +92,11 @@ class Photo extends Model
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
     }
 
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     // Scopes
 
     public function scopePublic($query)

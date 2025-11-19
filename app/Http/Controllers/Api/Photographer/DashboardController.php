@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Photographer;
 use App\Http\Controllers\Controller;
 use App\Models\Photo;
 use App\Models\Revenue;
+use App\Services\RevenueService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
@@ -63,7 +64,7 @@ class DashboardController extends Controller
      *     )
      * )
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, RevenueService $revenueService): JsonResponse
     {
         $photographer = $request->user();
 
@@ -71,28 +72,22 @@ class DashboardController extends Controller
             // Photo statistics
             'photos' => [
                 'total' => $photographer->photos()->count(),
-                'approved' => $photographer->photos()->where('moderation_status', 'approved')->count(),
-                'pending' => $photographer->photos()->where('moderation_status', 'pending')->count(),
-                'rejected' => $photographer->photos()->where('moderation_status', 'rejected')->count(),
-                'views' => $photographer->photos()->sum('view_count'),
+                'approved' => $photographer->photos()->where('status', 'approved')->count(),
+                'pending' => $photographer->photos()->where('status', 'pending')->count(),
+                'rejected' => $photographer->photos()->where('status', 'rejected')->count(),
+                'views' => $photographer->photos()->sum('views_count'),
             ],
 
             // Revenue statistics
             'revenue' => [
-                'available' => Revenue::where('photographer_id', $photographer->id)
-                    ->where('available_at', '<=', now())
-                    ->sum('photographer_amount'),
-
-                'pending' => Revenue::where('photographer_id', $photographer->id)
-                    ->where('available_at', '>', now())
-                    ->sum('photographer_amount'),
-
-                'total_earnings' => Revenue::where('photographer_id', $photographer->id)
-                    ->sum('photographer_amount'),
-
-                'this_month' => Revenue::where('photographer_id', $photographer->id)
-                    ->whereMonth('sold_at', now()->month)
-                    ->sum('photographer_amount'),
+                'available' => $revenueService->getAvailableRevenue($photographer),
+                'pending' => $revenueService->getPendingRevenue($photographer),
+                'total_earnings' => $revenueService->getTotalRevenue($photographer),
+                'this_month' => $revenueService->getTotalRevenue(
+                    $photographer,
+                    now()->startOfMonth(),
+                    now()->endOfMonth()
+                ),
             ],
 
             // Sales statistics
@@ -116,7 +111,7 @@ class DashboardController extends Controller
             'recent_photos' => $photographer->photos()
                 ->latest()
                 ->take(5)
-                ->get(['id', 'title', 'moderation_status', 'view_count', 'created_at']),
+                ->get(['id', 'title', 'status', 'views_count', 'created_at']),
         ];
 
         return response()->json([
@@ -170,8 +165,8 @@ class DashboardController extends Controller
             'data' => [
                 'profile_completion' => $this->calculateProfileCompletion($photographer),
                 'average_photo_price' => $photographer->photos()
-                    ->where('moderation_status', 'approved')
-                    ->avg('price'),
+                    ->where('status', 'approved')
+                    ->avg('price_standard'),
                 'best_selling_photo' => $photographer->photos()
                     ->withCount('orderItems')
                     ->orderByDesc('order_items_count')
