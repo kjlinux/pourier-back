@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Admin\PhotographerController as AdminPhotographerCo
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\Admin\WithdrawalController as AdminWithdrawalController;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DownloadController;
@@ -39,6 +40,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
     Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
+    Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword'])->name('auth.forgotPassword');
+    Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('auth.resetPassword');
 });
 
 // Protected Auth Routes (requires JWT authentication)
@@ -73,6 +76,7 @@ Route::prefix('photos')->group(function () {
     Route::get('/popular', [PhotoController::class, 'popular'])->name('photos.popular');
     Route::get('/{photo}', [PhotoController::class, 'show'])->name('photos.show');
     Route::get('/{photo}/similar', [PhotoController::class, 'similar'])->name('photos.similar');
+    Route::post('/{photo}/view', [PhotoController::class, 'trackView'])->name('photos.trackView');
 });
 
 // Search
@@ -244,6 +248,12 @@ Route::middleware(['auth:api', 'photographer'])->prefix('photographer')->group(f
     Route::prefix('analytics')->group(function () {
         Route::get('/sales', [PhotographerAnalyticsController::class, 'sales'])->name('photographer.analytics.sales');
         Route::get('/popular-photos', [PhotographerAnalyticsController::class, 'popularPhotos'])->name('photographer.analytics.popularPhotos');
+        Route::get('/views-over-time', [PhotographerAnalyticsController::class, 'viewsOverTime'])->name('photographer.analytics.viewsOverTime');
+        Route::get('/sales-over-time', [PhotographerAnalyticsController::class, 'salesOverTime'])->name('photographer.analytics.salesOverTime');
+        Route::get('/revenue-over-time', [PhotographerAnalyticsController::class, 'revenueOverTime'])->name('photographer.analytics.revenueOverTime');
+        Route::get('/conversion-over-time', [PhotographerAnalyticsController::class, 'conversionOverTime'])->name('photographer.analytics.conversionOverTime');
+        Route::get('/hourly-distribution', [PhotographerAnalyticsController::class, 'hourlyDistribution'])->name('photographer.analytics.hourlyDistribution');
+        Route::get('/category-performance', [PhotographerAnalyticsController::class, 'categoryPerformance'])->name('photographer.analytics.categoryPerformance');
     });
 });
 

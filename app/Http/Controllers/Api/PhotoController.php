@@ -278,4 +278,51 @@ class PhotoController extends Controller
 
         return PhotoResource::collection($similarPhotos);
     }
+
+    /**
+     * @OA\Post(
+     *     path="/api/photos/{photo}/view",
+     *     tags={"Photos"},
+     *     summary="Enregistrer une vue de photo",
+     *     description="Incrémenter le compteur de vues d'une photo lorsqu'un utilisateur la consulte",
+     *     operationId="trackPhotoView",
+     *     @OA\Parameter(
+     *         name="photo",
+     *         in="path",
+     *         description="ID de la photo (UUID)",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Vue enregistrée avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="photo_id", type="string", format="uuid"),
+     *                 @OA\Property(property="views_count", type="integer", example=124)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Photo non trouvée",
+     *         @OA\JsonContent(ref="#/components/schemas/NotFoundResponse")
+     *     )
+     * )
+     */
+    public function trackView(Photo $photo)
+    {
+        $photo->incrementViews();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'photo_id' => $photo->id,
+                'views_count' => $photo->views_count,
+            ],
+        ]);
+    }
 }
