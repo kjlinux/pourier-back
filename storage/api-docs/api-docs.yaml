@@ -2803,6 +2803,126 @@ paths:
       security:
         -
           bearerAuth: []
+  /api/auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: 'Demander la réinitialisation du mot de passe'
+      description: 'Envoie un email avec un lien de réinitialisation de mot de passe. Limité à 3 requêtes par 15 minutes par email.'
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: utilisateur@example.com
+              type: object
+      responses:
+        200:
+          description: 'Email de réinitialisation envoyé'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Un email de réinitialisation a été envoyé à votre adresse.'
+                type: object
+        422:
+          description: 'Erreur de validation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        429:
+          description: 'Trop de requêtes'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Trop de tentatives. Veuillez réessayer dans quelques minutes.'
+                type: object
+  /api/auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: 'Réinitialiser le mot de passe'
+      description: 'Finalise la réinitialisation du mot de passe avec le token reçu par email. Le token est valide pendant 60 minutes.'
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - token
+                - email
+                - password
+                - password_confirmation
+              properties:
+                token:
+                  type: string
+                  example: reset_token_from_email
+                email:
+                  type: string
+                  format: email
+                  example: utilisateur@example.com
+                password:
+                  type: string
+                  format: password
+                  example: NouveauMotDePasse123!
+                password_confirmation:
+                  type: string
+                  format: password
+                  example: NouveauMotDePasse123!
+              type: object
+      responses:
+        200:
+          description: 'Mot de passe réinitialisé avec succès'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Votre mot de passe a été réinitialisé avec succès.'
+                type: object
+        400:
+          description: 'Token invalide ou expiré'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Le token de réinitialisation est invalide ou a expiré.'
+                type: object
+        422:
+          description: 'Erreur de validation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
   /api/cart:
     get:
       tags:
@@ -3972,6 +4092,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotFoundResponse'
+  '/api/photos/{photo}/view':
+    post:
+      tags:
+        - Photos
+      summary: 'Enregistrer une vue de photo'
+      description: "Incrémenter le compteur de vues d'une photo lorsqu'un utilisateur la consulte"
+      operationId: trackPhotoView
+      parameters:
+        -
+          name: photo
+          in: path
+          description: 'ID de la photo (UUID)'
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: 'Vue enregistrée avec succès'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      photo_id:
+                        type: string
+                        format: uuid
+                      views_count:
+                        type: integer
+                        example: 124
+                    type: object
+                type: object
+        404:
+          description: 'Photo non trouvée'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
   /api/photographer/analytics/sales:
     get:
       tags:
@@ -4080,6 +4242,391 @@ paths:
                 type: object
         401:
           $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/analytics/views-over-time:
+    get:
+      tags:
+        - 'Photographer - Analytics'
+      summary: 'Get views over time'
+      description: "Get historical view counts for photographer's photos over a specified period"
+      operationId: getPhotographerViewsOverTime
+      parameters:
+        -
+          name: period
+          in: query
+          description: 'Analytics period'
+          required: true
+          schema:
+            type: string
+            enum:
+              - 7d
+              - 30d
+              - 90d
+            example: 30d
+      responses:
+        200:
+          description: 'Views data retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                          example: '2025-01-01'
+                        views:
+                          type: integer
+                          example: 145
+                      type: object
+                  summary:
+                    properties:
+                      total_views:
+                        type: integer
+                        example: 5432
+                      average_daily_views:
+                        type: number
+                        example: 181
+                      change_percentage:
+                        type: number
+                        example: 12.5
+                    type: object
+                type: object
+        401:
+          description: Unauthorized
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/analytics/sales-over-time:
+    get:
+      tags:
+        - 'Photographer - Analytics'
+      summary: 'Get sales over time'
+      description: 'Get historical sales counts over a specified period'
+      operationId: getPhotographerSalesOverTime
+      parameters:
+        -
+          name: period
+          in: query
+          description: 'Analytics period'
+          required: true
+          schema:
+            type: string
+            enum:
+              - 7d
+              - 30d
+              - 90d
+            example: 30d
+      responses:
+        200:
+          description: 'Sales data retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                          example: '2025-01-01'
+                        sales:
+                          type: integer
+                          example: 12
+                      type: object
+                  summary:
+                    properties:
+                      total_sales:
+                        type: integer
+                        example: 156
+                      average_daily_sales:
+                        type: number
+                        example: 5.2
+                      change_percentage:
+                        type: number
+                        example: -3.2
+                    type: object
+                type: object
+        401:
+          description: Unauthorized
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/analytics/revenue-over-time:
+    get:
+      tags:
+        - 'Photographer - Analytics'
+      summary: 'Get revenue over time'
+      description: "Get historical revenue data (photographer's 80% share after commission) over a specified period"
+      operationId: getPhotographerRevenueOverTime
+      parameters:
+        -
+          name: period
+          in: query
+          description: 'Analytics period'
+          required: true
+          schema:
+            type: string
+            enum:
+              - 7d
+              - 30d
+              - 90d
+            example: 30d
+      responses:
+        200:
+          description: 'Revenue data retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                          example: '2025-01-01'
+                        revenue:
+                          type: integer
+                          example: 45000
+                      type: object
+                  summary:
+                    properties:
+                      total_revenue:
+                        type: integer
+                        example: 567000
+                      average_daily_revenue:
+                        type: integer
+                        example: 18900
+                      change_percentage:
+                        type: number
+                        example: 8.7
+                    type: object
+                type: object
+        401:
+          description: Unauthorized
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/analytics/conversion-over-time:
+    get:
+      tags:
+        - 'Photographer - Analytics'
+      summary: 'Get conversion rate over time'
+      description: 'Get historical conversion rate (views to sales) over a specified period'
+      operationId: getPhotographerConversionOverTime
+      parameters:
+        -
+          name: period
+          in: query
+          description: 'Analytics period'
+          required: true
+          schema:
+            type: string
+            enum:
+              - 7d
+              - 30d
+              - 90d
+            example: 30d
+      responses:
+        200:
+          description: 'Conversion data retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                          example: '2025-01-01'
+                        conversion_rate:
+                          type: number
+                          example: 2.3
+                      type: object
+                  summary:
+                    properties:
+                      average_conversion_rate:
+                        type: number
+                        example: 2.1
+                      change_percentage:
+                        type: number
+                        example: 0.5
+                    type: object
+                type: object
+        401:
+          description: Unauthorized
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/analytics/hourly-distribution:
+    get:
+      tags:
+        - 'Photographer - Analytics'
+      summary: 'Get hourly distribution'
+      description: 'Analyze which hours of the day photos are most viewed or purchased'
+      operationId: getPhotographerHourlyDistribution
+      parameters:
+        -
+          name: period
+          in: query
+          description: 'Analytics period'
+          required: true
+          schema:
+            type: string
+            enum:
+              - 7d
+              - 30d
+              - 90d
+            example: 30d
+        -
+          name: metric
+          in: query
+          description: 'Metric to analyze'
+          required: false
+          schema:
+            type: string
+            default: views
+            enum:
+              - views
+              - sales
+      responses:
+        200:
+          description: 'Hourly distribution retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      properties:
+                        hour:
+                          type: integer
+                          example: 18
+                        value:
+                          type: integer
+                          example: 245
+                      type: object
+                  peak_hours:
+                    type: array
+                    items:
+                      type: integer
+                    example:
+                      - 18
+                      - 19
+                      - 20
+                  lowest_hours:
+                    type: array
+                    items:
+                      type: integer
+                    example:
+                      - 3
+                      - 4
+                      - 5
+                type: object
+        401:
+          description: Unauthorized
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/analytics/category-performance:
+    get:
+      tags:
+        - 'Photographer - Analytics'
+      summary: 'Get performance by category'
+      description: 'Analyze photo performance grouped by category'
+      operationId: getPhotographerCategoryPerformance
+      parameters:
+        -
+          name: period
+          in: query
+          description: 'Analytics period'
+          required: true
+          schema:
+            type: string
+            enum:
+              - 7d
+              - 30d
+              - 90d
+            example: 30d
+      responses:
+        200:
+          description: 'Category performance retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      properties:
+                        category_id:
+                          type: string
+                          format: uuid
+                        category_name:
+                          type: string
+                          example: Sport
+                        total_sales:
+                          type: integer
+                          example: 45
+                        total_revenue:
+                          type: integer
+                          example: 225000
+                        total_views:
+                          type: integer
+                          example: 3456
+                        conversion_rate:
+                          type: number
+                          example: 1.3
+                        average_price:
+                          type: integer
+                          example: 5000
+                      type: object
+                  top_category:
+                    properties:
+                      by_sales:
+                        type: string
+                        example: Sport
+                      by_revenue:
+                        type: string
+                        example: Culture
+                      by_conversion:
+                        type: string
+                        example: Portraits
+                    type: object
+                type: object
+        401:
+          description: Unauthorized
       security:
         -
           bearerAuth: []
