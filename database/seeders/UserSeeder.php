@@ -22,13 +22,13 @@ class UserSeeder extends Seeder
         // 1. Create Admin
         $admin = User::create([
             'id' => Str::uuid(),
-            'email' => 'admin@pourier.bf',
+            'email' => 'admin@pouire.bf',
             'password' => Hash::make('password'),
             'first_name' => 'Mohamed',
             'last_name' => 'Kaboré',
             'avatar_url' => 'https://i.pravatar.cc/300?img=1',
             'phone' => '+226 70 12 34 56',
-            'bio' => 'Administrateur de la plateforme Pourier',
+            'bio' => 'Administrateur de la plateforme Pouire',
             'account_type' => 'admin',
             'is_verified' => true,
             'is_active' => true,
@@ -40,14 +40,14 @@ class UserSeeder extends Seeder
         // 2. Create Moderators
         $moderatorData = [
             [
-                'email' => 'moderator1@pourier.bf',
+                'email' => 'moderator1@pouire.bf',
                 'first_name' => 'Aminata',
                 'last_name' => 'Sawadogo',
                 'phone' => '+226 71 23 45 67',
                 'img' => 2,
             ],
             [
-                'email' => 'moderator2@pourier.bf',
+                'email' => 'moderator2@pouire.bf',
                 'first_name' => 'Boureima',
                 'last_name' => 'Zongo',
                 'phone' => '+226 72 34 56 78',
@@ -64,7 +64,7 @@ class UserSeeder extends Seeder
                 'last_name' => $data['last_name'],
                 'avatar_url' => "https://i.pravatar.cc/300?img={$data['img']}",
                 'phone' => $data['phone'],
-                'bio' => 'Modérateur de contenu sur Pourier',
+                'bio' => 'Modérateur de contenu sur Pouire',
                 'account_type' => 'admin',
                 'is_verified' => true,
                 'is_active' => true,
@@ -79,7 +79,7 @@ class UserSeeder extends Seeder
             [
                 'first_name' => 'Abdoulaye',
                 'last_name' => 'Traoré',
-                'email' => 'abdoulaye.traore@pourier.bf',
+                'email' => 'abdoulaye.traore@pouire.bf',
                 'phone' => '+226 70 11 22 33',
                 'bio' => 'Photographe professionnel spécialisé dans les portraits et la photographie culturelle africaine. Passionné par la capture de l\'authenticité burkinabè.',
                 'img' => 10,
@@ -87,7 +87,7 @@ class UserSeeder extends Seeder
             [
                 'first_name' => 'Fatoumata',
                 'last_name' => 'Ouédraogo',
-                'email' => 'fatoumata.ouedraogo@pourier.bf',
+                'email' => 'fatoumata.ouedraogo@pouire.bf',
                 'phone' => '+226 71 22 33 44',
                 'bio' => 'Artiste visuelle et photographe documentaire. Je capture la beauté des paysages et de la vie quotidienne au Burkina Faso.',
                 'img' => 11,
@@ -95,7 +95,7 @@ class UserSeeder extends Seeder
             [
                 'first_name' => 'Moussa',
                 'last_name' => 'Compaoré',
-                'email' => 'moussa.compaore@pourier.bf',
+                'email' => 'moussa.compaore@pouire.bf',
                 'phone' => '+226 72 33 44 55',
                 'bio' => 'Photographe d\'événements basé à Ouagadougou. Spécialiste des mariages, baptêmes et célébrations traditionnelles.',
                 'img' => 12,
@@ -103,7 +103,7 @@ class UserSeeder extends Seeder
             [
                 'first_name' => 'Mariama',
                 'last_name' => 'Sankara',
-                'email' => 'mariama.sankara@pourier.bf',
+                'email' => 'mariama.sankara@pouire.bf',
                 'phone' => '+226 73 44 55 66',
                 'bio' => 'Photographe de nature et de wildlife. J\'explore les parcs nationaux et réserves du Burkina pour capturer sa biodiversité.',
                 'img' => 13,
@@ -111,7 +111,7 @@ class UserSeeder extends Seeder
             [
                 'first_name' => 'Seydou',
                 'last_name' => 'Ouattara',
-                'email' => 'seydou.ouattara@pourier.bf',
+                'email' => 'seydou.ouattara@pouire.bf',
                 'phone' => '+226 74 55 66 77',
                 'bio' => 'Photographe d\'architecture et urbain. Je documente l\'évolution des villes burkinabè et leur architecture unique.',
                 'img' => 14,
@@ -119,7 +119,7 @@ class UserSeeder extends Seeder
             [
                 'first_name' => 'Assétou',
                 'last_name' => 'Dipama',
-                'email' => 'assetou.dipama@pourier.bf',
+                'email' => 'assetou.dipama@pouire.bf',
                 'phone' => '+226 75 66 77 88',
                 'bio' => 'Street photographer passionnée. Mon objectif: capturer l\'essence de la vie dans les rues de Bobo-Dioulasso.',
                 'img' => 15,
@@ -127,7 +127,7 @@ class UserSeeder extends Seeder
             [
                 'first_name' => 'Ibrahim',
                 'last_name' => 'Nikiema',
-                'email' => 'ibrahim.nikiema@pourier.bf',
+                'email' => 'ibrahim.nikiema@pouire.bf',
                 'phone' => '+226 76 77 88 99',
                 'bio' => 'Photographe lifestyle et mode. Je collabore avec des créateurs locaux pour promouvoir la mode africaine contemporaine.',
                 'img' => 16,
@@ -135,7 +135,7 @@ class UserSeeder extends Seeder
             [
                 'first_name' => 'Awa',
                 'last_name' => 'Kaboré',
-                'email' => 'awa.kabore@pourier.bf',
+                'email' => 'awa.kabore@pouire.bf',
                 'phone' => '+226 77 88 99 00',
                 'bio' => 'Photographe de paysages et de voyages. J\'ai parcouru tout le Burkina Faso pour immortaliser ses merveilles naturelles.',
                 'img' => 17,
@@ -143,7 +143,7 @@ class UserSeeder extends Seeder
             [
                 'first_name' => 'Ousmane',
                 'last_name' => 'Zongo',
-                'email' => 'ousmane.zongo@pourier.bf',
+                'email' => 'ousmane.zongo@pouire.bf',
                 'phone' => '+226 78 99 00 11',
                 'bio' => 'Nouveau photographe passionné par la photographie de portrait. En attente d\'approbation.',
                 'img' => 18,
@@ -151,7 +151,7 @@ class UserSeeder extends Seeder
             [
                 'first_name' => 'Ramatou',
                 'last_name' => 'Sawadogo',
-                'email' => 'ramatou.sawadogo@pourier.bf',
+                'email' => 'ramatou.sawadogo@pouire.bf',
                 'phone' => '+226 79 00 11 22',
                 'bio' => 'Photographe émergente spécialisée dans la photographie culinaire et culturelle.',
                 'img' => 19,

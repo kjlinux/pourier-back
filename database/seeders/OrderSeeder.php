@@ -80,7 +80,7 @@ class OrderSeeder extends Seeder
                 'billing_first_name' => $buyer->first_name,
                 'billing_last_name' => $buyer->last_name,
                 'billing_phone' => $buyer->phone,
-                'invoice_url' => $status === 'completed' ? "https://pourier-invoices.s3.amazonaws.com/invoices/{$orderNumber}.pdf" : null,
+                'invoice_url' => $status === 'completed' ? "https://pouire-invoices.s3.amazonaws.com/invoices/{$orderNumber}.pdf" : null,
                 'invoice_path' => $status === 'completed' ? "invoices/{$orderNumber}.pdf" : null,
                 'invoice_generated_at' => $status === 'completed' ? $orderDate->addMinutes(5) : null,
                 'paid_at' => $status === 'completed' ? $orderDate->addMinutes(2) : null,

@@ -20,13 +20,14 @@ composer install
 ```
 
 **Dépendances clés installées** :
-- `intervention/image` - Traitement d'images
-- `intervention/image-laravel` - Integration Laravel
-- `aws/aws-sdk-php` - AWS S3
-- `league/flysystem-aws-s3-v3` - Filesystem S3
-- `guzzlehttp/guzzle` - Client HTTP (CinetPay API)
-- `barryvdh/laravel-dompdf` - Génération PDF (factures)
-- `tymon/jwt-auth` - Authentification JWT
+
+-   `intervention/image` - Traitement d'images
+-   `intervention/image-laravel` - Integration Laravel
+-   `aws/aws-sdk-php` - AWS S3
+-   `league/flysystem-aws-s3-v3` - Filesystem S3
+-   `guzzlehttp/guzzle` - Client HTTP (CinetPay API)
+-   `barryvdh/laravel-dompdf` - Génération PDF (factures)
+-   `tymon/jwt-auth` - Authentification JWT
 
 ---
 
@@ -53,11 +54,12 @@ cat .env.example.phases345 >> .env
 ### 3. Configurer les credentials
 
 Éditer `.env` et remplir :
-- **AWS_ACCESS_KEY_ID**, **AWS_SECRET_ACCESS_KEY**, **AWS_BUCKET**
-- **CINETPAY_SITE_ID**, **CINETPAY_API_KEY**, **CINETPAY_SECRET_KEY**
-- **REDIS_HOST** (si différent de localhost)
-- **MAIL_PASSWORD** (SendGrid ou autre)
-- **FRONTEND_URL**
+
+-   **AWS_ACCESS_KEY_ID**, **AWS_SECRET_ACCESS_KEY**, **AWS_BUCKET**
+-   **CINETPAY_SITE_ID**, **CINETPAY_API_KEY**, **CINETPAY_SECRET_KEY**
+-   **REDIS_HOST** (si différent de localhost)
+-   **MAIL_PASSWORD** (SendGrid ou autre)
+-   **FRONTEND_URL**
 
 ### 4. Générer la clé d'application
 
@@ -79,10 +81,10 @@ php artisan jwt:secret
 
 ```sql
 -- PostgreSQL
-CREATE DATABASE pourier;
+CREATE DATABASE pouire;
 
 -- MySQL
-CREATE DATABASE pourier CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE pouire CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ### 2. Configurer .env
@@ -91,7 +93,7 @@ CREATE DATABASE pourier CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 DB_CONNECTION=pgsql  # ou mysql
 DB_HOST=127.0.0.1
 DB_PORT=5432  # ou 3306 pour MySQL
-DB_DATABASE=pourier
+DB_DATABASE=pouire
 DB_USERNAME=your-db-username
 DB_PASSWORD=your-db-password
 ```
@@ -103,11 +105,12 @@ php artisan migrate
 ```
 
 **Migrations exécutées** :
-- `create_users_table`
-- `create_categories_table` ✅ (Phase 3)
-- `create_photos_table` ✅ (Phase 3)
-- `create_orders_table` ✅ (Phase 4)
-- `create_order_items_table` ✅ (Phase 4)
+
+-   `create_users_table`
+-   `create_categories_table` ✅ (Phase 3)
+-   `create_photos_table` ✅ (Phase 3)
+-   `create_orders_table` ✅ (Phase 4)
+-   `create_order_items_table` ✅ (Phase 4)
 
 ### 4. (Optionnel) Seeder catégories
 
@@ -122,7 +125,8 @@ php artisan db:seed --class=CategorySeeder
 ### 1. Créer le bucket S3
 
 Dans AWS Console :
-1. Créer bucket `pourier-photos`
+
+1. Créer bucket `pouire-photos`
 2. Région : `us-east-1` (ou autre)
 3. **Bloquer l'accès public** : NON (pour previews/thumbnails)
 4. Activer versioning (optionnel)
@@ -133,28 +137,29 @@ Créer un utilisateur IAM avec permissions S3 :
 
 ```json
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "s3:PutObject",
-        "s3:GetObject",
-        "s3:DeleteObject",
-        "s3:ListBucket"
-      ],
-      "Resource": [
-        "arn:aws:s3:::pourier-photos",
-        "arn:aws:s3:::pourier-photos/*"
-      ]
-    }
-  ]
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::pouire-photos",
+                "arn:aws:s3:::pouire-photos/*"
+            ]
+        }
+    ]
 }
 ```
 
 ### 3. Récupérer Access Key et Secret Key
 
 Ajouter dans `.env` :
+
 ```env
 AWS_ACCESS_KEY_ID=AKIA...
 AWS_SECRET_ACCESS_KEY=...
@@ -186,18 +191,19 @@ redis-cli ping  # devrait retourner PONG
 ### 2. Démarrer le worker de queue
 
 **En développement** :
+
 ```bash
 php artisan queue:work redis --tries=3 --timeout=600
 ```
 
 **En production (avec Supervisor)** :
 
-Créer `/etc/supervisor/conf.d/pourier-worker.conf` :
+Créer `/etc/supervisor/conf.d/pouire-worker.conf` :
 
 ```ini
-[program:pourier-worker]
+[program:pouire-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=php /path/to/pourier-back/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
+command=php /path/to/pouire-back/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
 autostart=true
 autorestart=true
 stopasgroup=true
@@ -205,15 +211,16 @@ killasgroup=true
 user=www-data
 numprocs=4
 redirect_stderr=true
-stdout_logfile=/path/to/pourier-back/storage/logs/worker.log
+stdout_logfile=/path/to/pouire-back/storage/logs/worker.log
 stopwaitsecs=3600
 ```
 
 Démarrer Supervisor :
+
 ```bash
 sudo supervisorctl reread
 sudo supervisorctl update
-sudo supervisorctl start pourier-worker:*
+sudo supervisorctl start pouire-worker:*
 ```
 
 ---
@@ -222,14 +229,15 @@ sudo supervisorctl start pourier-worker:*
 
 ### 1. Créer un compte CinetPay
 
-- Production : https://cinetpay.com
-- Récupérer `SITE_ID`, `API_KEY`, `SECRET_KEY`
+-   Production : https://cinetpay.com
+-   Récupérer `SITE_ID`, `API_KEY`, `SECRET_KEY`
 
 ### 2. Configurer les webhooks
 
 Dans le dashboard CinetPay, configurer :
-- **Webhook URL** : `https://api.pourier.com/api/webhooks/cinetpay`
-- **Return URL** : `https://pourier.com/payment/callback`
+
+-   **Webhook URL** : `https://api.pouire.com/api/webhooks/cinetpay`
+-   **Return URL** : `https://pouire.com/payment/callback`
 
 ### 3. Mode TEST
 
@@ -244,9 +252,10 @@ CINETPAY_API_KEY=test_api_key
 ### 4. Tester le paiement
 
 Numéros de test (fournis par CinetPay) :
-- **Orange Money** : +226 XX XX XX XX
-- **MTN Money** : +226 XX XX XX XX
-- **Moov Money** : +226 XX XX XX XX
+
+-   **Orange Money** : +226 XX XX XX XX
+-   **MTN Money** : +226 XX XX XX XX
+-   **Moov Money** : +226 XX XX XX XX
 
 ---
 
@@ -271,11 +280,12 @@ Tester l'upload d'une photo via API et vérifier que les jobs s'exécutent.
 ### 3. Tester l'API
 
 Avec Postman/Insomnia, tester :
-- POST `/api/auth/login` - Authentification
-- GET `/api/photos` - Liste photos
-- POST `/api/photographer/photos` - Upload photo
-- POST `/api/orders` - Créer commande
-- POST `/api/orders/{id}/pay` - Payer commande
+
+-   POST `/api/auth/login` - Authentification
+-   GET `/api/photos` - Liste photos
+-   POST `/api/photographer/photos` - Upload photo
+-   POST `/api/orders` - Créer commande
+-   POST `/api/orders/{id}/pay` - Payer commande
 
 ### 4. Vérifier les logs
 
@@ -304,11 +314,13 @@ composer install --optimize-autoloader --no-dev
 ### 3. Configurer CORS
 
 Dans `.env` :
+
 ```env
-FRONTEND_URL=https://pourier.com
+FRONTEND_URL=https://pouire.com
 ```
 
 Vérifier `config/cors.php` :
+
 ```php
 'allowed_origins' => [env('FRONTEND_URL')],
 ```
@@ -318,15 +330,16 @@ Vérifier `config/cors.php` :
 Configurer Nginx/Apache pour forcer HTTPS :
 
 **Nginx** :
+
 ```nginx
 server {
     listen 443 ssl http2;
-    server_name api.pourier.com;
+    server_name api.pouire.com;
 
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
 
-    root /path/to/pourier-back/public;
+    root /path/to/pouire-back/public;
     index index.php;
 
     location / {
@@ -358,6 +371,7 @@ tail -f storage/logs/worker.log
 ### 2. Logs CinetPay
 
 Vérifier dans les logs :
+
 ```bash
 grep "CinetPay" storage/logs/laravel.log
 ```
@@ -381,8 +395,9 @@ php artisan test
 ### 2. Tests manuels
 
 **Upload photo** :
+
 ```bash
-curl -X POST https://api.pourier.com/api/photographer/photos \
+curl -X POST https://api.pouire.com/api/photographer/photos \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -F "photos[]=@/path/to/photo.jpg" \
   -F "title=Test Photo" \
@@ -393,8 +408,9 @@ curl -X POST https://api.pourier.com/api/photographer/photos \
 ```
 
 **Créer commande** :
+
 ```bash
-curl -X POST https://api.pourier.com/api/orders \
+curl -X POST https://api.pouire.com/api/orders \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -463,6 +479,7 @@ php artisan queue:restart
 ## 📞 SUPPORT
 
 En cas de problème :
+
 1. Vérifier les logs : `storage/logs/laravel.log`
 2. Vérifier les queues : `php artisan queue:failed`
 3. Vérifier la connexion S3 : `php artisan tinker` puis `Storage::disk('s3')->exists('test')`

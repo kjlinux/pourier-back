@@ -2,7 +2,7 @@
 
 ## Vue d'ensemble
 
-Les tables de rôles et permissions utilisent désormais des **UUIDs** au lieu de auto-increment IDs, en cohérence avec le reste de l'application Pourier.
+Les tables de rôles et permissions utilisent désormais des **UUIDs** au lieu de auto-increment IDs, en cohérence avec le reste de l'application Pouire.
 
 ---
 
@@ -13,6 +13,7 @@ Les tables de rôles et permissions utilisent désormais des **UUIDs** au lieu d
 **Fichier**: `database/migrations/2025_11_16_232433_create_permission_tables.php`
 
 **Changements**:
+
 ```php
 // AVANT (Spatie par défaut)
 $table->bigIncrements('id');
@@ -28,11 +29,12 @@ $table->uuid('model_id');
 ```
 
 **Tables affectées**:
-- `roles` - Clé primaire UUID
-- `permissions` - Clé primaire UUID
-- `model_has_permissions` - Toutes les clés étrangères en UUID
-- `model_has_roles` - Toutes les clés étrangères en UUID
-- `role_has_permissions` - Toutes les clés étrangères en UUID
+
+-   `roles` - Clé primaire UUID
+-   `permissions` - Clé primaire UUID
+-   `model_has_permissions` - Toutes les clés étrangères en UUID
+-   `model_has_roles` - Toutes les clés étrangères en UUID
+-   `role_has_permissions` - Toutes les clés étrangères en UUID
 
 ---
 
@@ -65,10 +67,11 @@ class Role extends SpatieRole
 ```
 
 **Fonctionnalités**:
-- ✅ Étend le modèle Spatie `Role`
-- ✅ Utilise le trait Laravel `HasUuids` pour génération automatique
-- ✅ Configure `$incrementing = false`
-- ✅ Configure `$keyType = 'string'`
+
+-   ✅ Étend le modèle Spatie `Role`
+-   ✅ Utilise le trait Laravel `HasUuids` pour génération automatique
+-   ✅ Configure `$incrementing = false`
+-   ✅ Configure `$keyType = 'string'`
 
 ---
 
@@ -101,10 +104,11 @@ class Permission extends SpatiePermission
 ```
 
 **Fonctionnalités**:
-- ✅ Étend le modèle Spatie `Permission`
-- ✅ Utilise le trait Laravel `HasUuids` pour génération automatique
-- ✅ Configure `$incrementing = false`
-- ✅ Configure `$keyType = 'string'`
+
+-   ✅ Étend le modèle Spatie `Permission`
+-   ✅ Utilise le trait Laravel `HasUuids` pour génération automatique
+-   ✅ Configure `$incrementing = false`
+-   ✅ Configure `$keyType = 'string'`
 
 ---
 
@@ -113,6 +117,7 @@ class Permission extends SpatiePermission
 **Fichier**: `config/permission.php`
 
 **Changements**:
+
 ```php
 // AVANT
 'models' => [
@@ -136,6 +141,7 @@ class Permission extends SpatiePermission
 **Fichier**: `database/seeders/RolePermissionSeeder.php`
 
 **Changements**:
+
 ```php
 // AVANT
 use Spatie\Permission\Models\Role;
@@ -155,20 +161,23 @@ use App\Models\Role;
 ### Avantages
 
 1. **Cohérence**
-   - Tous les autres modèles Pourier (User, Photo, Order, etc.) utilisent des UUIDs
-   - Base de données homogène
+
+    - Tous les autres modèles Pouire (User, Photo, Order, etc.) utilisent des UUIDs
+    - Base de données homogène
 
 2. **Sécurité**
-   - Les IDs ne sont pas séquentiels, donc moins prédictibles
-   - Impossible de deviner l'ID d'un rôle ou permission
+
+    - Les IDs ne sont pas séquentiels, donc moins prédictibles
+    - Impossible de deviner l'ID d'un rôle ou permission
 
 3. **Distribution**
-   - Génération côté application (pas de conflit lors de merge de bases)
-   - Parfait pour microservices ou réplication
+
+    - Génération côté application (pas de conflit lors de merge de bases)
+    - Parfait pour microservices ou réplication
 
 4. **Standards**
-   - UUID est un standard universel (RFC 4122)
-   - Compatible avec tous les systèmes
+    - UUID est un standard universel (RFC 4122)
+    - Compatible avec tous les systèmes
 
 ### Considérations
 
@@ -191,8 +200,9 @@ use App\Models\Role;
 ```
 
 **Résultat attendu**:
-- Colonne `id` de type `uuid`
-- Colonnes `*_id` de type `uuid`
+
+-   Colonne `id` de type `uuid`
+-   Colonnes `*_id` de type `uuid`
 
 ### Vérifier la génération des UUIDs
 
@@ -282,17 +292,17 @@ foreach ($oldRoles as $oldRole) {
 
 ### ✅ Compatible avec
 
-- Laravel 10+
-- PostgreSQL (type `uuid` natif)
-- MySQL 5.7+ (stocké comme `char(36)`)
-- Spatie Laravel Permission 5.x+
-- Toutes les fonctionnalités Spatie
+-   Laravel 10+
+-   PostgreSQL (type `uuid` natif)
+-   MySQL 5.7+ (stocké comme `char(36)`)
+-   Spatie Laravel Permission 5.x+
+-   Toutes les fonctionnalités Spatie
 
 ### ⚠️ Notes
 
-- Les performances sont identiques (indexation UUID fonctionne très bien)
-- Les jointures fonctionnent normalement
-- Cache Spatie fonctionne sans modification
+-   Les performances sont identiques (indexation UUID fonctionne très bien)
+-   Les jointures fonctionnent normalement
+-   Cache Spatie fonctionne sans modification
 
 ---
 
@@ -338,19 +348,19 @@ $user->can('upload-photos'); // true
 
 ## Résumé
 
-| Aspect | Valeur |
-|--------|--------|
-| **Type de clé primaire** | UUID (v4) |
-| **Format** | `9d3e4f5a-6b7c-8d9e-0f1a-2b3c4d5e6f7a` |
-| **Longueur** | 36 caractères |
-| **Génération** | Automatique via trait `HasUuids` |
+| Aspect                    | Valeur                                     |
+| ------------------------- | ------------------------------------------ |
+| **Type de clé primaire**  | UUID (v4)                                  |
+| **Format**                | `9d3e4f5a-6b7c-8d9e-0f1a-2b3c4d5e6f7a`     |
+| **Longueur**              | 36 caractères                              |
+| **Génération**            | Automatique via trait `HasUuids`           |
 | **Modèles personnalisés** | `App\Models\Role`, `App\Models\Permission` |
-| **Compatibilité Spatie** | 100% |
-| **Migration nécessaire** | ✅ Déjà faite |
-| **Seeder nécessaire** | ✅ Déjà fait |
+| **Compatibilité Spatie**  | 100%                                       |
+| **Migration nécessaire**  | ✅ Déjà faite                              |
+| **Seeder nécessaire**     | ✅ Déjà fait                               |
 
 ---
 
 **Créé le**: 2025-11-16
-**Auteur**: Backend Team Pourier
+**Auteur**: Backend Team Pouire
 **Status**: ✅ Production Ready

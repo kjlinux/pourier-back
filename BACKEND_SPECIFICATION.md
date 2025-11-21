@@ -1,4 +1,4 @@
-# SPÉCIFICATION COMPLÈTE BACKEND LARAVEL 12 - Pourier/POUIRE
+# SPÉCIFICATION COMPLÈTE BACKEND LARAVEL 12 - Pouire/POUIRE
 
 ## 📋 TABLE DES MATIÈRES
 
@@ -29,7 +29,7 @@
 
 ### 1.1 Description
 
-**Pourier** (anciennement "Pouire") est une plateforme de vente de photos en ligne spécialisée dans la photographie africaine. La plateforme permet aux photographes de vendre leurs photos avec deux types de licences (Standard et Extended) et aux acheteurs d'acheter des photos de haute qualité.
+**Pouire** (anciennement "Pouire") est une plateforme de vente de photos en ligne spécialisée dans la photographie africaine. La plateforme permet aux photographes de vendre leurs photos avec deux types de licences (Standard et Extended) et aux acheteurs d'acheter des photos de haute qualité.
 
 ### 1.2 Acteurs
 
@@ -145,7 +145,7 @@
 ### 3.1 Structure du projet Laravel
 
 ```
-laravel-Pourier/
+laravel-Pouire/
 ├── app/
 │   ├── Console/
 │   │   └── Commands/
@@ -275,7 +275,7 @@ laravel-Pourier/
 │   ├── jwt.php
 │   ├── filesystems.php
 │   ├── services.php
-│   └── Pourier.php (custom config)
+│   └── Pouire.php (custom config)
 ├── database/
 │   ├── factories/
 │   ├── migrations/
@@ -2538,8 +2538,8 @@ class AuthService
 AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
 AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=Pourier-photos
-AWS_URL=https://Pourier-photos.s3.amazonaws.com
+AWS_BUCKET=Pouire-photos
+AWS_URL=https://Pouire-photos.s3.amazonaws.com
 AWS_USE_PATH_STYLE_ENDPOINT=false
 
 # Optionnel: CloudFront CDN

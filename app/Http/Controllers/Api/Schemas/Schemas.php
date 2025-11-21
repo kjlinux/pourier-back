@@ -152,10 +152,10 @@ use OpenApi\Annotations as OA;
  *     schema="PaginationLinks",
  *     title="Pagination Links",
  *     description="Liens de pagination Laravel",
- *     @OA\Property(property="first", type="string", example="http://api.pourier.com/api/photos?page=1"),
- *     @OA\Property(property="last", type="string", example="http://api.pourier.com/api/photos?page=10"),
+ *     @OA\Property(property="first", type="string", example="http://api.pouire.com/api/photos?page=1"),
+ *     @OA\Property(property="last", type="string", example="http://api.pouire.com/api/photos?page=10"),
  *     @OA\Property(property="prev", type="string", nullable=true, example=null),
- *     @OA\Property(property="next", type="string", example="http://api.pourier.com/api/photos?page=2")
+ *     @OA\Property(property="next", type="string", example="http://api.pouire.com/api/photos?page=2")
  * )
  *
  * @OA\Schema(
@@ -166,7 +166,7 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(property="name", type="string", example="Jean Dupont"),
  *     @OA\Property(property="email", type="string", format="email", example="jean.dupont@example.com"),
  *     @OA\Property(property="account_type", type="string", enum={"user", "photographer", "admin"}, example="user"),
- *     @OA\Property(property="profile_picture", type="string", nullable=true, example="https://storage.pourier.com/profiles/profile.jpg"),
+ *     @OA\Property(property="profile_picture", type="string", nullable=true, example="https://storage.pouire.com/profiles/profile.jpg"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-15T10:30:00.000000Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-01-15T10:30:00.000000Z")
  * )
@@ -199,9 +199,9 @@ use OpenApi\Annotations as OA;
  *         @OA\Items(type="string"),
  *         example={"plage", "coucher de soleil", "océan", "nature"}
  *     ),
- *     @OA\Property(property="preview_url", type="string", example="https://storage.pourier.com/photos/preview.jpg"),
- *     @OA\Property(property="thumbnail_url", type="string", example="https://storage.pourier.com/photos/thumbnail.jpg"),
- *     @OA\Property(property="watermarked_url", type="string", example="https://storage.pourier.com/photos/watermarked.jpg"),
+ *     @OA\Property(property="preview_url", type="string", example="https://storage.pouire.com/photos/preview.jpg"),
+ *     @OA\Property(property="thumbnail_url", type="string", example="https://storage.pouire.com/photos/thumbnail.jpg"),
+ *     @OA\Property(property="watermarked_url", type="string", example="https://storage.pouire.com/photos/watermarked.jpg"),
  *     @OA\Property(property="width", type="integer", example=4000),
  *     @OA\Property(property="height", type="integer", example=3000),
  *     @OA\Property(property="file_size", type="integer", example=5242880, description="Taille en octets"),

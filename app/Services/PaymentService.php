@@ -21,7 +21,7 @@ class PaymentService
                 'transaction_id' => $order->order_number,
                 'amount' => $order->total, // en FCFA (integer)
                 'currency' => 'XOF',
-                'description' => 'Achat photos Pourier - Commande ' . $order->order_number,
+                'description' => 'Achat photos Pouire - Commande ' . $order->order_number,
                 'notify_url' => config('services.cinetpay.notify_url'),
                 'return_url' => config('services.cinetpay.return_url') . '/' . $order->id,
                 'channels' => $this->getCinetPayChannels($paymentMethod, $paymentProvider),
@@ -61,7 +61,6 @@ class PaymentService
                 'success' => false,
                 'message' => $response->json('message', 'Échec de l\'initialisation du paiement'),
             ];
-
         } catch (\Exception $e) {
             Log::error('Erreur processPayment: ' . $e->getMessage());
             $order->markAsFailed();
@@ -120,7 +119,6 @@ class PaymentService
                 'success' => false,
                 'message' => 'Impossible de vérifier le statut du paiement',
             ];
-
         } catch (\Exception $e) {
             Log::error('Erreur checkPaymentStatus: ' . $e->getMessage());
             return [

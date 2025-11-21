@@ -21,10 +21,11 @@ php artisan migrate:status
 ```
 
 **Résultat attendu** : Toutes les migrations doivent être "Ran"
-- `create_categories_table`
-- `create_photos_table`
-- `create_orders_table`
-- `create_order_items_table`
+
+-   `create_categories_table`
+-   `create_photos_table`
+-   `create_orders_table`
+-   `create_order_items_table`
 
 ---
 
@@ -35,16 +36,18 @@ php artisan route:list --path=api
 ```
 
 **Résultat attendu** : Doit afficher ~26 routes incluant :
-- `api/photos` (GET)
-- `api/cart` (GET, POST, PUT, DELETE)
-- `api/orders` (GET, POST)
-- `api/webhooks/cinetpay` (POST)
+
+-   `api/photos` (GET)
+-   `api/cart` (GET, POST, PUT, DELETE)
+-   `api/orders` (GET, POST)
+-   `api/webhooks/cinetpay` (POST)
 
 ---
 
 ### 4. ✅ Vérifier les fichiers créés
 
 #### Models
+
 ```bash
 ls -la app/Models/Photo.php
 ls -la app/Models/Category.php
@@ -53,6 +56,7 @@ ls -la app/Models/OrderItem.php
 ```
 
 #### Services
+
 ```bash
 ls -la app/Services/StorageService.php
 ls -la app/Services/ImageProcessingService.php
@@ -60,6 +64,7 @@ ls -la app/Services/PaymentService.php
 ```
 
 #### Controllers
+
 ```bash
 ls -la app/Http/Controllers/Api/PhotoController.php
 ls -la app/Http/Controllers/Api/SearchController.php
@@ -71,6 +76,7 @@ ls -la app/Http/Controllers/Api/Photographer/PhotoController.php
 ```
 
 #### Jobs
+
 ```bash
 ls -la app/Jobs/ProcessPhotoUpload.php
 ls -la app/Jobs/ExtractExifData.php
@@ -81,6 +87,7 @@ ls -la app/Jobs/ExtractExifData.php
 ### 5. ✅ Vérifier la configuration
 
 #### Vérifier .env
+
 ```bash
 # Vérifier que ces variables existent
 grep CINETPAY_SITE_ID .env
@@ -89,6 +96,7 @@ grep QUEUE_CONNECTION .env
 ```
 
 #### Vérifier config
+
 ```bash
 php artisan config:show services.cinetpay
 php artisan config:show filesystems.disks.s3
@@ -103,6 +111,7 @@ php artisan tinker
 ```
 
 Puis dans tinker :
+
 ```php
 // Vérifier connexion
 DB::connection()->getPdo();
@@ -126,9 +135,9 @@ php artisan tinker
 
 ```php
 // Test connexion S3
-Storage::disk('s3')->put('test.txt', 'Hello Pourier');
+Storage::disk('s3')->put('test.txt', 'Hello Pouire');
 Storage::disk('s3')->exists('test.txt'); // Doit retourner true
-Storage::disk('s3')->get('test.txt'); // Doit retourner "Hello Pourier"
+Storage::disk('s3')->get('test.txt'); // Doit retourner "Hello Pouire"
 Storage::disk('s3')->delete('test.txt');
 ```
 
@@ -145,6 +154,7 @@ php artisan tinker
 ```
 
 Dans tinker :
+
 ```php
 // Créer un job test
 dispatch(function () {
@@ -159,21 +169,27 @@ dispatch(function () {
 ### 9. ✅ Test API Endpoints
 
 #### Health Check
+
 ```bash
 curl http://localhost:8000/api/health
 ```
-**Attendu** : `{"success":true,"message":"Pourier API is running!"}`
+
+**Attendu** : `{"success":true,"message":"Pouire API is running!"}`
 
 #### Photos (public)
+
 ```bash
 curl http://localhost:8000/api/photos
 ```
+
 **Attendu** : JSON avec structure pagination
 
 #### Categories (public)
+
 ```bash
 curl http://localhost:8000/api/categories
 ```
+
 **Attendu** : JSON liste catégories
 
 ---
@@ -357,56 +373,61 @@ php artisan debugbar:clear # Si debugbar installé
 
 ### 20. ✅ Checklist Finale
 
-| Composant | Status | Vérification |
-|-----------|--------|--------------|
-| ✅ Migrations | ✓ | `php artisan migrate:status` |
-| ✅ Models | ✓ | Fichiers créés |
-| ✅ Services | ✓ | 3 services (Storage, ImageProcessing, Payment) |
-| ✅ Jobs | ✓ | 2 jobs (ProcessPhotoUpload, ExtractExifData) |
-| ✅ Controllers | ✓ | 7 controllers |
-| ✅ Form Requests | ✓ | 5 requests |
-| ✅ Resources | ✓ | 4 resources |
-| ✅ Policies | ✓ | 1 policy |
-| ✅ Routes | ✓ | 26 routes API |
-| ✅ Configuration | ✓ | CinetPay + AWS S3 |
-| ✅ Tests manuels | ✓ | Photos, Cart, Orders, Payment |
+| Composant        | Status | Vérification                                   |
+| ---------------- | ------ | ---------------------------------------------- |
+| ✅ Migrations    | ✓      | `php artisan migrate:status`                   |
+| ✅ Models        | ✓      | Fichiers créés                                 |
+| ✅ Services      | ✓      | 3 services (Storage, ImageProcessing, Payment) |
+| ✅ Jobs          | ✓      | 2 jobs (ProcessPhotoUpload, ExtractExifData)   |
+| ✅ Controllers   | ✓      | 7 controllers                                  |
+| ✅ Form Requests | ✓      | 5 requests                                     |
+| ✅ Resources     | ✓      | 4 resources                                    |
+| ✅ Policies      | ✓      | 1 policy                                       |
+| ✅ Routes        | ✓      | 26 routes API                                  |
+| ✅ Configuration | ✓      | CinetPay + AWS S3                              |
+| ✅ Tests manuels | ✓      | Photos, Cart, Orders, Payment                  |
 
 ---
 
 ## 🎯 CRITÈRES DE RÉUSSITE
 
 ### ✅ PHASE 3 : Photos & Catégories
-- [ ] Peut uploader une photo
-- [ ] Photo est traitée (preview, thumbnail, watermark)
-- [ ] EXIF extrait automatiquement
-- [ ] Photos s3 stockées sur AWS S3
-- [ ] Peut rechercher photos avec filtres
-- [ ] Peut voir photos featured/recent/popular
+
+-   [ ] Peut uploader une photo
+-   [ ] Photo est traitée (preview, thumbnail, watermark)
+-   [ ] EXIF extrait automatiquement
+-   [ ] Photos s3 stockées sur AWS S3
+-   [ ] Peut rechercher photos avec filtres
+-   [ ] Peut voir photos featured/recent/popular
 
 ### ✅ PHASE 4 : Panier & Commandes
-- [ ] Peut ajouter au panier
-- [ ] Peut modifier licence (standard/extended)
-- [ ] Peut créer commande
-- [ ] Commissions calculées (20%/80%)
-- [ ] Order_number généré automatiquement
+
+-   [ ] Peut ajouter au panier
+-   [ ] Peut modifier licence (standard/extended)
+-   [ ] Peut créer commande
+-   [ ] Commissions calculées (20%/80%)
+-   [ ] Order_number généré automatiquement
 
 ### ✅ PHASE 5 : Paiements CinetPay
-- [ ] Peut initier paiement CinetPay
-- [ ] Reçoit payment_url
-- [ ] Webhook CinetPay fonctionne
-- [ ] Order marquée completed après paiement
-- [ ] URL téléchargement générée (24h)
+
+-   [ ] Peut initier paiement CinetPay
+-   [ ] Reçoit payment_url
+-   [ ] Webhook CinetPay fonctionne
+-   [ ] Order marquée completed après paiement
+-   [ ] URL téléchargement générée (24h)
 
 ---
 
 ## 🚨 PROBLÈMES COURANTS
 
 ### Erreur : "Class 'Intervention\Image\ImageManager' not found"
+
 ```bash
 composer require intervention/image intervention/image-laravel
 ```
 
 ### Erreur : AWS S3 - "InvalidAccessKeyId"
+
 ```bash
 # Vérifier .env
 AWS_ACCESS_KEY_ID=correct-key-id
@@ -414,6 +435,7 @@ AWS_SECRET_ACCESS_KEY=correct-secret-key
 ```
 
 ### Erreur : Queue - "No default queue connection defined"
+
 ```bash
 # Vérifier .env
 QUEUE_CONNECTION=redis
@@ -423,6 +445,7 @@ redis-cli ping # Doit retourner PONG
 ```
 
 ### Erreur : CinetPay - "Invalid signature"
+
 ```bash
 # Vérifier que les credentials sont corrects
 # Vérifier config/services.php
@@ -435,6 +458,7 @@ redis-cli ping # Doit retourner PONG
 Si tous les tests passent : **✅ L'API est prête pour la production !**
 
 Si des tests échouent :
+
 1. Vérifier logs : `storage/logs/laravel.log`
 2. Vérifier configuration : `.env`
 3. Vérifier dépendances : `composer install`

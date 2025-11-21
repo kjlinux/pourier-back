@@ -109,7 +109,6 @@ class WebhookController extends Controller
                 'order_id' => $order->id,
                 'transaction_id' => $token,
             ]);
-
         } elseif ($status !== '00') {
             // Paiement échoué
             $order->markAsFailed();
@@ -145,7 +144,7 @@ class WebhookController extends Controller
      *             description="Frontend URL",
      *             @OA\Schema(
      *                 type="string",
-     *                 example="https://pourier.bf/orders/9d445a1c-85c5-4b6d-9c38-99a4915d6dac/success"
+     *                 example="https://pouire.bf/orders/9d445a1c-85c5-4b6d-9c38-99a4915d6dac/success"
      *             )
      *         )
      *     ),

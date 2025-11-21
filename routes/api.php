@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\AnalyticsController as AdminAnalyticsController;
 use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Admin\PhotoModerationController;
 use App\Http\Controllers\Api\Admin\PhotographerController as AdminPhotographerController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
@@ -56,7 +57,7 @@ Route::middleware('auth:api')->prefix('auth')->group(function () {
 Route::get('/health', function () {
     return response()->json([
         'success' => true,
-        'message' => 'Pourier API is running!',
+        'message' => 'Pouire API is running!',
         'version' => '1.0.0',
         'timestamp' => now()->toIso8601String(),
     ]);
@@ -205,6 +206,12 @@ Route::middleware(['auth:api', 'admin'])->prefix('admin')->group(function () {
         Route::put('/{user}/suspend', [AdminUserController::class, 'suspend'])->name('admin.users.suspend');
         Route::put('/{user}/activate', [AdminUserController::class, 'activate'])->name('admin.users.activate');
         Route::delete('/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
+    });
+
+    // Order Management
+    Route::prefix('orders')->group(function () {
+        Route::get('/', [AdminOrderController::class, 'index'])->name('admin.orders.index');
+        Route::get('/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
     });
 
     // Analytics

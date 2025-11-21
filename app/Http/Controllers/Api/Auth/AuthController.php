@@ -46,7 +46,7 @@ class AuthController extends Controller
      *         description="Inscription réussie",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Inscription réussie ! Bienvenue sur Pourier."),
+     *             @OA\Property(property="message", type="string", example="Inscription réussie ! Bienvenue sur Pouire."),
      *             @OA\Property(
      *                 property="data",
      *                 type="object",
@@ -79,7 +79,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Inscription réussie ! Bienvenue sur Pourier.',
+                'message' => 'Inscription réussie ! Bienvenue sur Pouire.',
                 'data' => [
                     'user' => new UserResource($result['user']),
                     'access_token' => $result['token'],

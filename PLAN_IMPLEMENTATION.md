@@ -1,4 +1,4 @@
-# PLAN D'IMPLÉMENTATION COMPLET - BACKEND Pourier/POUIRE
+# PLAN D'IMPLÉMENTATION COMPLET - BACKEND Pouire/POUIRE
 
 > Plan détaillé pour l'implémentation complète du backend Laravel 12 basé sur les spécifications BACKEND_SPECIFICATION.md et BACKEND_SPECIFICATION_PART2.md
 
@@ -45,8 +45,8 @@ Développer un backend Laravel 12 complet pour une plateforme de vente de photos
 
 ```bash
 # Créer projet Laravel 12
-composer create-project laravel/laravel Pourier-backend "^12.0"
-cd Pourier-backend
+composer create-project laravel/laravel Pouire-backend "^12.0"
+cd Pouire-backend
 
 # Installer packages requis
 composer require tymon/jwt-auth:"^2.1"
@@ -169,8 +169,8 @@ php artisan migrate
 AWS_ACCESS_KEY_ID=your_aws_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret
 AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=Pourier-photos
-AWS_URL=https://pourier-photos.s3.amazonaws.com
+AWS_BUCKET=Pouire-photos
+AWS_URL=https://pouire-photos.s3.amazonaws.com
 
 # Optionnel: CloudFront CDN
 AWS_CLOUDFRONT_URL=https://d1234abcd.cloudfront.net
@@ -179,7 +179,7 @@ AWS_CLOUDFRONT_URL=https://d1234abcd.cloudfront.net
 **Structure buckets S3 :**
 
 ```
-Pourier-photos/
+Pouire-photos/
 ├── photos/
 │   └── {photographer_id}/
 │       ├── originals/
@@ -220,8 +220,8 @@ MAIL_PORT=587
 MAIL_USERNAME=apikey
 MAIL_PASSWORD=your-sendgrid-api-key
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@Pourier.com
-MAIL_FROM_NAME="Pourier"
+MAIL_FROM_ADDRESS=noreply@Pouire.com
+MAIL_FROM_NAME="Pouire"
 ```
 
 **Sentry (Monitoring)**
@@ -914,8 +914,8 @@ CINETPAY_API_URL=https://api-checkout.cinetpay.com/v2
 CINETPAY_SITE_ID=your-site-id
 CINETPAY_API_KEY=your-api-key
 CINETPAY_SECRET_KEY=your-secret-key
-CINETPAY_NOTIFY_URL=https://api.Pourier.com/webhooks/cinetpay
-CINETPAY_RETURN_URL=https://Pourier.com/payment/return
+CINETPAY_NOTIFY_URL=https://api.Pouire.com/webhooks/cinetpay
+CINETPAY_RETURN_URL=https://Pouire.com/payment/return
 ```
 
 ### 5.2 PaymentService
@@ -946,7 +946,7 @@ POST https://api-checkout.cinetpay.com/v2/payment
     "transaction_id": $order->order_number,
     "amount": $order->total, // en FCFA
     "currency": "XOF",
-    "description": "Achat photos Pourier - Commande {order_number}",
+    "description": "Achat photos Pouire - Commande {order_number}",
     "notify_url": route('webhooks.cinetpay'),
     "return_url": config('app.frontend_url') . '/orders/' . $order->id,
     "channels": $this->getCinetPayChannels($paymentMethod, $paymentProvider),
@@ -1535,12 +1535,12 @@ public function toDatabase($notifiable): array
 public function toMail($notifiable): MailMessage
 {
     return (new MailMessage)
-        ->subject('Photo approuvée - Pourier')
+        ->subject('Photo approuvée - Pouire')
         ->greeting('Bonjour ' . $notifiable->first_name . ',')
         ->line("Votre photo \"{$this->photo->title}\" a été approuvée!")
         ->line('Elle est maintenant visible par tous les utilisateurs de la plateforme.')
         ->action('Voir ma photo', url('/photographer/photos/' . $this->photo->id))
-        ->line('Merci d\'utiliser Pourier!');
+        ->line('Merci d\'utiliser Pouire!');
 }
 ```
 
@@ -1634,7 +1634,7 @@ public function __construct(public User $user) {}
 
 public function envelope(): Envelope
 {
-    return new Envelope(subject: 'Bienvenue sur Pourier');
+    return new Envelope(subject: 'Bienvenue sur Pouire');
 }
 
 public function content(): Content
@@ -1772,8 +1772,8 @@ MAIL_PORT=587
 MAIL_USERNAME=apikey
 MAIL_PASSWORD=SG.your-sendgrid-api-key
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@Pourier.com
-MAIL_FROM_NAME="Pourier"
+MAIL_FROM_ADDRESS=noreply@Pouire.com
+MAIL_FROM_NAME="Pouire"
 ```
 
 ### 8.5 Commande Test
@@ -2390,7 +2390,7 @@ GenerateInvoicePdf::dispatch($order);
 
 Template PDF avec :
 
--   Logo Pourier
+-   Logo Pouire
 -   Informations société
 -   Détails commande : order*number, date, billing*\*
 -   Table items : photo, licence, prix
@@ -2565,7 +2565,7 @@ Schedule::command('notifications:clean-old')->weekly();
 ### 13.3 Cron Job (Production)
 
 ```bash
-* * * * * cd /var/www/Pourier && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /var/www/Pouire && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 ---
@@ -2924,17 +2924,17 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        container_name: Pourier-app
+        container_name: Pouire-app
         restart: unless-stopped
         working_dir: /var/www
         volumes:
             - ./:/var/www
         networks:
-            - Pourier
+            - Pouire
 
     postgres:
         image: postgres:16
-        container_name: Pourier-db
+        container_name: Pouire-db
         restart: unless-stopped
         environment:
             POSTGRES_DB: ${DB_DATABASE}
@@ -2943,18 +2943,18 @@ services:
         volumes:
             - postgres-data:/var/lib/postgresql/data
         networks:
-            - Pourier
+            - Pouire
 
     redis:
         image: redis:7-alpine
-        container_name: Pourier-redis
+        container_name: Pouire-redis
         restart: unless-stopped
         networks:
-            - Pourier
+            - Pouire
 
     nginx:
         image: nginx:alpine
-        container_name: Pourier-nginx
+        container_name: Pouire-nginx
         restart: unless-stopped
         ports:
             - "80:80"
@@ -2963,22 +2963,22 @@ services:
             - ./:/var/www
             - ./nginx.conf:/etc/nginx/conf.d/default.conf
         networks:
-            - Pourier
+            - Pouire
 
     queue-worker:
         build:
             context: .
             dockerfile: Dockerfile
-        container_name: Pourier-queue
+        container_name: Pouire-queue
         restart: unless-stopped
         command: php artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
         volumes:
             - ./:/var/www
         networks:
-            - Pourier
+            - Pouire
 
 networks:
-    Pourier:
+    Pouire:
         driver: bridge
 
 volumes:
@@ -2992,7 +2992,7 @@ volumes:
 ```nginx
 server {
     listen 80;
-    server_name api.Pourier.com;
+    server_name api.Pouire.com;
     root /var/www/public;
 
     add_header X-Frame-Options "SAMEORIGIN";
@@ -3024,10 +3024,10 @@ server {
 
 ### 15.3 Supervisor Configuration
 
-**`/etc/supervisor/conf.d/Pourier-worker.conf`**
+**`/etc/supervisor/conf.d/Pouire-worker.conf`**
 
 ```ini
-[program:Pourier-worker]
+[program:Pouire-worker]
 process_name=%(program_name)s_%(process_num)02d
 command=php /var/www/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
 autostart=true
@@ -3046,11 +3046,11 @@ stopwaitsecs=3600
 **`.env.production`**
 
 ```env
-APP_NAME=Pourier
+APP_NAME=Pouire
 APP_ENV=production
 APP_KEY=
 APP_DEBUG=false
-APP_URL=https://api.Pourier.com
+APP_URL=https://api.Pouire.com
 
 LOG_CHANNEL=stack
 LOG_LEVEL=error
@@ -3059,7 +3059,7 @@ LOG_LEVEL=error
 DB_CONNECTION=pgsql
 DB_HOST=your-postgres-host
 DB_PORT=5432
-DB_DATABASE=Pourier
+DB_DATABASE=Pouire
 DB_USERNAME=your-db-user
 DB_PASSWORD=your-db-password
 
@@ -3082,8 +3082,8 @@ JWT_REFRESH_TTL=20160
 AWS_ACCESS_KEY_ID=your-aws-key
 AWS_SECRET_ACCESS_KEY=your-aws-secret
 AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=Pourier-photos
-AWS_URL=https://Pourier-photos.s3.amazonaws.com
+AWS_BUCKET=Pouire-photos
+AWS_URL=https://Pouire-photos.s3.amazonaws.com
 
 # Mail
 MAIL_MAILER=smtp
@@ -3092,7 +3092,7 @@ MAIL_PORT=587
 MAIL_USERNAME=apikey
 MAIL_PASSWORD=your-sendgrid-api-key
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@Pourier.com
+MAIL_FROM_ADDRESS=noreply@Pouire.com
 MAIL_FROM_NAME="${APP_NAME}"
 
 # CinetPay
@@ -3100,8 +3100,8 @@ CINETPAY_API_URL=https://api-checkout.cinetpay.com/v2
 CINETPAY_SITE_ID=your-site-id
 CINETPAY_API_KEY=your-api-key
 CINETPAY_SECRET_KEY=your-secret-key
-CINETPAY_NOTIFY_URL=https://api.Pourier.com/webhooks/cinetpay
-CINETPAY_RETURN_URL=https://Pourier.com/payment/return
+CINETPAY_NOTIFY_URL=https://api.Pouire.com/webhooks/cinetpay
+CINETPAY_RETURN_URL=https://Pouire.com/payment/return
 
 # Sentry
 SENTRY_LARAVEL_DSN=your-sentry-dsn
@@ -3113,8 +3113,8 @@ SENTRY_LARAVEL_DSN=your-sentry-dsn
 
 ```bash
 # Cloner repo
-git clone https://github.com/your-repo/Pourier-backend.git
-cd Pourier-backend
+git clone https://github.com/your-repo/Pouire-backend.git
+cd Pouire-backend
 
 # Installer dependencies
 composer install --no-dev --optimize-autoloader
@@ -3191,7 +3191,7 @@ Route::get('/up', function () {
 ### 16.1 README.md
 
 ```markdown
-# Pourier Backend API
+# Pouire Backend API
 
 API REST Laravel 12 pour plateforme de vente de photos africaines.
 
@@ -3209,8 +3209,8 @@ API REST Laravel 12 pour plateforme de vente de photos africaines.
 
 # Cloner repo
 
-git clone https://github.com/your-repo/Pourier-backend.git
-cd Pourier-backend
+git clone https://github.com/your-repo/Pouire-backend.git
+cd Pouire-backend
 
 # Installer dependencies
 
@@ -3224,7 +3224,7 @@ php artisan jwt:secret
 
 # Créer base de données
 
-createdb Pourier
+createdb Pouire
 
 # Migrations
 
@@ -3243,7 +3243,7 @@ php artisan serve
 
 ### AWS S3
 
--   Créer bucket : `Pourier-photos`
+-   Créer bucket : `Pouire-photos`
 -   Configurer IAM user avec permissions S3
 -   Ajouter credentials dans `.env`
 
@@ -3251,7 +3251,7 @@ php artisan serve
 
 -   Créer compte CinetPay
 -   Obtenir : site_id, api_key, secret_key
--   Configurer webhook : `https://api.Pourier.com/webhooks/cinetpay`
+-   Configurer webhook : `https://api.Pouire.com/webhooks/cinetpay`
 
 ## Commandes Utiles
 
@@ -3278,7 +3278,7 @@ php artisan view:clear
 
 ## API Documentation
 
-Base URL : `https://api.Pourier.com/api`
+Base URL : `https://api.Pouire.com/api`
 
 ### Authentification
 
@@ -3303,7 +3303,7 @@ Voir collection Postman complète : `/docs/postman_collection.json`
 
 ## Licence
 
-Propriétaire - Pourier © 2024
+Propriétaire - Pouire © 2024
 ```
 
 ### 16.2 Collection Postman
@@ -3328,7 +3328,7 @@ composer require darkaonline/l5-swagger
 php artisan l5-swagger:generate
 ```
 
-Accessible : `https://api.Pourier.com/api/documentation`
+Accessible : `https://api.Pouire.com/api/documentation`
 
 ---
 

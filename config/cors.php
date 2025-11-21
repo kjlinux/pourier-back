@@ -22,7 +22,7 @@ return [
     'allowed_origins' => [
         'http://localhost:3000',
         'http://localhost:5173',
-        env('FRONTEND_URL', 'https://pourier.com'),
+        env('FRONTEND_URL', 'https://pouire.com'),
     ],
 
     'allowed_origins_patterns' => [],

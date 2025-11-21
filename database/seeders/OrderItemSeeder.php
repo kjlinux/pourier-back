@@ -65,7 +65,7 @@ class OrderItemSeeder extends Seeder
                     'photographer_amount' => $photographerAmount,
                     'platform_commission' => $platformCommission,
                     'download_url' => $order->payment_status === 'completed'
-                        ? "https://pourier-downloads.s3.amazonaws.com/photos/{$photo->id}/download"
+                        ? "https://pouire-downloads.s3.amazonaws.com/photos/{$photo->id}/download"
                         : null,
                     'download_expires_at' => $order->payment_status === 'completed'
                         ? now()->addDays(30)

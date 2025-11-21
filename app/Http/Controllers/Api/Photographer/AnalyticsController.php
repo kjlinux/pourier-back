@@ -55,7 +55,7 @@ class AnalyticsController extends Controller
         $photographer = $request->user();
         $period = $request->input('period', '30days');
 
-        $startDate = match($period) {
+        $startDate = match ($period) {
             '7days' => now()->subDays(7),
             '30days' => now()->subDays(30),
             '90days' => now()->subDays(90),
@@ -96,7 +96,7 @@ class AnalyticsController extends Controller
      *                 @OA\Items(
      *                     @OA\Property(property="id", type="string", format="uuid"),
      *                     @OA\Property(property="title", type="string", example="Sunset over Ouagadougou"),
-     *                     @OA\Property(property="thumbnail_url", type="string", format="url", example="https://pourier.s3.amazonaws.com/thumbnails/xyz.jpg"),
+     *                     @OA\Property(property="thumbnail_url", type="string", format="url", example="https://pouire.s3.amazonaws.com/thumbnails/xyz.jpg"),
      *                     @OA\Property(property="price_standard", type="number", format="float", example=5000),
      *                     @OA\Property(property="price_extended", type="number", format="float", example=10000),
      *                     @OA\Property(property="view_count", type="integer", example=1500),

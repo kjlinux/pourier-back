@@ -11,14 +11,14 @@ return [
     */
 
     'company' => [
-        'name' => env('COMPANY_NAME', 'Pourier Photo'),
+        'name' => env('COMPANY_NAME', 'Pouire Photo'),
         'address' => env('COMPANY_ADDRESS', '123 Rue de la Photo'),
         'city' => env('COMPANY_CITY', 'Paris'),
         'postal_code' => env('COMPANY_POSTAL_CODE', '75001'),
         'country' => env('COMPANY_COUNTRY', 'France'),
         'siret' => env('COMPANY_SIRET', ''),
         'vat_number' => env('COMPANY_VAT_NUMBER', ''),
-        'email' => env('COMPANY_EMAIL', 'contact@pourier.com'),
+        'email' => env('COMPANY_EMAIL', 'contact@pouire.com'),
         'phone' => env('COMPANY_PHONE', ''),
     ],
 

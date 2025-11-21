@@ -725,7 +725,7 @@ class PaymentService
                 'transaction_id' => $order->order_number,
                 'amount' => $order->total, // en FCFA (integer)
                 'currency' => 'XOF',
-                'description' => 'Achat photos Pourier - Commande ' . $order->order_number,
+                'description' => 'Achat photos Pouire - Commande ' . $order->order_number,
                 'notify_url' => route('webhooks.cinetpay'),
                 'return_url' => config('app.frontend_url') . '/orders/' . $order->id,
                 'channels' => $this->getCinetPayChannels($paymentMethod, $paymentProvider),
@@ -1444,12 +1444,12 @@ class PhotoApprovedNotification extends Notification implements ShouldQueue
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Photo approuvée - Pourier')
+            ->subject('Photo approuvée - Pouire')
             ->greeting('Bonjour ' . $notifiable->first_name . ',')
             ->line("Votre photo \"{$this->photo->title}\" a été approuvée!")
             ->line('Elle est maintenant visible par tous les utilisateurs de la plateforme.')
             ->action('Voir ma photo', url('/photographer/photos/' . $this->photo->id))
-            ->line('Merci d\'utiliser Pourier!');
+            ->line('Merci d\'utiliser Pouire!');
     }
 }
 ```
@@ -1500,7 +1500,7 @@ class PhotoRejectedNotification extends Notification implements ShouldQueue
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Photo rejetée - Pourier')
+            ->subject('Photo rejetée - Pouire')
             ->greeting('Bonjour ' . $notifiable->first_name . ',')
             ->line("Malheureusement, votre photo \"{$this->photo->title}\" a été rejetée.")
             ->line("Raison: {$this->reason}")
@@ -1564,13 +1564,13 @@ class NewSaleNotification extends Notification implements ShouldQueue
         $photoCount = count($this->items);
 
         return (new MailMessage)
-            ->subject('Nouvelle vente - Pourier')
+            ->subject('Nouvelle vente - Pouire')
             ->greeting('Bonjour ' . $notifiable->first_name . ',')
             ->line("Félicitations! Vous avez réalisé une nouvelle vente.")
             ->line("{$photoCount} photo(s) vendue(s)")
             ->line("Montant gagné: {$totalEarned} FCFA")
             ->action('Voir mes revenus', url('/photographer/revenue'))
-            ->line('Merci d\'utiliser Pourier!');
+            ->line('Merci d\'utiliser Pouire!');
     }
 }
 ```
@@ -1619,12 +1619,12 @@ class WithdrawalApprovedNotification extends Notification implements ShouldQueue
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Retrait approuvé - Pourier')
+            ->subject('Retrait approuvé - Pouire')
             ->greeting('Bonjour ' . $notifiable->first_name . ',')
             ->line("Votre demande de retrait de {$this->withdrawal->amount} FCFA a été approuvée.")
             ->line('Le montant sera transféré sur votre compte dans les 24-48h.')
             ->action('Voir mes retraits', url('/photographer/revenue'))
-            ->line('Merci d\'utiliser Pourier!');
+            ->line('Merci d\'utiliser Pouire!');
     }
 }
 ```
@@ -1858,8 +1858,8 @@ class OrderConfirmationMail extends Mailable
         </div>
 
         <div class="footer">
-            <p>© {{ date('Y') }} Pourier. Tous droits réservés.</p>
-            <p>Contact: contact@Pourier.com</p>
+            <p>© {{ date('Y') }} Pouire. Tous droits réservés.</p>
+            <p>Contact: contact@Pouire.com</p>
         </div>
     </div>
 </body>
@@ -1893,7 +1893,7 @@ class WelcomeMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Bienvenue sur Pourier',
+            subject: 'Bienvenue sur Pouire',
         );
     }
 
@@ -2216,11 +2216,11 @@ class PhotoTest extends TestCase
 ### 20.1 Variables d'environnement (.env)
 
 ```env
-APP_NAME=Pourier
+APP_NAME=Pouire
 APP_ENV=production
 APP_KEY=
 APP_DEBUG=false
-APP_URL=https://api.Pourier.com
+APP_URL=https://api.Pouire.com
 
 LOG_CHANNEL=stack
 LOG_LEVEL=error
@@ -2229,7 +2229,7 @@ LOG_LEVEL=error
 DB_CONNECTION=pgsql
 DB_HOST=your-postgres-host
 DB_PORT=5432
-DB_DATABASE=Pourier
+DB_DATABASE=Pouire
 DB_USERNAME=your-db-user
 DB_PASSWORD=your-db-password
 
@@ -2252,8 +2252,8 @@ JWT_REFRESH_TTL=20160
 AWS_ACCESS_KEY_ID=your-aws-key
 AWS_SECRET_ACCESS_KEY=your-aws-secret
 AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=Pourier-photos
-AWS_URL=https://Pourier-photos.s3.amazonaws.com
+AWS_BUCKET=Pouire-photos
+AWS_URL=https://Pouire-photos.s3.amazonaws.com
 
 # Mail
 MAIL_MAILER=smtp
@@ -2262,7 +2262,7 @@ MAIL_PORT=587
 MAIL_USERNAME=apikey
 MAIL_PASSWORD=your-sendgrid-api-key
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@Pourier.com
+MAIL_FROM_ADDRESS=noreply@Pouire.com
 MAIL_FROM_NAME="${APP_NAME}"
 
 # CinetPay
@@ -2270,8 +2270,8 @@ CINETPAY_API_URL=https://api-checkout.cinetpay.com/v2
 CINETPAY_SITE_ID=your-site-id
 CINETPAY_API_KEY=your-api-key
 CINETPAY_SECRET_KEY=your-secret-key
-CINETPAY_NOTIFY_URL=https://api.Pourier.com/webhooks/cinetpay
-CINETPAY_RETURN_URL=https://Pourier.com/payment/return
+CINETPAY_NOTIFY_URL=https://api.Pouire.com/webhooks/cinetpay
+CINETPAY_RETURN_URL=https://Pouire.com/payment/return
 
 # Sentry (monitoring)
 SENTRY_LARAVEL_DSN=your-sentry-dsn
@@ -2345,17 +2345,17 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        container_name: Pourier-app
+        container_name: Pouire-app
         restart: unless-stopped
         working_dir: /var/www
         volumes:
             - ./:/var/www
         networks:
-            - Pourier
+            - Pouire
 
     postgres:
         image: postgres:16
-        container_name: Pourier-db
+        container_name: Pouire-db
         restart: unless-stopped
         environment:
             POSTGRES_DB: ${DB_DATABASE}
@@ -2364,18 +2364,18 @@ services:
         volumes:
             - postgres-data:/var/lib/postgresql/data
         networks:
-            - Pourier
+            - Pouire
 
     redis:
         image: redis:7-alpine
-        container_name: Pourier-redis
+        container_name: Pouire-redis
         restart: unless-stopped
         networks:
-            - Pourier
+            - Pouire
 
     nginx:
         image: nginx:alpine
-        container_name: Pourier-nginx
+        container_name: Pouire-nginx
         restart: unless-stopped
         ports:
             - "80:80"
@@ -2384,22 +2384,22 @@ services:
             - ./:/var/www
             - ./nginx.conf:/etc/nginx/conf.d/default.conf
         networks:
-            - Pourier
+            - Pouire
 
     queue-worker:
         build:
             context: .
             dockerfile: Dockerfile
-        container_name: Pourier-queue
+        container_name: Pouire-queue
         restart: unless-stopped
         command: php artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
         volumes:
             - ./:/var/www
         networks:
-            - Pourier
+            - Pouire
 
 networks:
-    Pourier:
+    Pouire:
         driver: bridge
 
 volumes:
@@ -2431,10 +2431,10 @@ php artisan queue:restart
 
 ### 20.5 Supervisor Configuration
 
-**Fichier**: `/etc/supervisor/conf.d/Pourier-worker.conf`
+**Fichier**: `/etc/supervisor/conf.d/Pouire-worker.conf`
 
 ```ini
-[program:Pourier-worker]
+[program:Pouire-worker]
 process_name=%(program_name)s_%(process_num)02d
 command=php /var/www/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
 autostart=true
@@ -2455,7 +2455,7 @@ stopwaitsecs=3600
 ```nginx
 server {
     listen 80;
-    server_name api.Pourier.com;
+    server_name api.Pouire.com;
     root /var/www/public;
 
     add_header X-Frame-Options "SAMEORIGIN";
@@ -2490,7 +2490,7 @@ server {
 
 ## RÉSUMÉ FINAL
 
-Ce document complet spécifie tout ce qui est nécessaire pour développer le backend Laravel 12 pour Pourier/Pouire :
+Ce document complet spécifie tout ce qui est nécessaire pour développer le backend Laravel 12 pour Pouire/Pouire :
 
 ### ✅ Points clés couverts
 

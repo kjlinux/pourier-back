@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->command->info('🌍 Seeding Pourier database with Burkinabé data...');
+        $this->command->info('🌍 Seeding Pouire database with Burkinabé data...');
         $this->command->newLine();
 
         // 1. Seed Roles & Permissions (if not already seeded)
@@ -57,9 +57,9 @@ class DatabaseSeeder extends Seeder
         $this->command->info('✅ Database seeding completed successfully!');
         $this->command->newLine();
         $this->command->info('📝 Login credentials:');
-        $this->command->info('   Admin: admin@pourier.bf / password');
-        $this->command->info('   Moderator: moderator1@pourier.bf / password');
-        $this->command->info('   Photographer: abdoulaye.traore@pourier.bf / password');
+        $this->command->info('   Admin: admin@pouire.bf / password');
+        $this->command->info('   Moderator: moderator1@pouire.bf / password');
+        $this->command->info('   Photographer: abdoulaye.traore@pouire.bf / password');
         $this->command->info('   Buyer: Use any buyer email / password');
         $this->command->newLine();
     }

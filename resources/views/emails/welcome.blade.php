@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenue sur Pourier</title>
+    <title>Bienvenue sur Pouire</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -71,7 +71,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">Pourier</div>
+            <div class="logo">Pouire</div>
             <p>Marketplace de photos africaines</p>
         </div>
 
@@ -79,7 +79,7 @@
             <p class="greeting">Bonjour {{ $userName }} 👋</p>
 
             <p class="message">
-                Nous sommes ravis de vous accueillir sur <strong>Pourier</strong>, la plateforme dédiée
+                Nous sommes ravis de vous accueillir sur <strong>Pouire</strong>, la plateforme dédiée
                 aux photos africaines de haute qualité !
             </p>
 
@@ -119,14 +119,14 @@
             </p>
 
             <p class="message">
-                Merci d'avoir choisi Pourier !<br>
-                L'équipe Pourier
+                Merci d'avoir choisi Pouire !<br>
+                L'équipe Pouire
             </p>
         </div>
 
         <div class="footer">
             <p>
-                © {{ date('Y') }} Pourier. Tous droits réservés.<br>
+                © {{ date('Y') }} Pouire. Tous droits réservés.<br>
                 Cet email a été envoyé à {{ $userEmail }}
             </p>
         </div>

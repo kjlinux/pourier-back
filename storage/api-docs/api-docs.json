@@ -1,11 +1,11 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Pourier API",
-        "description": "API REST pour la plateforme de vente de photos Pourier. Cette API permet aux utilisateurs d'acheter des photos, aux photographes de vendre leurs créations, et aux administrateurs de gérer la plateforme.",
+        "title": "Pouire API",
+        "description": "API REST pour la plateforme de vente de photos Pouire. Cette API permet aux utilisateurs d'acheter des photos, aux photographes de vendre leurs créations, et aux administrateurs de gérer la plateforme.",
         "contact": {
-            "name": "Pourier Support",
-            "email": "contact@pourier.com"
+            "name": "Pouire Support",
+            "email": "contact@pouire.com"
         },
         "license": {
             "name": "Proprietary",
@@ -16,7 +16,7 @@
     "servers": [
         {
             "url": "http://localhost:8000",
-            "description": "Serveur API Pourier"
+            "description": "Serveur API Pouire"
         }
     ],
     "paths": {
@@ -652,6 +652,257 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Accès non autorisé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/orders": {
+            "get": {
+                "tags": [
+                    "Admin - Orders"
+                ],
+                "summary": "Get all orders with filtering",
+                "description": "Retrieve all orders with advanced filtering options by status, user, photographer, date range, and search. Requires admin role.",
+                "operationId": "getAdminOrders",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by payment status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "processing",
+                                "completed",
+                                "failed",
+                                "refunded"
+                            ],
+                            "example": "completed"
+                        }
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "Filter by buyer user UUID",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "9d445a1c-85c5-4b6d-9c38-99a4915d6dac"
+                        }
+                    },
+                    {
+                        "name": "photographer_id",
+                        "in": "query",
+                        "description": "Filter by photographer UUID (orders containing photos from this photographer)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "9d445a1c-85c5-4b6d-9c38-99a4915d6dac"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "Filter orders from this date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-01-01"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "Filter orders until this date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2024-12-31"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by order number",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "ORD-20241121"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 20,
+                            "example": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Orders retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 150
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin role required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Accès non autorisé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/orders/{order}": {
+            "get": {
+                "tags": [
+                    "Admin - Orders"
+                ],
+                "summary": "Get order details",
+                "description": "Retrieve detailed information about a specific order including buyer info, items, and payment details. Requires admin role.",
+                "operationId": "getAdminOrder",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "Order UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "9d445a1c-85c5-4b6d-9c38-99a4915d6dac"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedResponse"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin role required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Accès non autorisé"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Commande introuvable"
                                         }
                                     },
                                     "type": "object"
@@ -3696,7 +3947,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Inscription réussie ! Bienvenue sur Pourier."
+                                            "example": "Inscription réussie ! Bienvenue sur Pouire."
                                         },
                                         "data": {
                                             "properties": {
@@ -6206,7 +6457,7 @@
                                                     "thumbnail_url": {
                                                         "type": "string",
                                                         "format": "url",
-                                                        "example": "https://pourier.s3.amazonaws.com/thumbnails/xyz.jpg"
+                                                        "example": "https://pouire.s3.amazonaws.com/thumbnails/xyz.jpg"
                                                     },
                                                     "price_standard": {
                                                         "type": "number",
@@ -9690,7 +9941,7 @@
                                 "description": "Frontend URL",
                                 "schema": {
                                     "type": "string",
-                                    "example": "https://pourier.bf/orders/9d445a1c-85c5-4b6d-9c38-99a4915d6dac/success"
+                                    "example": "https://pouire.bf/orders/9d445a1c-85c5-4b6d-9c38-99a4915d6dac/success"
                                 }
                             }
                         }
@@ -9848,11 +10099,11 @@
                 "properties": {
                     "first": {
                         "type": "string",
-                        "example": "http://api.pourier.com/api/photos?page=1"
+                        "example": "http://api.pouire.com/api/photos?page=1"
                     },
                     "last": {
                         "type": "string",
-                        "example": "http://api.pourier.com/api/photos?page=10"
+                        "example": "http://api.pouire.com/api/photos?page=10"
                     },
                     "prev": {
                         "type": "string",
@@ -9861,7 +10112,7 @@
                     },
                     "next": {
                         "type": "string",
-                        "example": "http://api.pourier.com/api/photos?page=2"
+                        "example": "http://api.pouire.com/api/photos?page=2"
                     }
                 },
                 "type": "object"
@@ -9895,7 +10146,7 @@
                     },
                     "profile_picture": {
                         "type": "string",
-                        "example": "https://storage.pourier.com/profiles/profile.jpg",
+                        "example": "https://storage.pouire.com/profiles/profile.jpg",
                         "nullable": true
                     },
                     "created_at": {
@@ -9989,15 +10240,15 @@
                     },
                     "preview_url": {
                         "type": "string",
-                        "example": "https://storage.pourier.com/photos/preview.jpg"
+                        "example": "https://storage.pouire.com/photos/preview.jpg"
                     },
                     "thumbnail_url": {
                         "type": "string",
-                        "example": "https://storage.pourier.com/photos/thumbnail.jpg"
+                        "example": "https://storage.pouire.com/photos/thumbnail.jpg"
                     },
                     "watermarked_url": {
                         "type": "string",
-                        "example": "https://storage.pourier.com/photos/watermarked.jpg"
+                        "example": "https://storage.pouire.com/photos/watermarked.jpg"
                     },
                     "width": {
                         "type": "integer",
@@ -10382,6 +10633,10 @@
         {
             "name": "Webhooks",
             "description": "Webhooks pour les intégrations tierces (CinetPay)"
+        },
+        {
+            "name": "Admin - Orders",
+            "description": "Admin - Orders"
         },
         {
             "name": "Admin - Photo Moderation",

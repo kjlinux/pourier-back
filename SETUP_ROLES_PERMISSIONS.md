@@ -2,21 +2,23 @@
 
 ## ⚠️ IMPORTANT - UUID Support
 
-Ce système utilise des **UUIDs** pour les tables de rôles et permissions, en cohérence avec le reste de l'application Pourier.
+Ce système utilise des **UUIDs** pour les tables de rôles et permissions, en cohérence avec le reste de l'application Pouire.
 
 ### Modifications Spécifiques UUID
 
 Les fichiers suivants ont été créés/modifiés pour supporter les UUIDs :
 
 1. **Modèles personnalisés** :
-   - `app/Models/Role.php` - Étend `Spatie\Permission\Models\Role` avec support UUID
-   - `app/Models/Permission.php` - Étend `Spatie\Permission\Models\Permission` avec support UUID
+
+    - `app/Models/Role.php` - Étend `Spatie\Permission\Models\Role` avec support UUID
+    - `app/Models/Permission.php` - Étend `Spatie\Permission\Models\Permission` avec support UUID
 
 2. **Configuration** :
-   - `config/permission.php` - Pointe vers nos modèles personnalisés
+
+    - `config/permission.php` - Pointe vers nos modèles personnalisés
 
 3. **Migration modifiée** :
-   - `database/migrations/2025_11_16_232433_create_permission_tables.php` - Utilise `uuid()` au lieu de `bigIncrements()`
+    - `database/migrations/2025_11_16_232433_create_permission_tables.php` - Utilise `uuid()` au lieu de `bigIncrements()`
 
 ---
 
@@ -32,11 +34,12 @@ php artisan migrate
 ```
 
 Cette commande créera les tables suivantes **avec clés primaires UUID** :
-- `roles` - Table des rôles (id: UUID)
-- `permissions` - Table des permissions (id: UUID)
-- `model_has_permissions` - Permissions assignées aux utilisateurs (permission_id: UUID, model_id: UUID)
-- `model_has_roles` - Rôles assignés aux utilisateurs (role_id: UUID, model_id: UUID)
-- `role_has_permissions` - Permissions assignées aux rôles (permission_id: UUID, role_id: UUID)
+
+-   `roles` - Table des rôles (id: UUID)
+-   `permissions` - Table des permissions (id: UUID)
+-   `model_has_permissions` - Permissions assignées aux utilisateurs (permission_id: UUID, model_id: UUID)
+-   `model_has_roles` - Rôles assignés aux utilisateurs (role_id: UUID, model_id: UUID)
+-   `role_has_permissions` - Permissions assignées aux rôles (permission_id: UUID, role_id: UUID)
 
 ### 2. Seeding des Rôles et Permissions
 
@@ -46,9 +49,10 @@ php artisan db:seed --class=RolePermissionSeeder
 ```
 
 Ceci créera :
-- **4 rôles** : buyer, photographer, moderator, admin
-- **40+ permissions** organisées par catégorie
-- **Association automatique** des permissions aux rôles
+
+-   **4 rôles** : buyer, photographer, moderator, admin
+-   **40+ permissions** organisées par catégorie
+-   **Association automatique** des permissions aux rôles
 
 ### 3. Assigner les Rôles aux Utilisateurs Existants
 
@@ -74,7 +78,7 @@ foreach ($photographers as $photographer) {
 }
 
 // Assigner le rôle "admin" à un admin spécifique
-$admin = User::where('email', 'admin@pourier.com')->first();
+$admin = User::where('email', 'admin@pouire.com')->first();
 if ($admin) {
     $admin->assignRole('admin');
 }
@@ -123,6 +127,7 @@ class AssignExistingUsersRolesSeeder extends Seeder
 ```
 
 Puis exécutez :
+
 ```bash
 php artisan db:seed --class=AssignExistingUsersRolesSeeder
 ```
@@ -144,6 +149,7 @@ public function run(): void
 ### 5. Vérification
 
 **Vérifier les rôles créés :**
+
 ```bash
 php artisan tinker
 ```
@@ -181,6 +187,7 @@ $user->roles()->first()?->id; // Devrait être un UUID
 ### 6. Tester l'API
 
 **Test de Login :**
+
 ```bash
 curl -X POST http://localhost:8000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -191,12 +198,14 @@ curl -X POST http://localhost:8000/api/auth/login \
 ```
 
 Vérifiez que la réponse contient :
-- `user.roles` : array de rôles
-- `user.permissions` : array de permissions
-- `user.photographer_status` : statut si photographe
-- `user.is_approved_photographer` : boolean
+
+-   `user.roles` : array de rôles
+-   `user.permissions` : array de permissions
+-   `user.photographer_status` : statut si photographe
+-   `user.is_approved_photographer` : boolean
 
 **Test de l'endpoint Abilities :**
+
 ```bash
 curl -X GET http://localhost:8000/api/auth/abilities \
   -H "Authorization: Bearer {votre-token}"
@@ -211,50 +220,60 @@ Devrait retourner toutes les capacités de l'utilisateur.
 ### Nouveaux Fichiers
 
 1. **Config**
-   - `config/permission.php` - Configuration Spatie (modifiée pour utiliser nos modèles)
+
+    - `config/permission.php` - Configuration Spatie (modifiée pour utiliser nos modèles)
 
 2. **Migrations**
-   - `database/migrations/2025_11_16_232433_create_permission_tables.php` - **Modifiée pour UUID**
+
+    - `database/migrations/2025_11_16_232433_create_permission_tables.php` - **Modifiée pour UUID**
 
 3. **Modèles (Support UUID)** ⭐ NOUVEAU
-   - `app/Models/Role.php` - Modèle Role avec support UUID
-   - `app/Models/Permission.php` - Modèle Permission avec support UUID
+
+    - `app/Models/Role.php` - Modèle Role avec support UUID
+    - `app/Models/Permission.php` - Modèle Permission avec support UUID
 
 4. **Seeders**
-   - `database/seeders/RolePermissionSeeder.php` - Utilise nos modèles UUID
+
+    - `database/seeders/RolePermissionSeeder.php` - Utilise nos modèles UUID
 
 5. **Policies**
-   - `app/Policies/OrderPolicy.php`
-   - `app/Policies/WithdrawalPolicy.php`
-   - `app/Policies/UserPolicy.php`
-   - `app/Policies/PhotographerProfilePolicy.php`
+
+    - `app/Policies/OrderPolicy.php`
+    - `app/Policies/WithdrawalPolicy.php`
+    - `app/Policies/UserPolicy.php`
+    - `app/Policies/PhotographerProfilePolicy.php`
 
 6. **Documentation**
-   - `FRONTEND_ROLES_PERMISSIONS_GUIDE.md` - Guide d'intégration frontend complet
-   - `SETUP_ROLES_PERMISSIONS.md` - Ce fichier
+    - `FRONTEND_ROLES_PERMISSIONS_GUIDE.md` - Guide d'intégration frontend complet
+    - `SETUP_ROLES_PERMISSIONS.md` - Ce fichier
 
 ### Fichiers Modifiés
 
 1. `app/Models/User.php`
-   - Ajout de `$guard_name = 'api'`
-   - Méthodes `isApprovedPhotographer()` et `getPhotographerStatus()`
+
+    - Ajout de `$guard_name = 'api'`
+    - Méthodes `isApprovedPhotographer()` et `getPhotographerStatus()`
 
 2. `app/Http/Resources/UserResource.php`
-   - Ajout des champs `roles`, `permissions`
-   - Ajout des champs `photographer_status`, `is_approved_photographer`
+
+    - Ajout des champs `roles`, `permissions`
+    - Ajout des champs `photographer_status`, `is_approved_photographer`
 
 3. `app/Services/AuthService.php`
-   - Eager loading de `roles` et `permissions` dans register(), login(), me()
-   - Auto-assignation des rôles lors de l'inscription ✅ FAIT
+
+    - Eager loading de `roles` et `permissions` dans register(), login(), me()
+    - Auto-assignation des rôles lors de l'inscription ✅ FAIT
 
 4. `app/Http/Controllers/Api/Auth/AuthController.php`
-   - Nouvelle méthode `abilities()` avec documentation OpenAPI
+
+    - Nouvelle méthode `abilities()` avec documentation OpenAPI
 
 5. `routes/api.php`
-   - Nouvelle route `GET /api/auth/abilities`
+
+    - Nouvelle route `GET /api/auth/abilities`
 
 6. `config/permission.php`
-   - Pointe vers `App\Models\Role` et `App\Models\Permission` au lieu des modèles Spatie par défaut
+    - Pointe vers `App\Models\Role` et `App\Models\Permission` au lieu des modèles Spatie par défaut
 
 ---
 
@@ -286,9 +305,10 @@ if ($user->isPhotographer()) {
 ```
 
 **Comportement** :
-- Les nouveaux acheteurs reçoivent automatiquement le rôle `buyer`
-- Les nouveaux photographes reçoivent automatiquement le rôle `photographer`
-- Les admins doivent être créés et assignés manuellement (sécurité)
+
+-   Les nouveaux acheteurs reçoivent automatiquement le rôle `buyer`
+-   Les nouveaux photographes reçoivent automatiquement le rôle `photographer`
+-   Les admins doivent être créés et assignés manuellement (sécurité)
 
 ---
 
@@ -297,25 +317,29 @@ if ($user->isPhotographer()) {
 ### Bonnes Pratiques
 
 1. **Ne jamais assigner le rôle "admin" automatiquement**
-   - Les admins doivent être créés manuellement
+
+    - Les admins doivent être créés manuellement
 
 2. **Toujours vérifier `isApprovedPhotographer()` pour les actions de photographe**
-   - Avoir le rôle ne suffit pas
-   - Le profil doit être approuvé
+
+    - Avoir le rôle ne suffit pas
+    - Le profil doit être approuvé
 
 3. **Utiliser les Policies dans les contrôleurs**
-   ```php
-   $this->authorize('view', $photo);
-   ```
+
+    ```php
+    $this->authorize('view', $photo);
+    ```
 
 4. **Vérifier les permissions au lieu des rôles quand possible**
-   ```php
-   // BON
-   if ($user->can('delete-any-photo')) { ... }
 
-   // MOINS BON
-   if ($user->isAdmin()) { ... }
-   ```
+    ```php
+    // BON
+    if ($user->can('delete-any-photo')) { ... }
+
+    // MOINS BON
+    if ($user->isAdmin()) { ... }
+    ```
 
 ### Cache des Permissions
 
@@ -326,6 +350,7 @@ php artisan permission:cache-reset
 ```
 
 Ou dans le code :
+
 ```php
 app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 ```

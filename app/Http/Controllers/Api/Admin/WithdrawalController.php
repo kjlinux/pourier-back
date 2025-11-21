@@ -70,7 +70,7 @@ class WithdrawalController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Withdrawal::with('photographer:id,first_name,last_name,email');
+        $query = Withdrawal::with('photographer:id,first_name,last_name,email,phone,avatar_url');
 
         // Filter by status
         if ($request->has('status')) {

@@ -8,12 +8,12 @@ use Illuminate\Routing\Controller as BaseController;
 
 /**
  * @OA\Info(
- *     title="Pourier API",
+ *     title="Pouire API",
  *     version="1.0.0",
- *     description="API REST pour la plateforme de vente de photos Pourier. Cette API permet aux utilisateurs d'acheter des photos, aux photographes de vendre leurs créations, et aux administrateurs de gérer la plateforme.",
+ *     description="API REST pour la plateforme de vente de photos Pouire. Cette API permet aux utilisateurs d'acheter des photos, aux photographes de vendre leurs créations, et aux administrateurs de gérer la plateforme.",
  *     @OA\Contact(
- *         email="contact@pourier.com",
- *         name="Pourier Support"
+ *         email="contact@pouire.com",
+ *         name="Pouire Support"
  *     ),
  *     @OA\License(
  *         name="Proprietary",
@@ -23,7 +23,7 @@ use Illuminate\Routing\Controller as BaseController;
  *
  * @OA\Server(
  *     url=L5_SWAGGER_CONST_HOST,
- *     description="Serveur API Pourier"
+ *     description="Serveur API Pouire"
  * )
  *
  * @OA\SecurityScheme(
