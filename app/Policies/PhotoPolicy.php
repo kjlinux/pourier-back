@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Order;
 use App\Models\Photo;
 use App\Models\User;
 
@@ -55,5 +56,26 @@ class PhotoPolicy
     public function reject(User $user, Photo $photo): bool
     {
         return $user->account_type === 'admin';
+    }
+
+    public function download(User $user, Photo $photo): bool
+    {
+        // Les admins peuvent télécharger toutes les photos
+        if ($user->account_type === 'admin') {
+            return true;
+        }
+
+        // Le photographe peut télécharger ses propres photos
+        if ($user->id === $photo->photographer_id) {
+            return true;
+        }
+
+        // Vérifier si l'utilisateur a acheté cette photo
+        return Order::where('user_id', $user->id)
+            ->where('payment_status', 'completed')
+            ->whereHas('items', function ($query) use ($photo) {
+                $query->where('photo_id', $photo->id);
+            })
+            ->exists();
     }
 }

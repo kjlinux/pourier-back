@@ -59,7 +59,7 @@ class OrderController extends Controller
     {
         $orders = Order::query()
             ->where('user_id', $request->user()->id)
-            ->with('items.photo')
+            ->with(['items.photo.photographer.photographerProfile'])
             ->latest()
             ->paginate($request->get('per_page', 20));
 
@@ -244,7 +244,7 @@ class OrderController extends Controller
             ], 403);
         }
 
-        $order->load('items.photo');
+        $order->load(['items.photo.photographer.photographerProfile']);
 
         return new OrderResource($order);
     }

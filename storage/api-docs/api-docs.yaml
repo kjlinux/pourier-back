@@ -5109,37 +5109,43 @@ paths:
                             photographer_id:
                               type: string
                               format: uuid
-                            photo_id:
+                            month:
+                              description: 'Month of the revenue record'
                               type: string
-                              format: uuid
-                            photo:
-                              properties:
-                                id:
-                                  type: string
-                                  format: uuid
-                                title:
-                                  type: string
-                                  example: 'Sunset over Ouagadougou'
-                              type: object
-                            photographer_amount:
-                              description: "Photographer's share (80%) in FCFA"
-                              type: number
-                              format: float
-                              example: 4000
-                            platform_commission:
+                              format: date
+                              example: '2025-11-01'
+                            total_sales:
+                              description: 'Total sales amount in FCFA'
+                              type: integer
+                              example: 50000
+                            commission:
                               description: 'Platform commission (20%) in FCFA'
-                              type: number
-                              format: float
-                              example: 1000
-                            sold_at:
-                              type: string
-                              format: date-time
-                              example: '2025-11-10T14:30:00Z'
-                            available_at:
-                              description: 'When revenue becomes available for withdrawal'
-                              type: string
-                              format: date-time
-                              example: '2025-11-20T14:30:00Z'
+                              type: integer
+                              example: 10000
+                            net_revenue:
+                              description: "Photographer's net revenue (80%) in FCFA"
+                              type: integer
+                              example: 40000
+                            available_balance:
+                              description: 'Available balance for withdrawal in FCFA'
+                              type: integer
+                              example: 35000
+                            pending_balance:
+                              description: 'Pending balance in FCFA'
+                              type: integer
+                              example: 5000
+                            withdrawn:
+                              description: 'Amount already withdrawn in FCFA'
+                              type: integer
+                              example: 0
+                            sales_count:
+                              description: 'Number of sales'
+                              type: integer
+                              example: 10
+                            photos_sold:
+                              description: 'Number of unique photos sold'
+                              type: integer
+                              example: 8
                           type: object
                       current_page:
                         type: integer
@@ -5215,32 +5221,31 @@ paths:
                         photographer_id:
                           type: string
                           format: uuid
-                        photo_id:
+                        month:
+                          description: 'Month of the revenue record'
                           type: string
-                          format: uuid
-                        photo:
-                          properties:
-                            id:
-                              type: string
-                              format: uuid
-                            title:
-                              type: string
-                              example: 'Mountain Landscape'
-                          type: object
-                        photographer_amount:
-                          description: "Photographer's share (80%) in FCFA"
-                          type: number
-                          format: float
-                          example: 4000
-                        sold_at:
-                          type: string
-                          format: date-time
-                          example: '2025-11-12T10:00:00Z'
-                        available_at:
-                          description: 'When this revenue will become available'
-                          type: string
-                          format: date-time
-                          example: '2025-11-22T10:00:00Z'
+                          format: date
+                          example: '2025-11-01'
+                        total_sales:
+                          description: 'Total sales amount in FCFA'
+                          type: integer
+                          example: 50000
+                        commission:
+                          description: 'Platform commission (20%) in FCFA'
+                          type: integer
+                          example: 10000
+                        net_revenue:
+                          description: "Photographer's net revenue (80%) in FCFA"
+                          type: integer
+                          example: 40000
+                        available_balance:
+                          description: 'Available balance for withdrawal in FCFA'
+                          type: integer
+                          example: 35000
+                        pending_balance:
+                          description: 'Pending balance in FCFA'
+                          type: integer
+                          example: 5000
                       type: object
                 type: object
         401:
@@ -5252,8 +5257,8 @@ paths:
     get:
       tags:
         - 'Photographer - Revenue'
-      summary: 'Get revenue history by date'
-      description: "Get daily revenue summary with total earnings and sales count, grouped by date. Shows photographer's 80% share after 20% platform commission."
+      summary: 'Get revenue history by month'
+      description: "Get monthly revenue summary with total earnings and sales count. Shows photographer's 80% share after 20% platform commission."
       operationId: getPhotographerRevenueHistory
       responses:
         200:
@@ -5271,18 +5276,17 @@ paths:
                         type: array
                         items:
                           properties:
-                            date:
-                              description: 'Date of sales'
+                            month:
+                              description: 'Month of sales'
                               type: string
                               format: date
-                              example: '2025-11-14'
+                              example: '2025-11-01'
                             total:
-                              description: 'Total photographer earnings for the day in FCFA'
-                              type: number
-                              format: float
+                              description: 'Total photographer earnings for the month in FCFA'
+                              type: integer
                               example: 12000
                             sales:
-                              description: 'Number of sales on this date'
+                              description: 'Number of sales in this month'
                               type: integer
                               example: 3
                           type: object
@@ -5293,9 +5297,118 @@ paths:
                         type: integer
                         example: 30
                       total:
-                        description: 'Total number of days with sales'
+                        description: 'Total number of months with sales'
                         type: integer
-                        example: 90
+                        example: 12
+                    type: object
+                type: object
+        401:
+          $ref: '#/components/responses/UnauthorizedResponse'
+      security:
+        -
+          bearerAuth: []
+  /api/photographer/revenue/transactions:
+    get:
+      tags:
+        - 'Photographer - Revenue'
+      summary: 'Get recent detailed transactions'
+      description: 'Get paginated list of individual sales transactions with detailed information including photo title, sale date, net amount, and status.'
+      operationId: getPhotographerRevenueTransactions
+      parameters:
+        -
+          name: per_page
+          in: query
+          description: 'Number of transactions per page'
+          required: false
+          schema:
+            type: integer
+            default: 15
+            maximum: 100
+            minimum: 1
+        -
+          name: status
+          in: query
+          description: 'Filter by transaction status'
+          required: false
+          schema:
+            type: string
+            enum:
+              - completed
+              - pending
+      responses:
+        200:
+          description: 'Transactions retrieved successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          properties:
+                            id:
+                              description: 'Transaction ID (OrderItem ID)'
+                              type: string
+                              format: uuid
+                            description:
+                              description: 'Photo title'
+                              type: string
+                              example: 'Sunset over Abidjan'
+                            date:
+                              description: 'Sale date'
+                              type: string
+                              format: date-time
+                              example: '2025-11-15T14:30:00Z'
+                            amount:
+                              description: 'Net amount for photographer in FCFA (80% of sale)'
+                              type: integer
+                              example: 4000
+                            gross_amount:
+                              description: 'Gross sale amount in FCFA'
+                              type: integer
+                              example: 5000
+                            commission:
+                              description: 'Platform commission in FCFA (20%)'
+                              type: integer
+                              example: 1000
+                            status:
+                              description: 'Transaction status'
+                              type: string
+                              enum:
+                                - completed
+                                - pending
+                              example: completed
+                            photo_id:
+                              description: 'Photo ID'
+                              type: string
+                              format: uuid
+                            photo_thumbnail:
+                              description: 'Photo thumbnail URL'
+                              type: string
+                              example: 'https://...'
+                            license_type:
+                              description: 'License type purchased'
+                              type: string
+                              example: standard
+                            order_number:
+                              description: 'Order number'
+                              type: string
+                              example: ORD-20251115-ABC123
+                          type: object
+                      current_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 15
+                      total:
+                        type: integer
+                        example: 50
                     type: object
                 type: object
         401:

@@ -234,6 +234,7 @@ Route::middleware(['auth:api', 'photographer'])->prefix('photographer')->group(f
         Route::get('/available', [PhotographerRevenueController::class, 'available'])->name('photographer.revenue.available');
         Route::get('/pending', [PhotographerRevenueController::class, 'pending'])->name('photographer.revenue.pending');
         Route::get('/history', [PhotographerRevenueController::class, 'history'])->name('photographer.revenue.history');
+        Route::get('/transactions', [PhotographerRevenueController::class, 'transactions'])->name('photographer.revenue.transactions');
     });
 
     // Withdrawal Management

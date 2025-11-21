@@ -72,7 +72,7 @@ class OrderPolicy
             return true;
         }
 
-        // Users can only download their own paid orders
-        return $order->user_id === $user->id && $order->payment_status === 'paid';
+        // Users can only download their own completed orders
+        return $order->user_id === $user->id && $order->payment_status === 'completed';
     }
 }

@@ -11,19 +11,36 @@ class OrderItemResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'order_id' => $this->order_id,
             'photo_id' => $this->photo_id,
-            'photo_title' => $this->photo_title,
-            'photo_thumbnail' => $this->photo_thumbnail,
-            'photographer_id' => $this->photographer_id,
-            'photographer_name' => $this->photographer_name,
             'license_type' => $this->license_type,
             'price' => $this->price,
-            'photographer_amount' => $this->photographer_amount,
-            'platform_commission' => $this->platform_commission,
-            'download_url' => $this->download_url,
-            'download_expires_at' => $this->download_expires_at?->toISOString(),
-            'created_at' => $this->created_at->toISOString(),
+            'photo' => $this->when($this->relationLoaded('photo') && $this->photo, function () {
+                $photo = $this->photo;
+                $photographer = $photo->photographer;
+                $profile = $photographer?->photographerProfile;
+
+                return [
+                    'id' => $photo->id,
+                    'title' => $photo->title,
+                    'preview_url' => $photo->preview_url,
+                    'thumbnail_url' => $photo->thumbnail_url,
+                    'photographer' => [
+                        'id' => $photographer?->id,
+                        'name' => $photographer ? $photographer->first_name . ' ' . $photographer->last_name : $this->photographer_name,
+                        'display_name' => $profile?->display_name ?? ($photographer ? $photographer->first_name . ' ' . $photographer->last_name : $this->photographer_name),
+                    ],
+                ];
+            }, [
+                'id' => $this->photo_id,
+                'title' => $this->photo_title,
+                'preview_url' => null,
+                'thumbnail_url' => $this->photo_thumbnail,
+                'photographer' => [
+                    'id' => $this->photographer_id,
+                    'name' => $this->photographer_name,
+                    'display_name' => $this->photographer_name,
+                ],
+            ]),
         ];
     }
 }

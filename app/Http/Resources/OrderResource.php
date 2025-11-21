@@ -25,10 +25,8 @@ class OrderResource extends JsonResource
 
             // Payment
             'payment_method' => $this->payment_method,
-            'payment_provider' => $this->payment_provider,
             'payment_status' => $this->payment_status,
-            'payment_id' => $this->payment_id,
-            'paid_at' => $this->paid_at?->toISOString(),
+            'transaction_id' => $this->cinetpay_transaction_id,
 
             // Billing
             'billing_email' => $this->billing_email,

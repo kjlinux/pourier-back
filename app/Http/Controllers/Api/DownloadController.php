@@ -72,25 +72,17 @@ class DownloadController extends Controller
      */
     public function downloadPhoto(Request $request, Photo $photo): StreamedResponse
     {
+        // La policy vérifie si l'utilisateur a acheté cette photo
         Gate::authorize('download', $photo);
-
-        // Vérifier si l'utilisateur a acheté cette photo
-        $hasPurchased = Order::where('user_id', $request->user()->id)
-            ->where('payment_status', 'completed')
-            ->whereHas('items', function ($query) use ($photo) {
-                $query->where('photo_id', $photo->id);
-            })
-            ->exists();
-
-        if (!$hasPurchased) {
-            abort(403, 'You have not purchased this photo');
-        }
 
         $filePath = $this->storageService->getHighResPath($photo);
 
         if (!Storage::disk('public')->exists($filePath)) {
             abort(404, 'Photo file not found');
         }
+
+        // Incrémenter le compteur de téléchargements
+        $photo->incrementDownloads();
 
         return Storage::disk('public')->download(
             $filePath,
