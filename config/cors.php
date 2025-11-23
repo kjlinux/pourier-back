@@ -22,6 +22,8 @@ return [
     'allowed_origins' => [
         'http://localhost:3000',
         'http://localhost:5173',
+        'http://pouire.tangagroup.com',
+        'https://pouire.tangagroup.com',
         env('FRONTEND_URL', 'https://pouire.com'),
     ],
 

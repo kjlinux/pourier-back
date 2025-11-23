@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Photo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use OpenApi\Annotations as OA;
 
 class FavoriteController extends Controller
@@ -126,7 +127,7 @@ class FavoriteController extends Controller
             return response()->json(['success' => false, 'message' => 'Photo déjà dans les favoris.'], 400);
         }
 
-        $request->user()->favorites()->attach($photo->id);
+        $request->user()->favorites()->attach($photo->id, ['id' => Str::uuid()]);
 
         return response()->json(['success' => true, 'message' => 'Photo ajoutée aux favoris.']);
     }

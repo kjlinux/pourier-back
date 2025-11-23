@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'photographer' => \App\Http\Middleware\CheckPhotographer::class,
             'admin' => \App\Http\Middleware\CheckAdmin::class,
         ]);
+        $middleware->api(prepend: [
+            \Illuminate\Http\Middleware\HandleCors::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
