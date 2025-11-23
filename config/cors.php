@@ -24,7 +24,6 @@ return [
         'http://localhost:5173',
         'http://pouire.tangagroup.com',
         'https://pouire.tangagroup.com',
-        env('FRONTEND_URL', 'https://pouire.com'),
     ],
 
     'allowed_origins_patterns' => [],
