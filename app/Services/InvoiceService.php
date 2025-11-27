@@ -19,11 +19,14 @@ class InvoiceService
         $invoiceData = $this->prepareInvoiceData($order);
         
         $pdf = Pdf::loadView('invoices.order', $invoiceData);
-        
+
         $fileName = 'invoices/' . $order->order_number . '_' . now()->format('Y-m-d') . '.pdf';
-        
-        Storage::disk('local')->put($fileName, $pdf->output());
-        
+
+        $disk = config('filesystems.default');
+        Storage::disk($disk)->put($fileName, $pdf->output(), [
+            'visibility' => 'private',
+        ]);
+
         $order->update([
             'invoice_path' => $fileName,
             'invoice_generated_at' => now()
@@ -38,11 +41,14 @@ class InvoiceService
     public function generatePayoutInvoice(array $payoutData): string
     {
         $pdf = Pdf::loadView('invoices.payout', $payoutData);
-        
+
         $fileName = 'invoices/payout_' . $payoutData['photographer_id'] . '_' . now()->format('Y-m-d_His') . '.pdf';
-        
-        Storage::disk('local')->put($fileName, $pdf->output());
-        
+
+        $disk = config('filesystems.default');
+        Storage::disk($disk)->put($fileName, $pdf->output(), [
+            'visibility' => 'private',
+        ]);
+
         return $fileName;
     }
 
@@ -99,7 +105,18 @@ class InvoiceService
             return null;
         }
 
-        return Storage::disk('local')->path($order->invoice_path);
+        $disk = config('filesystems.default');
+
+        // For S3, return a signed URL
+        if ($disk === 's3') {
+            return Storage::disk($disk)->temporaryUrl(
+                $order->invoice_path,
+                now()->addHour()
+            );
+        }
+
+        // For local, return file path
+        return Storage::disk($disk)->path($order->invoice_path);
     }
 
     /**
@@ -107,7 +124,8 @@ class InvoiceService
      */
     public function hasInvoice(Order $order): bool
     {
-        return $order->invoice_path && Storage::disk('local')->exists($order->invoice_path);
+        $disk = config('filesystems.default');
+        return $order->invoice_path && Storage::disk($disk)->exists($order->invoice_path);
     }
 
     /**
@@ -119,8 +137,9 @@ class InvoiceService
             return false;
         }
 
-        if (Storage::disk('local')->exists($order->invoice_path)) {
-            Storage::disk('local')->delete($order->invoice_path);
+        $disk = config('filesystems.default');
+        if (Storage::disk($disk)->exists($order->invoice_path)) {
+            Storage::disk($disk)->delete($order->invoice_path);
         }
 
         $order->update([

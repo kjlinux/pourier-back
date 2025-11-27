@@ -35,14 +35,16 @@ return [
         ],
     ],
 
-    'cinetpay' => [
-        'api_url' => env('CINETPAY_API_URL', 'https://api-checkout.cinetpay.com/v2'),
-        'site_id' => env('CINETPAY_SITE_ID'),
-        'api_key' => env('CINETPAY_API_KEY'),
-        'secret_key' => env('CINETPAY_SECRET_KEY'),
-        'notify_url' => env('CINETPAY_NOTIFY_URL', env('APP_URL').'/api/webhooks/cinetpay'),
-        'return_url' => env('CINETPAY_RETURN_URL', env('APP_URL').'/payment/callback'),
-        'mode' => env('CINETPAY_MODE', 'PRODUCTION'), // TEST or PRODUCTION
+    'ligdicash' => [
+        'api_url' => env('LIGDICASH_API_URL', 'https://app.ligdicash.com/pay/v01/redirect/checkout-invoice'),
+        'api_key' => env('LIGDICASH_API_KEY'),
+        'auth_token' => env('LIGDICASH_AUTH_TOKEN'),
+        'platform' => env('LIGDICASH_PLATFORM', 'live'), // test or live
+        'callback_url' => env('LIGDICASH_CALLBACK_URL', env('APP_URL').'/api/webhooks/ligdicash'),
+        'return_url' => env('LIGDICASH_RETURN_URL', env('APP_URL').'/payment/callback'),
+        'cancel_url' => env('LIGDICASH_CANCEL_URL', env('APP_URL').'/payment/cancel'),
+        'store_name' => env('LIGDICASH_STORE_NAME', 'Pouire'),
+        'store_website' => env('LIGDICASH_STORE_WEBSITE', 'https://pouire.bf'),
     ],
 
     'sendgrid' => [

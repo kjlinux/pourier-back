@@ -71,7 +71,7 @@ class DownloadController extends Controller
      *     )
      * )
      */
-    public function downloadPhoto(Request $request, Photo $photo): StreamedResponse|BinaryFileResponse
+    public function downloadPhoto(Request $request, Photo $photo): StreamedResponse|BinaryFileResponse|\Illuminate\Http\RedirectResponse
     {
         // La policy vérifie si l'utilisateur a acheté cette photo
         Gate::authorize('download', $photo);
@@ -85,9 +85,26 @@ class DownloadController extends Controller
         // Incrémenter le compteur de téléchargements
         $photo->incrementDownloads();
 
-        // Check if it's an external URL or local path
+        $disk = config('filesystems.default');
+
+        // For S3: redirect to signed URL (no proxy)
+        if ($disk === 's3') {
+            $path = $this->storageService->extractPathFromUrl($originalUrl);
+
+            $signedUrl = Storage::disk('s3')->temporaryUrl(
+                $path,
+                now()->addHours(24),
+                [
+                    'ResponseContentDisposition' => 'attachment; filename="' . $photo->title . '.jpg"',
+                    'ResponseContentType' => 'image/jpeg',
+                ]
+            );
+
+            return redirect($signedUrl);
+        }
+
+        // For local: check if external URL or local path
         if (filter_var($originalUrl, FILTER_VALIDATE_URL)) {
-            // Stream from external URL
             return $this->streamFromUrl($originalUrl, $photo->title . '.jpg');
         }
 
@@ -216,6 +233,8 @@ class DownloadController extends Controller
         }
 
         $addedFiles = 0;
+        $disk = config('filesystems.default');
+
         foreach ($photos as $photo) {
             $originalUrl = $photo->original_url;
             if (!$originalUrl) {
@@ -223,15 +242,22 @@ class DownloadController extends Controller
             }
 
             $filename = $photo->title . '_' . $photo->id . '.jpg';
+            $path = $this->storageService->extractPathFromUrl($originalUrl);
 
-            // Check if it's an external URL or local path
-            if (filter_var($originalUrl, FILTER_VALIDATE_URL)) {
-                // Fetch content from external URL
+            // For S3: download from S3
+            if ($disk === 's3') {
+                try {
+                    $content = Storage::disk('s3')->get($path);
+                    $zip->addFromString($filename, $content);
+                    $addedFiles++;
+                } catch (\Exception $e) {
+                    \Log::error("Failed to download from S3: {$path}", ['error' => $e->getMessage()]);
+                }
+            }
+            // For local or external URLs
+            elseif (filter_var($originalUrl, FILTER_VALIDATE_URL)) {
                 $context = stream_context_create([
-                    'http' => [
-                        'timeout' => 30,
-                        'user_agent' => 'Mozilla/5.0'
-                    ]
+                    'http' => ['timeout' => 30, 'user_agent' => 'Mozilla/5.0']
                 ]);
                 $content = @file_get_contents($originalUrl, false, $context);
                 if ($content !== false) {
@@ -310,7 +336,7 @@ class DownloadController extends Controller
      *     )
      * )
      */
-    public function downloadInvoice(Request $request, Order $order): BinaryFileResponse
+    public function downloadInvoice(Request $request, Order $order): BinaryFileResponse|\Illuminate\Http\RedirectResponse
     {
         Gate::authorize('view', $order);
 
@@ -324,6 +350,22 @@ class DownloadController extends Controller
             $this->invoiceService->generateInvoice($order);
         }
 
+        $disk = config('filesystems.default');
+
+        // For S3: redirect to signed URL
+        if ($disk === 's3') {
+            $signedUrl = Storage::disk('s3')->temporaryUrl(
+                $order->invoice_path,
+                now()->addHour(),
+                [
+                    'ResponseContentDisposition' => 'attachment; filename="invoice_' . $order->order_number . '.pdf"',
+                    'ResponseContentType' => 'application/pdf',
+                ]
+            );
+            return redirect($signedUrl);
+        }
+
+        // For local: direct download
         $invoicePath = $this->invoiceService->getInvoicePath($order);
 
         if (!$invoicePath) {
@@ -373,7 +415,7 @@ class DownloadController extends Controller
      *     )
      * )
      */
-    public function downloadPreview(Photo $photo): StreamedResponse|BinaryFileResponse
+    public function downloadPreview(Photo $photo): StreamedResponse|BinaryFileResponse|\Illuminate\Http\RedirectResponse
     {
         $previewUrl = $photo->preview_url;
 
@@ -381,9 +423,15 @@ class DownloadController extends Controller
             abort(404, 'Preview not found');
         }
 
-        // Check if it's an external URL or local path
+        $disk = config('filesystems.default');
+
+        // For S3: redirect to public URL (no signed URL needed for previews)
+        if ($disk === 's3') {
+            return redirect($previewUrl);
+        }
+
+        // For local: check if external URL or local path
         if (filter_var($previewUrl, FILTER_VALIDATE_URL)) {
-            // Stream from external URL
             return $this->streamFromUrl($previewUrl, 'preview_' . $photo->title . '.jpg');
         }
 

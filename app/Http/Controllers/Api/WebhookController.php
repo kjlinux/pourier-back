@@ -17,21 +17,25 @@ class WebhookController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/webhooks/cinetpay",
-     *     operationId="storeWebhooksCinetpay",
+     *     path="/api/webhooks/ligdicash",
+     *     operationId="storeWebhooksLigdicash",
      *     tags={"Webhooks"},
-     *     summary="CinetPay payment webhook (callback)",
-     *     description="Receives payment notifications from CinetPay when payment status changes. Uses HMAC signature verification for security. This endpoint is called by CinetPay servers only.",
+     *     summary="Ligdicash payment webhook (callback)",
+     *     description="Receives payment notifications from Ligdicash when payment status changes. This endpoint is called by Ligdicash servers only. Ligdicash sends two POST requests (application/x-www-form-urlencoded and application/json) with the same data.",
      *     @OA\RequestBody(
      *         required=true,
-     *         description="CinetPay webhook payload",
+     *         description="Ligdicash webhook payload",
      *         @OA\JsonContent(
-     *             @OA\Property(property="cpm_trans_id", type="string", example="CP123456789", description="CinetPay transaction ID"),
-     *             @OA\Property(property="cpm_custom", type="string", example="ORD-123456", description="Order number (custom field)"),
-     *             @OA\Property(property="cpm_amount", type="number", format="float", example=15000, description="Payment amount in FCFA"),
-     *             @OA\Property(property="cpm_result", type="string", example="00", description="Payment result code ('00' = success)"),
-     *             @OA\Property(property="signature", type="string", example="abc123def456...", description="HMAC signature = sha256(site_id + order_number + api_key)"),
-     *             @OA\Property(property="payment_method", type="string", example="FLOOZ", description="Payment provider used")
+     *             @OA\Property(property="response_code", type="string", example="00", description="Response code ('00' = success, '01' = error)"),
+     *             @OA\Property(property="token", type="string", example="eyJhbGci...", description="Transaction token"),
+     *             @OA\Property(property="status", type="string", example="completed", description="Transaction status (completed, pending, notcompleted)"),
+     *             @OA\Property(property="amount", type="integer", example=15000, description="Payment amount in FCFA"),
+     *             @OA\Property(property="operator_name", type="string", example="Orange Money", description="Payment operator name"),
+     *             @OA\Property(property="custom_data", type="object", description="Custom data sent in initial request",
+     *                 @OA\Property(property="order_id", type="string", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac"),
+     *                 @OA\Property(property="order_number", type="string", example="ORD-20231127-ABC123"),
+     *                 @OA\Property(property="user_id", type="string", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -39,13 +43,6 @@ class WebhookController extends Controller
      *         description="Webhook processed successfully",
      *         @OA\JsonContent(
      *             @OA\Property(property="status", type="string", example="success")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Invalid signature",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Invalid signature")
      *         )
      *     ),
      *     @OA\Response(
@@ -57,64 +54,66 @@ class WebhookController extends Controller
      *     )
      * )
      */
-    public function handleCinetPayWebhook(Request $request)
+    public function handleLigdicashWebhook(Request $request)
     {
-        Log::info('CinetPay Webhook received', $request->all());
+        Log::info('Ligdicash Webhook received', $request->all());
 
         // Récupérer les données du webhook
-        $token = $request->input('cpm_trans_id');
-        $transactionId = $request->input('cpm_custom'); // order_number
-        $amount = $request->input('cpm_amount');
-        $status = $request->input('cpm_result'); // '00' = success
-        $signature = $request->input('signature');
+        $responseCode = $request->input('response_code');
+        $token = $request->input('token');
+        $status = $request->input('status'); // completed, pending, notcompleted
+        $amount = $request->input('amount');
+        $operatorName = $request->input('operator_name');
+        $customData = $request->input('custom_data', []);
 
-        // Vérifier la signature du webhook pour sécurité
-        $apiKey = config('services.cinetpay.api_key');
-        $siteId = config('services.cinetpay.site_id');
+        // Extraire l'order_id depuis custom_data
+        $orderId = $customData['order_id'] ?? null;
 
-        // Calculer la signature attendue
-        $expectedSignature = hash('sha256', $siteId . $transactionId . $apiKey);
-
-        if ($signature !== $expectedSignature) {
-            Log::warning('CinetPay webhook signature mismatch', [
-                'expected' => $expectedSignature,
-                'received' => $signature,
-            ]);
-            return response()->json(['error' => 'Invalid signature'], 400);
+        if (!$orderId) {
+            Log::error('Ligdicash webhook: Order ID not found in custom_data');
+            return response()->json(['error' => 'Order ID not found'], 400);
         }
 
         // Trouver la commande
-        $order = Order::where('order_number', $transactionId)->first();
+        $order = Order::find($orderId);
 
         if (!$order) {
-            Log::error('CinetPay webhook: Order not found', ['transaction_id' => $transactionId]);
+            Log::error('Ligdicash webhook: Order not found', ['order_id' => $orderId]);
             return response()->json(['error' => 'Order not found'], 404);
         }
 
+        // Vérifier si la commande n'a pas déjà été traitée (éviter la duplication)
+        if ($order->isCompleted()) {
+            Log::info('Ligdicash webhook: Order already completed', ['order_id' => $orderId]);
+            return response()->json(['status' => 'success', 'message' => 'Already processed']);
+        }
+
         // Traiter selon le statut
-        if ($status === '00' && $order->isPending()) {
+        if ($responseCode === '00' && $status === 'completed' && $order->isPending()) {
             // Paiement réussi
             $order->update([
                 'payment_status' => 'completed',
                 'payment_id' => $token,
-                'cinetpay_transaction_id' => $token,
-                'payment_provider' => $request->input('payment_method'),
+                'ligdicash_token' => $token,
+                'payment_provider' => $operatorName,
                 'paid_at' => now(),
             ]);
 
             // Compléter la commande
             $this->paymentService->completeOrder($order, $token);
 
-            Log::info('CinetPay payment completed', [
+            Log::info('Ligdicash payment completed', [
                 'order_id' => $order->id,
-                'transaction_id' => $token,
+                'token' => $token,
+                'operator' => $operatorName,
             ]);
-        } elseif ($status !== '00') {
+        } elseif ($responseCode !== '00' || $status === 'notcompleted') {
             // Paiement échoué
             $order->markAsFailed();
 
-            Log::warning('CinetPay payment failed', [
+            Log::warning('Ligdicash payment failed', [
                 'order_id' => $order->id,
+                'response_code' => $responseCode,
                 'status' => $status,
             ]);
         }
@@ -124,11 +123,11 @@ class WebhookController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/webhooks/cinetpay/return/{order}",
-     *     operationId="getWebhooksCinetpayReturn",
+     *     path="/api/webhooks/ligdicash/return/{order}",
+     *     operationId="getWebhooksLigdicashReturn",
      *     tags={"Webhooks"},
-     *     summary="CinetPay payment return URL",
-     *     description="User is redirected here after completing payment on CinetPay. Checks payment status and redirects to frontend success/failure page.",
+     *     summary="Ligdicash payment return URL",
+     *     description="User is redirected here after completing payment on Ligdicash. Checks payment status and redirects to frontend success/failure page.",
      *     @OA\Parameter(
      *         name="order",
      *         in="path",
@@ -155,20 +154,69 @@ class WebhookController extends Controller
      *     )
      * )
      */
-    public function handleCinetPayReturn(Request $request, string $orderId)
+    public function handleLigdicashReturn(Request $request, string $orderId)
     {
         // Page de retour après paiement
         $order = Order::findOrFail($orderId);
 
-        // Vérifier le statut du paiement auprès de CinetPay
+        // Vérifier le statut du paiement auprès de Ligdicash
         $result = $this->paymentService->checkPaymentStatus($order);
 
         $frontendUrl = config('app.frontend_url', config('app.url'));
 
-        if ($result['success'] && ($result['status'] === 'ACCEPTED' || $result['status'] === '00')) {
+        if ($result['success'] && isset($result['is_paid']) && $result['is_paid']) {
             return redirect()->away($frontendUrl . '/orders/' . $order->id . '/success');
         }
 
         return redirect()->away($frontendUrl . '/orders/' . $order->id . '/failed');
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/webhooks/ligdicash/cancel/{order}",
+     *     operationId="getWebhooksLigdicashCancel",
+     *     tags={"Webhooks"},
+     *     summary="Ligdicash payment cancel URL",
+     *     description="User is redirected here when cancelling payment on Ligdicash.",
+     *     @OA\Parameter(
+     *         name="order",
+     *         in="path",
+     *         description="Order UUID",
+     *         required=true,
+     *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
+     *     ),
+     *     @OA\Response(
+     *         response=302,
+     *         description="Redirect to frontend cancelled page",
+     *         @OA\Header(
+     *             header="Location",
+     *             description="Frontend URL",
+     *             @OA\Schema(
+     *                 type="string",
+     *                 example="https://pouire.bf/orders/9d445a1c-85c5-4b6d-9c38-99a4915d6dac/cancelled"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Order not found",
+     *         ref="#/components/responses/NotFoundResponse"
+     *     )
+     * )
+     */
+    public function handleLigdicashCancel(Request $request, string $orderId)
+    {
+        // Page d'annulation après paiement
+        $order = Order::findOrFail($orderId);
+
+        // Marquer la commande comme échouée si elle est toujours en attente
+        if ($order->isPending()) {
+            $order->markAsFailed();
+            Log::info('Ligdicash payment cancelled by user', ['order_id' => $order->id]);
+        }
+
+        $frontendUrl = config('app.frontend_url', config('app.url'));
+
+        return redirect()->away($frontendUrl . '/orders/' . $order->id . '/cancelled');
     }
 }

@@ -14,44 +14,72 @@ class PaymentService
     public function processPayment(Order $order, string $paymentMethod, ?string $paymentProvider = null, ?string $phone = null): array
     {
         try {
-            // Initialiser le paiement via CinetPay
-            $cinetpayData = [
-                'apikey' => config('services.cinetpay.api_key'),
-                'site_id' => config('services.cinetpay.site_id'),
-                'transaction_id' => $order->order_number,
-                'amount' => $order->total, // en FCFA (integer)
-                'currency' => 'XOF',
-                'description' => 'Achat photos Pouire - Commande ' . $order->order_number,
-                'notify_url' => config('services.cinetpay.notify_url'),
-                'return_url' => config('services.cinetpay.return_url') . '/' . $order->id,
-                'channels' => $this->getCinetPayChannels($paymentMethod, $paymentProvider),
-                'metadata' => json_encode([
-                    'order_id' => $order->id,
-                    'user_id' => $order->user_id,
-                ]),
-            ];
-
-            // Ajouter le numéro de téléphone si fourni (pour Mobile Money)
-            if ($phone) {
-                $cinetpayData['customer_phone_number'] = $phone;
+            // Préparer les items pour la facture Ligdicash
+            $invoiceItems = [];
+            foreach ($order->items as $item) {
+                $invoiceItems[] = [
+                    'name' => $item->photo_title,
+                    'description' => 'Photo par ' . $item->photographer_name . ' - Licence: ' . $item->license_type,
+                    'quantity' => 1,
+                    'unit_price' => $item->price,
+                    'total_price' => $item->price,
+                ];
             }
 
-            $response = Http::post(config('services.cinetpay.api_url') . '/payment', $cinetpayData);
+            // Initialiser le paiement via Ligdicash
+            $ligdicashData = [
+                'commande' => [
+                    'invoice' => [
+                        'items' => $invoiceItems,
+                        'total_amount' => $order->total,
+                        'devise' => 'XOF',
+                        'description' => 'Achat photos Pouire - Commande ' . $order->order_number,
+                        'customer' => '',
+                        'customer_firstname' => $order->billing_first_name,
+                        'customer_lastname' => $order->billing_last_name,
+                        'customer_email' => $order->billing_email,
+                        'external_id' => '',
+                        'otp' => '',
+                    ],
+                    'store' => [
+                        'name' => config('services.ligdicash.store_name'),
+                        'website_url' => config('services.ligdicash.store_website'),
+                    ],
+                    'actions' => [
+                        'cancel_url' => config('services.ligdicash.cancel_url') . '/' . $order->id,
+                        'return_url' => config('services.ligdicash.return_url') . '/' . $order->id,
+                        'callback_url' => config('services.ligdicash.callback_url'),
+                    ],
+                    'custom_data' => [
+                        'order_id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'user_id' => $order->user_id,
+                    ],
+                ],
+            ];
 
-            if ($response->successful() && $response->json('code') === '201') {
-                $data = $response->json('data');
+            $response = Http::withHeaders([
+                'Apikey' => config('services.ligdicash.api_key'),
+                'Authorization' => 'Bearer ' . config('services.ligdicash.auth_token'),
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])->post(config('services.ligdicash.api_url') . '/create', $ligdicashData);
 
-                // Mettre à jour la commande avec l'ID de transaction CinetPay
+            if ($response->successful() && $response->json('response_code') === '00') {
+                $token = $response->json('token');
+                $paymentUrl = $response->json('response_text');
+
+                // Mettre à jour la commande avec le token Ligdicash
                 $order->update([
-                    'cinetpay_transaction_id' => $data['payment_token'],
+                    'ligdicash_token' => $token,
                     'payment_provider' => $paymentProvider,
                 ]);
 
                 return [
                     'success' => true,
                     'message' => 'Paiement initialisé avec succès',
-                    'payment_url' => $data['payment_url'],
-                    'payment_token' => $data['payment_token'],
+                    'payment_url' => $paymentUrl,
+                    'payment_token' => $token,
                 ];
             }
 
@@ -59,7 +87,7 @@ class PaymentService
 
             return [
                 'success' => false,
-                'message' => $response->json('message', 'Échec de l\'initialisation du paiement'),
+                'message' => $response->json('response_text', 'Échec de l\'initialisation du paiement'),
             ];
         } catch (\Exception $e) {
             Log::error('Erreur processPayment: ' . $e->getMessage());
@@ -72,45 +100,36 @@ class PaymentService
         }
     }
 
-    private function getCinetPayChannels(string $paymentMethod, ?string $provider = null): string
-    {
-        // Déterminer les canaux CinetPay selon la méthode de paiement
-        if ($paymentMethod === 'mobile_money') {
-            // Si un provider spécifique est demandé
-            if ($provider) {
-                return match ($provider) {
-                    'ORANGE' => 'ORANGE_MONEY_BF',
-                    'MTN' => 'MTN_MONEY_BF',
-                    'MOOV' => 'MOOV_MONEY_BF',
-                    'WAVE' => 'WAVE_BF',
-                    default => 'ALL', // Tous les Mobile Money si non reconnu
-                };
-            }
-            return 'ALL'; // Tous les Mobile Money
-        }
-
-        if ($paymentMethod === 'card') {
-            return 'CARD'; // Paiement par carte
-        }
-
-        return 'ALL'; // Par défaut, tous les moyens de paiement
-    }
-
     public function checkPaymentStatus(Order $order): array
     {
         try {
-            $response = Http::post(config('services.cinetpay.api_url') . '/check', [
-                'apikey' => config('services.cinetpay.api_key'),
-                'site_id' => config('services.cinetpay.site_id'),
-                'transaction_id' => $order->order_number,
+            if (!$order->ligdicash_token) {
+                return [
+                    'success' => false,
+                    'message' => 'Token de paiement introuvable',
+                ];
+            }
+
+            $response = Http::withHeaders([
+                'Apikey' => config('services.ligdicash.api_key'),
+                'Authorization' => 'Bearer ' . config('services.ligdicash.auth_token'),
+                'Accept' => 'application/json',
+            ])->get(config('services.ligdicash.api_url') . '/confirm/', [
+                'invoiceToken' => $order->ligdicash_token,
             ]);
 
             if ($response->successful()) {
-                $data = $response->json('data');
+                $data = $response->json();
+                $responseCode = $data['response_code'] ?? null;
+                $status = $data['status'] ?? 'UNKNOWN';
+
+                // Ligdicash: response_code = "00" et status = "completed" = paiement réussi
+                $isPaid = ($responseCode === '00' && $status === 'completed');
 
                 return [
                     'success' => true,
-                    'status' => $data['status'] ?? 'UNKNOWN',
+                    'status' => $status,
+                    'is_paid' => $isPaid,
                     'data' => $data,
                 ];
             }

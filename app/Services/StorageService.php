@@ -7,7 +7,12 @@ use Illuminate\Support\Str;
 
 class StorageService
 {
-    private const DISK = 'local';
+    private string $disk;
+
+    public function __construct()
+    {
+        $this->disk = config('filesystems.default');
+    }
 
     /**
      * Get the high resolution path for a photo (original file)
@@ -45,8 +50,9 @@ class StorageService
 
     /**
      * Extract the storage path from a URL
+     * Made public to be accessible from controllers
      */
-    private function extractPathFromUrl(?string $url): string
+    public function extractPathFromUrl(?string $url): string
     {
         if (!$url) {
             return '';
@@ -57,7 +63,21 @@ class StorageService
             return $url;
         }
 
-        // Extract path from URL
+        // Handle S3 URLs
+        if (str_contains($url, 's3.amazonaws.com') || str_contains($url, env('AWS_BUCKET'))) {
+            $parsed = parse_url($url);
+            $path = ltrim($parsed['path'], '/');
+
+            // Remove bucket name if present in path
+            $bucket = env('AWS_BUCKET');
+            if ($bucket && str_starts_with($path, $bucket . '/')) {
+                $path = substr($path, strlen($bucket) + 1);
+            }
+
+            return $path;
+        }
+
+        // Handle local URLs
         $path = parse_url($url, PHP_URL_PATH);
         return ltrim($path, '/');
     }
@@ -68,9 +88,12 @@ class StorageService
         $path = "photos/{$photographerId}/originals/{$filename}";
 
         $content = file_get_contents($filePath);
-        Storage::disk(self::DISK)->put($path, $content, 'private');
+        Storage::disk($this->disk)->put($path, $content, [
+            'visibility' => 'private',
+            'CacheControl' => 'max-age=31536000',
+        ]);
 
-        return Storage::disk(self::DISK)->url($path);
+        return Storage::disk($this->disk)->url($path);
     }
 
     public function storePreview(string $filePath, string $photographerId): string
@@ -79,9 +102,12 @@ class StorageService
         $path = "photos/{$photographerId}/previews/{$filename}";
 
         $content = file_get_contents($filePath);
-        Storage::disk(self::DISK)->put($path, $content, 'public');
+        Storage::disk($this->disk)->put($path, $content, [
+            'visibility' => 'public',
+            'CacheControl' => 'max-age=31536000',
+        ]);
 
-        return Storage::disk(self::DISK)->url($path);
+        return Storage::disk($this->disk)->url($path);
     }
 
     public function storeThumbnail(string $filePath, string $photographerId): string
@@ -90,9 +116,12 @@ class StorageService
         $path = "photos/{$photographerId}/thumbnails/{$filename}";
 
         $content = file_get_contents($filePath);
-        Storage::disk(self::DISK)->put($path, $content, 'public');
+        Storage::disk($this->disk)->put($path, $content, [
+            'visibility' => 'public',
+            'CacheControl' => 'max-age=31536000',
+        ]);
 
-        return Storage::disk(self::DISK)->url($path);
+        return Storage::disk($this->disk)->url($path);
     }
 
     public function storeAvatar(string $filePath, string $userId): string
@@ -101,9 +130,12 @@ class StorageService
         $path = "users/{$userId}/avatars/{$filename}";
 
         $content = file_get_contents($filePath);
-        Storage::disk(self::DISK)->put($path, $content, 'public');
+        Storage::disk($this->disk)->put($path, $content, [
+            'visibility' => 'public',
+            'CacheControl' => 'max-age=31536000',
+        ]);
 
-        return Storage::disk(self::DISK)->url($path);
+        return Storage::disk($this->disk)->url($path);
     }
 
     public function storeCover(string $filePath, string $userId): string
@@ -112,9 +144,12 @@ class StorageService
         $path = "users/{$userId}/covers/{$filename}";
 
         $content = file_get_contents($filePath);
-        Storage::disk(self::DISK)->put($path, $content, 'public');
+        Storage::disk($this->disk)->put($path, $content, [
+            'visibility' => 'public',
+            'CacheControl' => 'max-age=31536000',
+        ]);
 
-        return Storage::disk(self::DISK)->url($path);
+        return Storage::disk($this->disk)->url($path);
     }
 
     public function storeInvoice(string $content, string $orderNumber): string
@@ -122,19 +157,21 @@ class StorageService
         $filename = "invoice-{$orderNumber}.pdf";
         $path = "invoices/{$filename}";
 
-        Storage::disk(self::DISK)->put($path, $content, 'private');
+        Storage::disk($this->disk)->put($path, $content, [
+            'visibility' => 'private',
+            'CacheControl' => 'max-age=0',
+        ]);
 
-        return Storage::disk(self::DISK)->url($path);
+        return Storage::disk($this->disk)->url($path);
     }
 
     public function generateSignedDownloadUrl(string $url, int $expirationHours = 24): string
     {
-        // Extraire le path depuis l'URL S3
-        $path = parse_url($url, PHP_URL_PATH);
-        $path = ltrim($path, '/');
+        // Extract path from URL
+        $path = $this->extractPathFromUrl($url);
 
-        // Générer une URL signée temporaire
-        return Storage::disk(self::DISK)->temporaryUrl(
+        // Generate temporary signed URL
+        return Storage::disk($this->disk)->temporaryUrl(
             $path,
             now()->addHours($expirationHours)
         );
@@ -143,12 +180,10 @@ class StorageService
     public function deleteFile(string $url): bool
     {
         try {
-            $path = parse_url($url, PHP_URL_PATH);
-            $path = ltrim($path, '/');
-
-            return Storage::disk(self::DISK)->delete($path);
+            $path = $this->extractPathFromUrl($url);
+            return Storage::disk($this->disk)->delete($path);
         } catch (\Exception $e) {
-            \Log::error('Erreur suppression fichier S3: ' . $e->getMessage());
+            \Log::error('File deletion error: ' . $e->getMessage());
             return false;
         }
     }

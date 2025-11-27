@@ -21,7 +21,7 @@ class Order extends Model
         'payment_method',
         'payment_provider',
         'payment_id',
-        'cinetpay_transaction_id',
+        'ligdicash_token',
         'billing_email',
         'billing_first_name',
         'billing_last_name',

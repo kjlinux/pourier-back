@@ -126,14 +126,15 @@ Route::middleware('auth:api')->prefix('orders')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| PHASE 5: PAIEMENTS CINETPAY
+| PHASE 5: PAIEMENTS LIGDICASH
 |--------------------------------------------------------------------------
 */
 
-// Webhooks CinetPay (Public - No auth required)
+// Webhooks Ligdicash (Public - No auth required)
 Route::prefix('webhooks')->group(function () {
-    Route::post('/cinetpay', [WebhookController::class, 'handleCinetPayWebhook'])->name('webhooks.cinetpay');
-    Route::get('/cinetpay/return/{order}', [WebhookController::class, 'handleCinetPayReturn'])->name('webhooks.cinetpay.return');
+    Route::post('/ligdicash', [WebhookController::class, 'handleLigdicashWebhook'])->name('webhooks.ligdicash');
+    Route::get('/ligdicash/return/{order}', [WebhookController::class, 'handleLigdicashReturn'])->name('webhooks.ligdicash.return');
+    Route::get('/ligdicash/cancel/{order}', [WebhookController::class, 'handleLigdicashCancel'])->name('webhooks.ligdicash.cancel');
 });
 
 /*

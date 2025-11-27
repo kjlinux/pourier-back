@@ -9808,51 +9808,63 @@
                 ]
             }
         },
-        "/api/webhooks/cinetpay": {
+        "/api/webhooks/ligdicash": {
             "post": {
                 "tags": [
                     "Webhooks"
                 ],
-                "summary": "CinetPay payment webhook (callback)",
-                "description": "Receives payment notifications from CinetPay when payment status changes. Uses HMAC signature verification for security. This endpoint is called by CinetPay servers only.",
-                "operationId": "storeWebhooksCinetpay",
+                "summary": "Ligdicash payment webhook (callback)",
+                "description": "Receives payment notifications from Ligdicash when payment status changes. This endpoint is called by Ligdicash servers only. Ligdicash sends two POST requests (application/x-www-form-urlencoded and application/json) with the same data.",
+                "operationId": "storeWebhooksLigdicash",
                 "requestBody": {
-                    "description": "CinetPay webhook payload",
+                    "description": "Ligdicash webhook payload",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "cpm_trans_id": {
-                                        "description": "CinetPay transaction ID",
-                                        "type": "string",
-                                        "example": "CP123456789"
-                                    },
-                                    "cpm_custom": {
-                                        "description": "Order number (custom field)",
-                                        "type": "string",
-                                        "example": "ORD-123456"
-                                    },
-                                    "cpm_amount": {
-                                        "description": "Payment amount in FCFA",
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 15000
-                                    },
-                                    "cpm_result": {
-                                        "description": "Payment result code ('00' = success)",
+                                    "response_code": {
+                                        "description": "Response code ('00' = success, '01' = error)",
                                         "type": "string",
                                         "example": "00"
                                     },
-                                    "signature": {
-                                        "description": "HMAC signature = sha256(site_id + order_number + api_key)",
+                                    "token": {
+                                        "description": "Transaction token",
                                         "type": "string",
-                                        "example": "abc123def456..."
+                                        "example": "eyJhbGci..."
                                     },
-                                    "payment_method": {
-                                        "description": "Payment provider used",
+                                    "status": {
+                                        "description": "Transaction status (completed, pending, notcompleted)",
                                         "type": "string",
-                                        "example": "FLOOZ"
+                                        "example": "completed"
+                                    },
+                                    "amount": {
+                                        "description": "Payment amount in FCFA",
+                                        "type": "integer",
+                                        "example": 15000
+                                    },
+                                    "operator_name": {
+                                        "description": "Payment operator name",
+                                        "type": "string",
+                                        "example": "Orange Money"
+                                    },
+                                    "custom_data": {
+                                        "description": "Custom data sent in initial request",
+                                        "properties": {
+                                            "order_id": {
+                                                "type": "string",
+                                                "example": "9d445a1c-85c5-4b6d-9c38-99a4915d6dac"
+                                            },
+                                            "order_number": {
+                                                "type": "string",
+                                                "example": "ORD-20231127-ABC123"
+                                            },
+                                            "user_id": {
+                                                "type": "string",
+                                                "example": "9d445a1c-85c5-4b6d-9c38-99a4915d6dac"
+                                            }
+                                        },
+                                        "type": "object"
                                     }
                                 },
                                 "type": "object"
@@ -9870,22 +9882,6 @@
                                         "status": {
                                             "type": "string",
                                             "example": "success"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid signature",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Invalid signature"
                                         }
                                     },
                                     "type": "object"
@@ -9912,14 +9908,14 @@
                 }
             }
         },
-        "/api/webhooks/cinetpay/return/{order}": {
+        "/api/webhooks/ligdicash/return/{order}": {
             "get": {
                 "tags": [
                     "Webhooks"
                 ],
-                "summary": "CinetPay payment return URL",
-                "description": "User is redirected here after completing payment on CinetPay. Checks payment status and redirects to frontend success/failure page.",
-                "operationId": "getWebhooksCinetpayReturn",
+                "summary": "Ligdicash payment return URL",
+                "description": "User is redirected here after completing payment on Ligdicash. Checks payment status and redirects to frontend success/failure page.",
+                "operationId": "getWebhooksLigdicashReturn",
                 "parameters": [
                     {
                         "name": "order",
@@ -9942,6 +9938,46 @@
                                 "schema": {
                                     "type": "string",
                                     "example": "https://pouire.bf/orders/9d445a1c-85c5-4b6d-9c38-99a4915d6dac/success"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFoundResponse"
+                    }
+                }
+            }
+        },
+        "/api/webhooks/ligdicash/cancel/{order}": {
+            "get": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Ligdicash payment cancel URL",
+                "description": "User is redirected here when cancelling payment on Ligdicash.",
+                "operationId": "getWebhooksLigdicashCancel",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "Order UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "9d445a1c-85c5-4b6d-9c38-99a4915d6dac"
+                        }
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect to frontend cancelled page",
+                        "headers": {
+                            "Location": {
+                                "description": "Frontend URL",
+                                "schema": {
+                                    "type": "string",
+                                    "example": "https://pouire.bf/orders/9d445a1c-85c5-4b6d-9c38-99a4915d6dac/cancelled"
                                 }
                             }
                         }
