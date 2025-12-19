@@ -31,6 +31,11 @@ class Order extends Model
         'invoice_path',
         'invoice_generated_at',
         'completed_at',
+        'payment_phone',
+        'otp_requested_at',
+        'otp_expires_at',
+        'otp_request_count',
+        'payment_flow',
     ];
 
     protected function casts(): array
@@ -43,6 +48,8 @@ class Order extends Model
             'discount' => 'integer',
             'total' => 'integer',
             'paid_at' => 'datetime',
+            'otp_requested_at' => 'datetime',
+            'otp_expires_at' => 'datetime',
         ];
     }
 
@@ -112,7 +119,50 @@ class Order extends Model
     {
         $date = now()->format('Ymd');
         $random = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
+
         return "ORD-{$date}-{$random}";
+    }
+
+    // OTP-related methods
+
+    public function canRequestOtp(): bool
+    {
+        $maxRequests = config('services.ligdicash.max_otp_requests', 3);
+
+        return $this->otp_request_count < $maxRequests && $this->isPending();
+    }
+
+    public function isOtpExpired(): bool
+    {
+        if (! $this->otp_expires_at) {
+            return true;
+        }
+
+        return $this->otp_expires_at->isPast();
+    }
+
+    public function incrementOtpRequestCount(): void
+    {
+        $this->increment('otp_request_count');
+    }
+
+    public function resetOtpTracking(): void
+    {
+        $this->update([
+            'otp_requested_at' => null,
+            'otp_expires_at' => null,
+            'otp_request_count' => 0,
+        ]);
+    }
+
+    public function isOtpFlow(): bool
+    {
+        return $this->payment_flow === 'otp';
+    }
+
+    public function isRedirectFlow(): bool
+    {
+        return $this->payment_flow === 'redirect';
     }
 
     protected static function boot()

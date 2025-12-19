@@ -45,6 +45,13 @@ return [
         'cancel_url' => env('LIGDICASH_CANCEL_URL', env('APP_URL').'/payment/cancel'),
         'store_name' => env('LIGDICASH_STORE_NAME', 'Pouire'),
         'store_website' => env('LIGDICASH_STORE_WEBSITE', 'https://pouire.bf'),
+
+        // OTP Configuration
+        'otp_api_url' => env('LIGDICASH_OTP_API_URL', 'https://app.ligdicash.com/pay/v02'),
+        'otp_enabled' => env('LIGDICASH_OTP_ENABLED', true),
+        'otp_expiry_minutes' => 5,
+        'max_otp_requests' => 3,
+        'otp_providers' => ['ORANGE', 'LIGDICASH_WALLET'],
     ],
 
     'sendgrid' => [

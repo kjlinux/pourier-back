@@ -23,7 +23,10 @@
       "Bash(dir /B)",
       "Bash(nul)",
       "Bash(dir:*)",
-      "Bash(composer search:*)"
+      "Bash(composer search:*)",
+      "Bash(vendor/bin/pint:*)",
+      "Bash(\"/c/laravel/bin/php/php-8.4.12-nts-Win32-vs17-x64/php.exe\" artisan db:seed:*)",
+      "Bash(powershell -Command \"Get-Content ''c:\\\\laragon\\\\www\\\\pourier-back\\\\app\\\\Http\\\\Controllers\\\\Api\\\\OrderController.php'' | Measure-Object -Line\")"
     ],
     "deny": [],
     "ask": []

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "eb557fdcdc4cd5975b637607c912e2d0",
+    "content-hash": "f1004becf559c8c059189a9fb65ff220",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -3033,6 +3033,58 @@
                 }
             ],
             "time": "2024-12-08T08:18:47+00:00"
+        },
+        {
+            "name": "ligdicash/ligdicash",
+            "version": "V1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Ligdicash/ligdicash-php.git",
+                "reference": "a47ca09d03fb14880886ced2f52399f42b1478f2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Ligdicash/ligdicash-php/zipball/a47ca09d03fb14880886ced2f52399f42b1478f2",
+                "reference": "a47ca09d03fb14880886ced2f52399f42b1478f2",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.8"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/Core/Defaults.php",
+                    "src/Core/Wiki.php",
+                    "src/Core/Transaction.php"
+                ],
+                "psr-4": {
+                    "Ligdicash\\": "src/"
+                },
+                "classmap": [
+                    "src/Core/Providers.php",
+                    "src/Core/Errors.php",
+                    "src/Core/Payin.php",
+                    "src/Core/Withdrawal.php",
+                    "src/Core/Responses.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "LigdiCash",
+                    "email": "info@ligdicash.com"
+                }
+            ],
+            "description": "Librairie PHP pour manipuler l'API de paiement de LigdiCash",
+            "support": {
+                "issues": "https://github.com/Ligdicash/ligdicash-php/issues",
+                "source": "https://github.com/Ligdicash/ligdicash-php/tree/V1.0.3"
+            },
+            "time": "2024-12-01T12:26:43+00:00"
         },
         {
             "name": "masterminds/html5",

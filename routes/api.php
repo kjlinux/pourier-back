@@ -3,8 +3,8 @@
 use App\Http\Controllers\Api\Admin\AnalyticsController as AdminAnalyticsController;
 use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
-use App\Http\Controllers\Api\Admin\PhotoModerationController;
 use App\Http\Controllers\Api\Admin\PhotographerController as AdminPhotographerController;
+use App\Http\Controllers\Api\Admin\PhotoModerationController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\Admin\WithdrawalController as AdminWithdrawalController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -14,16 +14,16 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DownloadController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PhotoController;
-use App\Http\Controllers\Api\SearchController;
-use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\Api\Photographer\AnalyticsController as PhotographerAnalyticsController;
 use App\Http\Controllers\Api\Photographer\DashboardController as PhotographerDashboardController;
 use App\Http\Controllers\Api\Photographer\PhotoController as PhotographerPhotoController;
 use App\Http\Controllers\Api\Photographer\RevenueController as PhotographerRevenueController;
 use App\Http\Controllers\Api\Photographer\WithdrawalController as PhotographerWithdrawalController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\User\FavoriteController;
 use App\Http\Controllers\Api\User\NotificationController;
 use App\Http\Controllers\Api\User\ProfileController;
+use App\Http\Controllers\Api\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -122,6 +122,10 @@ Route::middleware('auth:api')->prefix('orders')->group(function () {
     Route::get('/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/{order}/pay', [OrderController::class, 'pay'])->name('orders.pay');
     Route::get('/{order}/status', [OrderController::class, 'checkStatus'])->name('orders.checkStatus');
+
+    // OTP Flow Endpoints
+    Route::post('/{order}/request-otp', [OrderController::class, 'requestOtp'])->name('orders.requestOtp');
+    Route::post('/{order}/validate-otp', [OrderController::class, 'validateOtp'])->name('orders.validateOtp');
 });
 
 /*

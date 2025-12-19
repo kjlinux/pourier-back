@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\LigdicashOtpService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -25,8 +26,22 @@ class OrderResource extends JsonResource
 
             // Payment
             'payment_method' => $this->payment_method,
+            'payment_provider' => $this->payment_provider,
             'payment_status' => $this->payment_status,
-            'transaction_id' => $this->cinetpay_transaction_id,
+            'payment_id' => $this->payment_id,
+            'ligdicash_token' => $this->ligdicash_token,
+
+            // OTP Flow Fields
+            'payment_flow' => $this->payment_flow,
+            'payment_phone' => $this->payment_phone,
+            'otp_requested_at' => $this->otp_requested_at?->toISOString(),
+            'otp_expires_at' => $this->otp_expires_at?->toISOString(),
+            'otp_request_count' => $this->otp_request_count,
+            'can_request_otp' => $this->canRequestOtp(),
+            'otp_expired' => $this->isOtpExpired(),
+            'supports_otp' => $this->payment_provider
+                ? LigdicashOtpService::supportsOtp($this->payment_provider)
+                : null,
 
             // Billing
             'billing_email' => $this->billing_email,

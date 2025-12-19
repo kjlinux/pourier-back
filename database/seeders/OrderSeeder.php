@@ -20,6 +20,7 @@ class OrderSeeder extends Seeder
 
         if ($buyers->isEmpty()) {
             $this->command->warn('⚠️  No verified buyers found. Skipping OrderSeeder.');
+
             return;
         }
 
@@ -62,7 +63,7 @@ class OrderSeeder extends Seeder
             $discount = rand(0, 10) > 7 ? rand(500, 5000) : 0;
             $total = $subtotal + $tax - $discount;
 
-            $orderNumber = 'ORD-' . $orderDate->format('Ymd') . '-' . strtoupper(Str::random(6));
+            $orderNumber = 'ORD-'.$orderDate->format('Ymd').'-'.strtoupper(Str::random(6));
 
             Order::create([
                 'id' => Str::uuid(),
@@ -74,8 +75,9 @@ class OrderSeeder extends Seeder
                 'total' => $total,
                 'payment_status' => $status,
                 'payment_method' => $paymentMethod,
-                'payment_id' => $status === 'completed' ? 'pay_' . Str::random(24) : null,
-                'cinetpay_transaction_id' => $status === 'completed' ? 'CPY_' . rand(100000, 999999) : null,
+                'payment_provider' => $paymentProvider,
+                'payment_id' => $status === 'completed' ? 'pay_'.Str::random(24) : null,
+                'ligdicash_token' => $status === 'completed' ? 'LGD_'.Str::random(32) : null,
                 'billing_email' => $buyer->email,
                 'billing_first_name' => $buyer->first_name,
                 'billing_last_name' => $buyer->last_name,

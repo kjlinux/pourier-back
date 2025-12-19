@@ -12,9 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            // Ajouter la colonne ligdicash_token
-            $table->string('ligdicash_token')->nullable()->after('payment_id');
+            // Ajouter la colonne ligdicash_token si elle n'existe pas
+            if (! Schema::hasColumn('orders', 'ligdicash_token')) {
+                $table->string('ligdicash_token')->nullable()->after('payment_id');
+            }
+        });
 
+        Schema::table('orders', function (Blueprint $table) {
             // Supprimer la colonne cinetpay_transaction_id si elle existe
             if (Schema::hasColumn('orders', 'cinetpay_transaction_id')) {
                 $table->dropColumn('cinetpay_transaction_id');

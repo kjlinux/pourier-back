@@ -25,8 +25,9 @@ return new class extends Migration
             // Payment
             $table->enum('payment_status', ['pending', 'processing', 'completed', 'failed', 'refunded'])->default('pending');
             $table->string('payment_method')->nullable(); // mobile_money, card
-            $table->string('payment_id')->nullable(); // CinetPay payment ID
-            $table->string('cinetpay_transaction_id')->nullable();
+            $table->string('payment_provider')->nullable(); // Orange Money, Moov Money, etc.
+            $table->string('payment_id')->nullable(); // Payment transaction ID
+            $table->string('ligdicash_token')->nullable(); // Ligdicash payment token
 
             // Billing info
             $table->string('billing_email');
@@ -44,7 +45,7 @@ return new class extends Migration
             $table->index('order_number');
             $table->index('user_id');
             $table->index('payment_status');
-            $table->index('cinetpay_transaction_id');
+            $table->index('ligdicash_token');
             $table->index('created_at');
         });
     }

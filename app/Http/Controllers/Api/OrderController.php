@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Order\CreateOrderRequest;
 use App\Http\Requests\Order\PayOrderRequest;
+use App\Http\Requests\Order\RequestOtpRequest;
+use App\Http\Requests\Order\ValidateOtpRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Photo;
+use App\Services\LigdicashOtpService;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +22,8 @@ class OrderController extends Controller
     private const COMMISSION_RATE = 0.20; // 20%
 
     public function __construct(
-        private PaymentService $paymentService
+        private PaymentService $paymentService,
+        private LigdicashOtpService $otpService
     ) {
         $this->middleware('auth:api');
     }
@@ -32,22 +36,28 @@ class OrderController extends Controller
      *     summary="List user's orders",
      *     description="Get all orders for the authenticated user with pagination",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         description="Number of orders per page",
      *         required=false,
+     *
      *         @OA\Schema(type="integer", default=20, example=20)
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Orders retrieved successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Order")),
      *             @OA\Property(property="meta", ref="#/components/schemas/PaginationMeta"),
      *             @OA\Property(property="links", ref="#/components/schemas/PaginationLinks")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -74,14 +84,19 @@ class OrderController extends Controller
      *     summary="Create new order",
      *     description="Create a new order with items from cart. Platform takes 20% commission.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"items", "subtotal", "total", "payment_method", "billing_email", "billing_first_name", "billing_last_name", "billing_phone"},
+     *
      *             @OA\Property(
      *                 property="items",
      *                 type="array",
+     *
      *                 @OA\Items(
+     *
      *                     @OA\Property(property="photo_id", type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac"),
      *                     @OA\Property(property="license_type", type="string", enum={"standard", "extended"}, example="standard")
      *                 ),
@@ -98,23 +113,30 @@ class OrderController extends Controller
      *             @OA\Property(property="billing_phone", type="string", example="+226 70 12 34 56", description="Burkinabé phone format")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Order created successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Commande créée avec succès"),
      *             @OA\Property(property="data", ref="#/components/schemas/Order")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=400,
      *         description="Order creation failed - photo unavailable or validation error",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Erreur lors de la création de la commande: La photo 'xyz' n'est plus disponible")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -151,7 +173,7 @@ class OrderController extends Controller
                     $photo = Photo::findOrFail($item['photo_id']);
 
                     // Vérifier disponibilité
-                    if (!$photo->is_public || $photo->status !== 'approved') {
+                    if (! $photo->is_public || $photo->status !== 'approved') {
                         throw new \Exception("La photo '{$photo->title}' n'est plus disponible");
                     }
 
@@ -169,7 +191,7 @@ class OrderController extends Controller
                         'photo_title' => $photo->title,
                         'photo_thumbnail' => $photo->thumbnail_url,
                         'photographer_id' => $photo->photographer_id,
-                        'photographer_name' => $photo->photographer->first_name . ' ' . $photo->photographer->last_name,
+                        'photographer_name' => $photo->photographer->first_name.' '.$photo->photographer->last_name,
                         'license_type' => $item['license_type'],
                         'price' => $price,
                         'photographer_amount' => $photographerAmount,
@@ -189,7 +211,7 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la création de la commande: ' . $e->getMessage(),
+                'message' => 'Erreur lors de la création de la commande: '.$e->getMessage(),
             ], 400);
         }
     }
@@ -202,26 +224,34 @@ class OrderController extends Controller
      *     summary="Get order details",
      *     description="Retrieve detailed information about a specific order (must be order owner)",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="order",
      *         in="path",
      *         description="Order UUID",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Order details retrieved successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/Order")
      *     ),
+     *
      *     @OA\Response(
      *         response=403,
      *         description="Forbidden - user is not order owner",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Accès non autorisé")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Order not found",
@@ -257,26 +287,34 @@ class OrderController extends Controller
      *     summary="Initiate payment for order",
      *     description="Start payment process via CinetPay (Mobile Money or Card). Returns payment URL to redirect user.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="order",
      *         in="path",
      *         description="Order UUID",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"payment_method", "payment_provider"},
+     *
      *             @OA\Property(property="payment_method", type="string", enum={"mobile_money", "card"}, example="mobile_money", description="Payment method type"),
      *             @OA\Property(property="payment_provider", type="string", enum={"FLOOZ", "TMONEY", "MOOV", "CARD"}, example="FLOOZ", description="CinetPay payment provider code"),
      *             @OA\Property(property="phone", type="string", example="+22670123456", description="Phone number for mobile money (required for mobile_money)")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Payment initiated successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Paiement initié avec succès"),
      *             @OA\Property(
@@ -287,14 +325,18 @@ class OrderController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=400,
      *         description="Payment initiation failed - order already processed or payment error",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Cette commande a déjà été traitée")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -310,7 +352,7 @@ class OrderController extends Controller
     public function pay(PayOrderRequest $request, Order $order)
     {
         // Vérifier que la commande est en attente
-        if (!$order->isPending()) {
+        if (! $order->isPending()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Cette commande a déjà été traitée',
@@ -350,17 +392,22 @@ class OrderController extends Controller
      *     summary="Check order payment status",
      *     description="Check the current payment status of an order with CinetPay (must be order owner)",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="order",
      *         in="path",
      *         description="Order UUID",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Payment status retrieved successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Statut de paiement récupéré"),
      *             @OA\Property(
@@ -372,14 +419,18 @@ class OrderController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=403,
      *         description="Forbidden - user is not order owner",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Accès non autorisé")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -400,5 +451,140 @@ class OrderController extends Controller
         $result = $this->paymentService->checkPaymentStatus($order);
 
         return response()->json($result);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/orders/{order}/request-otp",
+     *     operationId="requestOtp",
+     *     tags={"Orders"},
+     *     summary="Request OTP code for payment",
+     *     description="Request an OTP code to be sent via SMS for OTP-based payment flow. Supports Orange Money and Ligdicash Wallet only. Max 3 attempts per order.",
+     *     security={{"bearerAuth":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="order",
+     *         in="path",
+     *         description="Order UUID",
+     *         required=true,
+     *
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"phone", "payment_provider"},
+     *
+     *             @OA\Property(property="phone", type="string", example="+226 70 12 34 56", description="Phone number for OTP"),
+     *             @OA\Property(property="payment_provider", type="string", enum={"ORANGE", "LIGDICASH_WALLET"}, example="ORANGE")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="OTP sent successfully",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Code OTP envoyé avec succès"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="expires_at", type="string", format="date-time"),
+     *                 @OA\Property(property="attempts_remaining", type="integer", example=2)
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=400, description="OTP request failed or rate limit exceeded"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
+    public function requestOtp(RequestOtpRequest $request, Order $order)
+    {
+        $result = $this->otpService->requestOtp(
+            $order,
+            $request->phone,
+            $request->payment_provider
+        );
+
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => $result['message'],
+                'data' => $result['data'],
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => $result['message'],
+        ], 400);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/orders/{order}/validate-otp",
+     *     operationId="validateOtp",
+     *     tags={"Orders"},
+     *     summary="Validate OTP and complete payment",
+     *     description="Validate the OTP code received via SMS and process the payment. OTP must be used within 5 minutes.",
+     *     security={{"bearerAuth":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="order",
+     *         in="path",
+     *         description="Order UUID",
+     *         required=true,
+     *
+     *         @OA\Schema(type="string", format="uuid")
+     *     ),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"otp"},
+     *
+     *             @OA\Property(property="otp", type="string", example="123456", description="6-digit OTP code received via SMS")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Payment completed successfully",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Paiement effectué avec succès"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="order_id", type="string", format="uuid"),
+     *                 @OA\Property(property="transaction_id", type="string")
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=400, description="Invalid OTP or payment failed"),
+     *     @OA\Response(response=422, description="Validation error - OTP expired or invalid format")
+     * )
+     */
+    public function validateOtp(ValidateOtpRequest $request, Order $order)
+    {
+        $result = $this->otpService->validateOtpAndPay($order, $request->otp);
+
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => $result['message'],
+                'data' => $result['data'],
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => $result['message'],
+        ], 400);
     }
 }
