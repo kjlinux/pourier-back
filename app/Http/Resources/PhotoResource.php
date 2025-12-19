@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\S3Service;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -9,13 +10,15 @@ class PhotoResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $s3Service = app(S3Service::class);
+
         return [
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
             'tags' => $this->tags,
-            'preview_url' => $this->preview_url,
-            'thumbnail_url' => $this->thumbnail_url,
+            'preview_url' => $this->preview_url ? $s3Service->getSignedUrl($this->preview_url, 60) : null,
+            'thumbnail_url' => $this->thumbnail_url ? $s3Service->getSignedUrl($this->thumbnail_url, 60) : null,
             'width' => $this->width,
             'height' => $this->height,
             'format' => $this->format,

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Photo;
 use App\Services\InvoiceService;
+use App\Services\S3Service;
 use App\Services\StorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -19,7 +20,8 @@ class DownloadController extends Controller
 {
     public function __construct(
         protected StorageService $storageService,
-        protected InvoiceService $invoiceService
+        protected InvoiceService $invoiceService,
+        protected S3Service $s3Service
     ) {}
 
     /**

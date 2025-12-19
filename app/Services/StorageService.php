@@ -93,7 +93,7 @@ class StorageService
             'CacheControl' => 'max-age=31536000',
         ]);
 
-        return Storage::disk($this->disk)->url($path);
+        return $path; // Return path instead of URL for S3 signed URL generation
     }
 
     public function storePreview(string $filePath, string $photographerId): string
@@ -103,11 +103,11 @@ class StorageService
 
         $content = file_get_contents($filePath);
         Storage::disk($this->disk)->put($path, $content, [
-            'visibility' => 'public',
+            'visibility' => 'private',
             'CacheControl' => 'max-age=31536000',
         ]);
 
-        return Storage::disk($this->disk)->url($path);
+        return $path; // Return path instead of URL for S3 signed URL generation
     }
 
     public function storeThumbnail(string $filePath, string $photographerId): string
@@ -117,11 +117,11 @@ class StorageService
 
         $content = file_get_contents($filePath);
         Storage::disk($this->disk)->put($path, $content, [
-            'visibility' => 'public',
+            'visibility' => 'private',
             'CacheControl' => 'max-age=31536000',
         ]);
 
-        return Storage::disk($this->disk)->url($path);
+        return $path; // Return path instead of URL for S3 signed URL generation
     }
 
     public function storeAvatar(string $filePath, string $userId): string
@@ -131,11 +131,11 @@ class StorageService
 
         $content = file_get_contents($filePath);
         Storage::disk($this->disk)->put($path, $content, [
-            'visibility' => 'public',
+            'visibility' => 'private',
             'CacheControl' => 'max-age=31536000',
         ]);
 
-        return Storage::disk($this->disk)->url($path);
+        return $path; // Return path instead of URL for S3 signed URL generation
     }
 
     public function storeCover(string $filePath, string $userId): string
@@ -145,11 +145,11 @@ class StorageService
 
         $content = file_get_contents($filePath);
         Storage::disk($this->disk)->put($path, $content, [
-            'visibility' => 'public',
+            'visibility' => 'private',
             'CacheControl' => 'max-age=31536000',
         ]);
 
-        return Storage::disk($this->disk)->url($path);
+        return $path; // Return path instead of URL for S3 signed URL generation
     }
 
     public function storeInvoice(string $content, string $orderNumber): string
@@ -162,7 +162,7 @@ class StorageService
             'CacheControl' => 'max-age=0',
         ]);
 
-        return Storage::disk($this->disk)->url($path);
+        return $path; // Return path instead of URL for S3 signed URL generation
     }
 
     public function generateSignedDownloadUrl(string $url, int $expirationHours = 24): string

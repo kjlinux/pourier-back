@@ -10,7 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "aws/aws-sdk-php": "*",
+        "aws/aws-sdk-php": "^3.363",
         "barryvdh/laravel-dompdf": "*",
         "darkaonline/l5-swagger": "*",
         "guzzlehttp/guzzle": "*",

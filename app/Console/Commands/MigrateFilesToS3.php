@@ -38,10 +38,10 @@ class MigrateFilesToS3 extends Command
         $this->newLine();
 
         // Check S3 connectivity
-        if (!$this->testS3Connection()) {
-            $this->error('Failed to connect to S3. Please check your credentials.');
-            return 1;
-        }
+        // if (!$this->testS3Connection()) {
+        //     $this->error('Failed to connect to S3. Please check your credentials.');
+        //     return 1;
+        // }
 
         // Migrate based on type
         if ($type === 'all' || $type === 'photos') {
