@@ -503,11 +503,24 @@ class OrderController extends Controller
      */
     public function requestOtp(RequestOtpRequest $request, Order $order)
     {
+        \Log::info('RequestOtp called', [
+            'order_id' => $order->id,
+            'request_data' => $request->all(),
+            'phone' => $request->phone,
+            'provider' => $request->payment_provider,
+        ]);
+
         $result = $this->otpService->requestOtp(
             $order,
             $request->phone,
             $request->payment_provider
         );
+
+        \Log::info('RequestOtp result', [
+            'order_id' => $order->id,
+            'success' => $result['success'],
+            'message' => $result['message'],
+        ]);
 
         if ($result['success']) {
             return response()->json([

@@ -11,10 +11,10 @@ use App\Services\StorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use ZipArchive;
-use OpenApi\Annotations as OA;
 
 class DownloadController extends Controller
 {
@@ -32,40 +32,54 @@ class DownloadController extends Controller
      *     summary="Download purchased photo (high-resolution)",
      *     description="Download the high-resolution version of a purchased photo. User must have completed order containing this photo.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="photo",
      *         in="path",
      *         description="Photo UUID",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Photo file download (streamed)",
+     *
      *         @OA\MediaType(
      *             mediaType="image/jpeg",
+     *
      *             @OA\Schema(type="string", format="binary")
      *         ),
+     *
      *         @OA\Header(
      *             header="Content-Disposition",
      *             description="Attachment filename",
+     *
      *             @OA\Schema(type="string", example="attachment; filename=photo.jpg")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=403,
      *         description="Forbidden - photo not purchased",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="message", type="string", example="You have not purchased this photo")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Photo file not found on server",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="message", type="string", example="Photo file not found")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -80,7 +94,7 @@ class DownloadController extends Controller
 
         $originalUrl = $photo->original_url;
 
-        if (!$originalUrl) {
+        if (! $originalUrl) {
             abort(404, 'Photo file not found');
         }
 
@@ -97,7 +111,7 @@ class DownloadController extends Controller
                 $path,
                 now()->addHours(24),
                 [
-                    'ResponseContentDisposition' => 'attachment; filename="' . $photo->title . '.jpg"',
+                    'ResponseContentDisposition' => 'attachment; filename="'.$photo->title.'.jpg"',
                     'ResponseContentType' => 'image/jpeg',
                 ]
             );
@@ -107,17 +121,18 @@ class DownloadController extends Controller
 
         // For local: check if external URL or local path
         if (filter_var($originalUrl, FILTER_VALIDATE_URL)) {
-            return $this->streamFromUrl($originalUrl, $photo->title . '.jpg');
+            return $this->streamFromUrl($originalUrl, $photo->title.'.jpg');
         }
 
         // Local file
-        if (!Storage::disk('local')->exists($originalUrl)) {
+        if (! Storage::disk('local')->exists($originalUrl)) {
             abort(404, 'Photo file not found');
         }
 
         $filePath = Storage::disk('local')->path($originalUrl);
-        return response()->download($filePath, $photo->title . '.jpg', [
-            'Content-Type' => 'image/jpeg'
+
+        return response()->download($filePath, $photo->title.'.jpg', [
+            'Content-Type' => 'image/jpeg',
         ]);
     }
 
@@ -130,8 +145,8 @@ class DownloadController extends Controller
             $context = stream_context_create([
                 'http' => [
                     'timeout' => 30,
-                    'user_agent' => 'Mozilla/5.0'
-                ]
+                    'user_agent' => 'Mozilla/5.0',
+                ],
             ]);
 
             $stream = @fopen($url, 'r', false, $context);
@@ -139,7 +154,7 @@ class DownloadController extends Controller
                 abort(404, 'Unable to fetch photo from source');
             }
 
-            while (!feof($stream)) {
+            while (! feof($stream)) {
                 echo fread($stream, 8192);
                 flush();
             }
@@ -158,47 +173,64 @@ class DownloadController extends Controller
      *     summary="Download all photos from order (ZIP)",
      *     description="Download all high-resolution photos from a completed order as a ZIP archive. User must be order owner.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="order",
      *         in="path",
      *         description="Order UUID",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="ZIP file download (streamed)",
+     *
      *         @OA\MediaType(
      *             mediaType="application/zip",
+     *
      *             @OA\Schema(type="string", format="binary")
      *         ),
+     *
      *         @OA\Header(
      *             header="Content-Disposition",
      *             description="Attachment filename",
+     *
      *             @OA\Schema(type="string", example="attachment; filename=order.zip")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=403,
      *         description="Forbidden - order not completed or not owner",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="message", type="string", example="Order is not completed yet")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="No photos found in order",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="message", type="string", example="No photos found in this order")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=500,
      *         description="Server error creating ZIP file",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="message", type="string", example="Could not create zip file")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -221,15 +253,15 @@ class DownloadController extends Controller
         }
 
         // Créer un fichier ZIP temporaire
-        $zipFileName = 'order_' . $order->order_number . '.zip';
-        $zipPath = storage_path('app/temp/' . $zipFileName);
+        $zipFileName = 'order_'.$order->order_number.'.zip';
+        $zipPath = storage_path('app/temp/'.$zipFileName);
 
         // S'assurer que le dossier temp existe
-        if (!file_exists(dirname($zipPath))) {
+        if (! file_exists(dirname($zipPath))) {
             mkdir(dirname($zipPath), 0755, true);
         }
 
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             abort(500, 'Could not create zip file');
         }
@@ -239,11 +271,11 @@ class DownloadController extends Controller
 
         foreach ($photos as $photo) {
             $originalUrl = $photo->original_url;
-            if (!$originalUrl) {
+            if (! $originalUrl) {
                 continue;
             }
 
-            $filename = $photo->title . '_' . $photo->id . '.jpg';
+            $filename = $photo->title.'_'.$photo->id.'.jpg';
             $path = $this->storageService->extractPathFromUrl($originalUrl);
 
             // For S3: download from S3
@@ -259,7 +291,7 @@ class DownloadController extends Controller
             // For local or external URLs
             elseif (filter_var($originalUrl, FILTER_VALIDATE_URL)) {
                 $context = stream_context_create([
-                    'http' => ['timeout' => 30, 'user_agent' => 'Mozilla/5.0']
+                    'http' => ['timeout' => 30, 'user_agent' => 'Mozilla/5.0'],
                 ]);
                 $content = @file_get_contents($originalUrl, false, $context);
                 if ($content !== false) {
@@ -299,26 +331,34 @@ class DownloadController extends Controller
      *     summary="Download order invoice (PDF)",
      *     description="Download the PDF invoice for a completed order. User must be order owner.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="order",
      *         in="path",
      *         description="Order UUID",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="PDF invoice download",
+     *
      *         @OA\MediaType(
      *             mediaType="application/pdf",
+     *
      *             @OA\Schema(type="string", format="binary")
      *         ),
+     *
      *         @OA\Header(
      *             header="Content-Disposition",
      *             description="Attachment filename",
+     *
      *             @OA\Schema(type="string", example="attachment; filename=invoice.pdf")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=403,
      *         description="Forbidden - not order owner",
@@ -327,10 +367,13 @@ class DownloadController extends Controller
      *     @OA\Response(
      *         response=404,
      *         description="Invoice not found",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="message", type="string", example="Invoice not found")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -348,7 +391,7 @@ class DownloadController extends Controller
         }
 
         // Generate invoice on-demand if it doesn't exist
-        if (!$this->invoiceService->hasInvoice($order)) {
+        if (! $this->invoiceService->hasInvoice($order)) {
             $this->invoiceService->generateInvoice($order);
         }
 
@@ -360,23 +403,24 @@ class DownloadController extends Controller
                 $order->invoice_path,
                 now()->addHour(),
                 [
-                    'ResponseContentDisposition' => 'attachment; filename="invoice_' . $order->order_number . '.pdf"',
+                    'ResponseContentDisposition' => 'attachment; filename="invoice_'.$order->order_number.'.pdf"',
                     'ResponseContentType' => 'application/pdf',
                 ]
             );
+
             return redirect($signedUrl);
         }
 
         // For local: direct download
         $invoicePath = $this->invoiceService->getInvoicePath($order);
 
-        if (!$invoicePath) {
+        if (! $invoicePath) {
             abort(500, 'Failed to generate invoice');
         }
 
         return response()->download(
             $invoicePath,
-            'invoice_' . $order->order_number . '.pdf',
+            'invoice_'.$order->order_number.'.pdf',
             ['Content-Type' => 'application/pdf']
         );
     }
@@ -388,30 +432,40 @@ class DownloadController extends Controller
      *     tags={"Downloads"},
      *     summary="Download watermarked preview (public)",
      *     description="Download a watermarked preview version of any photo. No authentication required. Useful for demos or sharing.",
+     *
      *     @OA\Parameter(
      *         name="photo",
      *         in="path",
      *         description="Photo UUID",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Watermarked preview image download",
+     *
      *         @OA\MediaType(
      *             mediaType="image/jpeg",
+     *
      *             @OA\Schema(type="string", format="binary")
      *         ),
+     *
      *         @OA\Header(
      *             header="Content-Disposition",
      *             description="Attachment filename",
+     *
      *             @OA\Schema(type="string", example="attachment; filename=preview.jpg")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Preview not found",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="message", type="string", example="Preview not found")
      *         )
      *     )
@@ -421,30 +475,34 @@ class DownloadController extends Controller
     {
         $previewUrl = $photo->preview_url;
 
-        if (!$previewUrl) {
+        if (! $previewUrl) {
             abort(404, 'Preview not found');
         }
 
         $disk = config('filesystems.default');
 
-        // For S3: redirect to public URL (no signed URL needed for previews)
+        // For S3: generate signed URL and redirect
         if ($disk === 's3') {
-            return redirect($previewUrl);
+            $s3Service = app(S3Service::class);
+            $signedUrl = $s3Service->getSignedUrl($previewUrl, config('s3.signed_url_expiration.preview', 60));
+
+            return redirect($signedUrl);
         }
 
         // For local: check if external URL or local path
         if (filter_var($previewUrl, FILTER_VALIDATE_URL)) {
-            return $this->streamFromUrl($previewUrl, 'preview_' . $photo->title . '.jpg');
+            return $this->streamFromUrl($previewUrl, 'preview_'.$photo->title.'.jpg');
         }
 
         // Local file
-        if (!Storage::disk('local')->exists($previewUrl)) {
+        if (! Storage::disk('local')->exists($previewUrl)) {
             abort(404, 'Preview not found');
         }
 
         $filePath = Storage::disk('local')->path($previewUrl);
-        return response()->download($filePath, 'preview_' . $photo->title . '.jpg', [
-            'Content-Type' => 'image/jpeg'
+
+        return response()->download($filePath, 'preview_'.$photo->title.'.jpg', [
+            'Content-Type' => 'image/jpeg',
         ]);
     }
 }

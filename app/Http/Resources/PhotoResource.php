@@ -8,17 +8,21 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PhotoResource extends JsonResource
 {
+    private static ?S3Service $s3Service = null;
+
     public function toArray(Request $request): array
     {
-        $s3Service = app(S3Service::class);
+        if (self::$s3Service === null) {
+            self::$s3Service = app(S3Service::class);
+        }
 
         return [
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
             'tags' => $this->tags,
-            'preview_url' => $this->preview_url ? $s3Service->getSignedUrl($this->preview_url, 60) : null,
-            'thumbnail_url' => $this->thumbnail_url ? $s3Service->getSignedUrl($this->thumbnail_url, 60) : null,
+            'preview_url' => $this->preview_url ? self::$s3Service->getSignedUrl($this->preview_url, config('s3.signed_url_expiration.preview', 60)) : null,
+            'thumbnail_url' => $this->thumbnail_url ? self::$s3Service->getSignedUrl($this->thumbnail_url, config('s3.signed_url_expiration.thumbnail', 60)) : null,
             'width' => $this->width,
             'height' => $this->height,
             'format' => $this->format,

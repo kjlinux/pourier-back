@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Rules\PhoneValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
@@ -36,7 +37,7 @@ class RegisterRequest extends FormRequest
                     ->uncompromised(),
             ],
             'account_type' => ['required', 'in:buyer,photographer'],
-            'phone' => ['nullable', 'string', 'regex:/^\+226\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}$/'],
+            'phone' => ['nullable', 'string', new PhoneValidation],
         ];
     }
 
@@ -68,8 +69,6 @@ class RegisterRequest extends FormRequest
 
             'account_type.required' => 'Le type de compte est obligatoire.',
             'account_type.in' => 'Le type de compte doit être "buyer" ou "photographer".',
-
-            'phone.regex' => 'Le numéro de téléphone doit être au format burkinabè (+226 XX XX XX XX).',
         ];
     }
 }

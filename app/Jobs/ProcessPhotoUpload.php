@@ -16,6 +16,7 @@ class ProcessPhotoUpload implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 300; // 5 minutes
+
     public $tries = 3;
 
     public function __construct(
@@ -27,9 +28,10 @@ class ProcessPhotoUpload implements ShouldQueue
     public function handle(ImageProcessingService $imageProcessingService): void
     {
         try {
-            // Traiter l'image
+            // Traiter l'image - construire le chemin complet depuis storage/app
+            $fullPath = storage_path('app/'.$this->tempPath);
             $result = $imageProcessingService->processUploadedPhoto(
-                Storage::path($this->tempPath),
+                $fullPath,
                 $this->photographerId
             );
 
@@ -56,18 +58,21 @@ class ProcessPhotoUpload implements ShouldQueue
                 ExtractExifData::dispatch($photo);
             }
 
-            // Nettoyer le fichier temporaire
-            Storage::delete($this->tempPath);
+            // Nettoyer le fichier temporaire (utiliser @unlink car le fichier est hors du disk local)
+            @unlink($fullPath);
 
         } catch (\Exception $e) {
-            \Log::error('Erreur traitement photo: ' . $e->getMessage());
+            \Log::error('Erreur traitement photo: '.$e->getMessage());
             throw $e;
         }
     }
 
     public function failed(\Throwable $exception): void
     {
-        \Log::error('Échec traitement photo: ' . $exception->getMessage());
-        Storage::delete($this->tempPath);
+        \Log::error('Échec traitement photo: '.$exception->getMessage());
+
+        // Tenter de nettoyer le fichier temporaire
+        $fullPath = storage_path('app/'.$this->tempPath);
+        @unlink($fullPath);
     }
 }

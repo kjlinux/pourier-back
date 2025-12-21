@@ -3,16 +3,11 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 
 class S3Service
 {
     /**
      * Generate a temporary signed URL for a file
-     *
-     * @param string $path
-     * @param int $expirationMinutes
-     * @return string
      */
     public function getSignedUrl(string $path, int $expirationMinutes = 60): string
     {
@@ -24,95 +19,76 @@ class S3Service
 
     /**
      * Get signed URL for photo preview (with watermark)
-     *
-     * @param string $photoId
-     * @param string $filename
-     * @param int $expirationMinutes
-     * @return string
      */
-    public function getPreviewUrl(string $photoId, string $filename, int $expirationMinutes = 60): string
+    public function getPreviewUrl(string $photoId, string $filename, ?int $expirationMinutes = null): string
     {
+        $expirationMinutes = $expirationMinutes ?? config('s3.signed_url_expiration.preview', 60);
         $path = "photos/{$photoId}/previews/{$filename}";
+
         return $this->getSignedUrl($path, $expirationMinutes);
     }
 
     /**
      * Get signed URL for photo thumbnail
-     *
-     * @param string $photoId
-     * @param string $filename
-     * @param int $expirationMinutes
-     * @return string
      */
-    public function getThumbnailUrl(string $photoId, string $filename, int $expirationMinutes = 60): string
+    public function getThumbnailUrl(string $photoId, string $filename, ?int $expirationMinutes = null): string
     {
+        $expirationMinutes = $expirationMinutes ?? config('s3.signed_url_expiration.thumbnail', 60);
         $path = "photos/{$photoId}/thumbnails/{$filename}";
+
         return $this->getSignedUrl($path, $expirationMinutes);
     }
 
     /**
      * Get signed URL for original photo (after payment)
-     *
-     * @param string $photoId
-     * @param string $filename
-     * @param int $expirationMinutes
-     * @return string
      */
-    public function getOriginalUrl(string $photoId, string $filename, int $expirationMinutes = 1440): string
+    public function getOriginalUrl(string $photoId, string $filename, ?int $expirationMinutes = null): string
     {
+        $expirationMinutes = $expirationMinutes ?? config('s3.signed_url_expiration.original', 1440);
         $path = "photos/{$photoId}/originals/{$filename}";
+
         return $this->getSignedUrl($path, $expirationMinutes);
     }
 
     /**
      * Get signed URL for user avatar
-     *
-     * @param string $userId
-     * @param string $filename
-     * @param int $expirationMinutes
-     * @return string
      */
-    public function getAvatarUrl(string $userId, string $filename, int $expirationMinutes = 1440): string
+    public function getAvatarUrl(string $userId, string $filename, ?int $expirationMinutes = null): string
     {
+        $expirationMinutes = $expirationMinutes ?? config('s3.signed_url_expiration.avatar', 1440);
         $path = "avatars/{$userId}/{$filename}";
+
         return $this->getSignedUrl($path, $expirationMinutes);
     }
 
     /**
      * Get signed URL for cover photo
      *
-     * @param string $entityType (event, album, etc.)
-     * @param string $entityId
-     * @param string $filename
-     * @param int $expirationMinutes
-     * @return string
+     * @param  string  $entityType  (event, album, etc.)
      */
-    public function getCoverUrl(string $entityType, string $entityId, string $filename, int $expirationMinutes = 1440): string
+    public function getCoverUrl(string $entityType, string $entityId, string $filename, ?int $expirationMinutes = null): string
     {
+        $expirationMinutes = $expirationMinutes ?? config('s3.signed_url_expiration.cover', 1440);
         $path = "covers/{$entityType}/{$entityId}/{$filename}";
+
         return $this->getSignedUrl($path, $expirationMinutes);
     }
 
     /**
      * Get signed URL for invoice
-     *
-     * @param string $orderId
-     * @param string $filename
-     * @param int $expirationMinutes
-     * @return string
      */
-    public function getInvoiceUrl(string $orderId, string $filename, int $expirationMinutes = 60): string
+    public function getInvoiceUrl(string $orderId, string $filename, ?int $expirationMinutes = null): string
     {
+        $expirationMinutes = $expirationMinutes ?? config('s3.signed_url_expiration.invoice', 60);
         $path = "invoices/{$orderId}/{$filename}";
+
         return $this->getSignedUrl($path, $expirationMinutes);
     }
 
     /**
      * Upload a file to S3
      *
-     * @param \Illuminate\Http\UploadedFile|string $file
-     * @param string $path
-     * @param array $options
+     * @param  \Illuminate\Http\UploadedFile|string  $file
      * @return string|false The path of the uploaded file or false on failure
      */
     public function uploadFile($file, string $path, array $options = [])
@@ -134,50 +110,44 @@ class S3Service
     /**
      * Upload photo preview
      *
-     * @param string $photoId
-     * @param \Illuminate\Http\UploadedFile $file
-     * @param string $filename
+     * @param  \Illuminate\Http\UploadedFile  $file
      * @return string|false
      */
     public function uploadPreview(string $photoId, $file, string $filename)
     {
         $path = "photos/{$photoId}/previews/{$filename}";
+
         return $this->uploadFile($file, $path);
     }
 
     /**
      * Upload photo thumbnail
      *
-     * @param string $photoId
-     * @param \Illuminate\Http\UploadedFile $file
-     * @param string $filename
+     * @param  \Illuminate\Http\UploadedFile  $file
      * @return string|false
      */
     public function uploadThumbnail(string $photoId, $file, string $filename)
     {
         $path = "photos/{$photoId}/thumbnails/{$filename}";
+
         return $this->uploadFile($file, $path);
     }
 
     /**
      * Upload original photo
      *
-     * @param string $photoId
-     * @param \Illuminate\Http\UploadedFile $file
-     * @param string $filename
+     * @param  \Illuminate\Http\UploadedFile  $file
      * @return string|false
      */
     public function uploadOriginal(string $photoId, $file, string $filename)
     {
         $path = "photos/{$photoId}/originals/{$filename}";
+
         return $this->uploadFile($file, $path);
     }
 
     /**
      * Delete a file from S3
-     *
-     * @param string $path
-     * @return bool
      */
     public function deleteFile(string $path): bool
     {
@@ -186,21 +156,16 @@ class S3Service
 
     /**
      * Delete all versions of a photo
-     *
-     * @param string $photoId
-     * @return bool
      */
     public function deletePhoto(string $photoId): bool
     {
         $directory = "photos/{$photoId}";
+
         return Storage::disk('s3')->deleteDirectory($directory);
     }
 
     /**
      * Check if file exists
-     *
-     * @param string $path
-     * @return bool
      */
     public function fileExists(string $path): bool
     {
@@ -209,9 +174,6 @@ class S3Service
 
     /**
      * Get file size
-     *
-     * @param string $path
-     * @return int
      */
     public function getFileSize(string $path): int
     {

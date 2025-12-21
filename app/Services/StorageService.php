@@ -54,24 +54,28 @@ class StorageService
      */
     public function extractPathFromUrl(?string $url): string
     {
-        if (!$url) {
+        if (! $url) {
             return '';
         }
 
         // If it's already a path (not a URL), return as-is
-        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
             return $url;
         }
 
-        // Handle S3 URLs
-        if (str_contains($url, 's3.amazonaws.com') || str_contains($url, env('AWS_BUCKET'))) {
+        // Handle S3 URLs - more robust detection
+        $awsBucket = config('filesystems.disks.s3.bucket');
+        $isS3Url = str_contains($url, 's3.amazonaws.com') ||
+                   str_contains($url, '.s3.') ||
+                   ($awsBucket && preg_match("#/{$awsBucket}/#", $url));
+
+        if ($isS3Url) {
             $parsed = parse_url($url);
             $path = ltrim($parsed['path'], '/');
 
             // Remove bucket name if present in path
-            $bucket = env('AWS_BUCKET');
-            if ($bucket && str_starts_with($path, $bucket . '/')) {
-                $path = substr($path, strlen($bucket) + 1);
+            if ($awsBucket && str_starts_with($path, $awsBucket.'/')) {
+                $path = substr($path, strlen($awsBucket) + 1);
             }
 
             return $path;
@@ -79,6 +83,7 @@ class StorageService
 
         // Handle local URLs
         $path = parse_url($url, PHP_URL_PATH);
+
         return ltrim($path, '/');
     }
 
@@ -181,15 +186,17 @@ class StorageService
     {
         try {
             $path = $this->extractPathFromUrl($url);
+
             return Storage::disk($this->disk)->delete($path);
         } catch (\Exception $e) {
-            \Log::error('File deletion error: ' . $e->getMessage());
+            \Log::error('File deletion error: '.$e->getMessage());
+
             return false;
         }
     }
 
     private function generateFilename(string $prefix): string
     {
-        return $prefix . '-' . Str::uuid() . '-' . time() . '.jpg';
+        return $prefix.'-'.Str::uuid().'-'.time().'.jpg';
     }
 }

@@ -29,12 +29,27 @@ class LigdicashOtpService
         $normalizedPhone = $this->normalizePhone($phone);
 
         try {
+            $url = config('services.ligdicash.otp_api_url')."/debitotp/{$normalizedPhone}/{$order->total}";
+
+            Log::info('Requesting OTP from Ligdicash', [
+                'url' => $url,
+                'phone' => $this->maskPhone($phone),
+                'normalized_phone' => $normalizedPhone,
+                'amount' => $order->total,
+                'provider' => $provider,
+            ]);
+
             // GET https://app.ligdicash.com/pay/v02/debitotp/{phone}/{amount}
             $response = Http::withHeaders([
                 'Apikey' => config('services.ligdicash.api_key'),
                 'Authorization' => 'Bearer '.config('services.ligdicash.auth_token'),
                 'Accept' => 'application/json',
-            ])->get(config('services.ligdicash.otp_api_url')."/debitotp/{$normalizedPhone}/{$order->total}");
+            ])->get($url);
+
+            Log::info('Ligdicash OTP response', [
+                'status' => $response->status(),
+                'body' => $response->json(),
+            ]);
 
             if ($response->successful() && $response->json('error') === false) {
                 // Update order with OTP tracking
@@ -271,9 +286,12 @@ class LigdicashOtpService
      */
     private function normalizePhone(string $phone): string
     {
-        // Remove spaces and country code for API
-        // +226 70 12 34 56 → 70123456
-        return preg_replace('/[\s+]/', '', str_replace('+226', '', $phone));
+        // Remove spaces but keep country code for API
+        // +226 70 12 34 56 → 22670123456
+        // Ligdicash OTP API expects international format without + sign
+        $cleaned = preg_replace('/[\s+]/', '', $phone);
+
+        return $cleaned;
     }
 
     /**

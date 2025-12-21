@@ -2,13 +2,13 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
-use App\Models\Photo;
-use App\Models\User;
-use App\Models\PhotographerProfile;
 use App\Models\Order;
+use App\Models\Photo;
+use App\Models\PhotographerProfile;
+use App\Models\User;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class MigrateFilesToS3 extends Command
 {
@@ -20,8 +20,11 @@ class MigrateFilesToS3 extends Command
     protected $description = 'Migrate files from local storage to AWS S3';
 
     private int $successCount = 0;
+
     private int $failureCount = 0;
+
     private int $skippedCount = 0;
+
     private array $errors = [];
 
     public function handle()
@@ -38,10 +41,11 @@ class MigrateFilesToS3 extends Command
         $this->newLine();
 
         // Check S3 connectivity
-        // if (!$this->testS3Connection()) {
-        //     $this->error('Failed to connect to S3. Please check your credentials.');
-        //     return 1;
-        // }
+        if (! $this->testS3Connection()) {
+            $this->error('Failed to connect to S3. Please check your credentials.');
+
+            return 1;
+        }
 
         // Migrate based on type
         if ($type === 'all' || $type === 'photos') {
@@ -67,7 +71,7 @@ class MigrateFilesToS3 extends Command
         $this->warn("⊘ Skipped: {$this->skippedCount}");
         $this->error("✗ Failed: {$this->failureCount}");
 
-        if (!empty($this->errors)) {
+        if (! empty($this->errors)) {
             $this->newLine();
             $this->error('Errors encountered:');
             foreach ($this->errors as $error) {
@@ -81,10 +85,12 @@ class MigrateFilesToS3 extends Command
     private function testS3Connection(): bool
     {
         try {
-            Storage::disk('s3')->exists('test-connection-' . time());
+            Storage::disk('s3')->exists('test-connection-'.time());
+
             return true;
         } catch (\Exception $e) {
-            $this->error('S3 Connection Error: ' . $e->getMessage());
+            $this->error('S3 Connection Error: '.$e->getMessage());
+
             return false;
         }
     }
@@ -107,45 +113,45 @@ class MigrateFilesToS3 extends Command
                 $updated = false;
 
                 // Migrate original
-                if ($photo->original_url && !$this->isS3Url($photo->original_url)) {
+                if ($photo->original_url && ! $this->isS3Url($photo->original_url)) {
                     $newUrl = $this->migrateFile(
                         $photo->original_url,
                         'private',
                         $dryRun
                     );
-                    if ($newUrl && !$dryRun) {
+                    if ($newUrl && ! $dryRun) {
                         $photo->original_url = $newUrl;
                         $updated = true;
                     }
                 }
 
                 // Migrate preview
-                if ($photo->preview_url && !$this->isS3Url($photo->preview_url)) {
+                if ($photo->preview_url && ! $this->isS3Url($photo->preview_url)) {
                     $newUrl = $this->migrateFile(
                         $photo->preview_url,
                         'public',
                         $dryRun
                     );
-                    if ($newUrl && !$dryRun) {
+                    if ($newUrl && ! $dryRun) {
                         $photo->preview_url = $newUrl;
                         $updated = true;
                     }
                 }
 
                 // Migrate thumbnail
-                if ($photo->thumbnail_url && !$this->isS3Url($photo->thumbnail_url)) {
+                if ($photo->thumbnail_url && ! $this->isS3Url($photo->thumbnail_url)) {
                     $newUrl = $this->migrateFile(
                         $photo->thumbnail_url,
                         'public',
                         $dryRun
                     );
-                    if ($newUrl && !$dryRun) {
+                    if ($newUrl && ! $dryRun) {
                         $photo->thumbnail_url = $newUrl;
                         $updated = true;
                     }
                 }
 
-                if ($updated && !$dryRun) {
+                if ($updated && ! $dryRun) {
                     $photo->save();
                 }
 
@@ -174,9 +180,9 @@ class MigrateFilesToS3 extends Command
 
         foreach ($users as $user) {
             try {
-                if (!$this->isS3Url($user->avatar_url)) {
+                if (! $this->isS3Url($user->avatar_url)) {
                     $newUrl = $this->migrateFile($user->avatar_url, 'public', $dryRun);
-                    if ($newUrl && !$dryRun) {
+                    if ($newUrl && ! $dryRun) {
                         $user->avatar_url = $newUrl;
                         $user->save();
                     }
@@ -206,9 +212,9 @@ class MigrateFilesToS3 extends Command
 
         foreach ($profiles as $profile) {
             try {
-                if (!$this->isS3Url($profile->cover_photo_url)) {
+                if (! $this->isS3Url($profile->cover_photo_url)) {
                     $newUrl = $this->migrateFile($profile->cover_photo_url, 'public', $dryRun);
-                    if ($newUrl && !$dryRun) {
+                    if ($newUrl && ! $dryRun) {
                         $profile->cover_photo_url = $newUrl;
                         $profile->save();
                     }
@@ -238,9 +244,9 @@ class MigrateFilesToS3 extends Command
 
         foreach ($orders as $order) {
             try {
-                if (!$this->isS3Url($order->invoice_path)) {
+                if (! $this->isS3Url($order->invoice_path)) {
                     $newUrl = $this->migrateFile($order->invoice_path, 'private', $dryRun);
-                    if ($newUrl && !$dryRun) {
+                    if ($newUrl && ! $dryRun) {
                         $order->invoice_path = $newUrl;
                         $order->save();
                     }
@@ -269,13 +275,15 @@ class MigrateFilesToS3 extends Command
         }
 
         // Check if file exists locally
-        if (!Storage::disk('local')->exists($localPath)) {
+        if (! Storage::disk('local')->exists($localPath)) {
             $this->skippedCount++;
+
             return null;
         }
 
         if ($dryRun) {
             $this->line("  Would migrate: {$localPath}");
+
             return "s3://simulated/{$localPath}";
         }
 

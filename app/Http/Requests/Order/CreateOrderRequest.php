@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Order;
 
+use App\Rules\PhoneValidation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateOrderRequest extends FormRequest
@@ -25,7 +26,7 @@ class CreateOrderRequest extends FormRequest
             'billing_email' => ['required', 'email'],
             'billing_first_name' => ['required', 'string'],
             'billing_last_name' => ['required', 'string'],
-            'billing_phone' => ['required', 'string', 'regex:/^\+226\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}$/'],
+            'billing_phone' => ['required', 'string', new PhoneValidation],
         ];
     }
 
@@ -38,7 +39,6 @@ class CreateOrderRequest extends FormRequest
             'items.*.license_type.in' => 'Type de licence invalide',
             'billing_email.required' => 'L\'email de facturation est requis',
             'billing_email.email' => 'L\'email de facturation doit être valide',
-            'billing_phone.regex' => 'Le format du téléphone est invalide',
         ];
     }
 }

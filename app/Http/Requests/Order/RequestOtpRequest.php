@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Order;
 
+use App\Rules\PhoneValidation;
 use App\Services\LigdicashOtpService;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -20,7 +21,7 @@ class RequestOtpRequest extends FormRequest
             'phone' => [
                 'required',
                 'string',
-                'regex:/^\+226\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}$/',
+                new PhoneValidation,
             ],
             'payment_provider' => [
                 'required',
@@ -34,7 +35,6 @@ class RequestOtpRequest extends FormRequest
     {
         return [
             'phone.required' => 'Le numéro de téléphone est requis',
-            'phone.regex' => 'Le format du numéro est invalide (ex: +226 70 12 34 56)',
             'payment_provider.required' => 'Le fournisseur de paiement est requis',
             'payment_provider.in' => 'Ce fournisseur ne supporte pas le paiement par OTP',
         ];

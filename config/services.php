@@ -44,7 +44,7 @@ return [
         'return_url' => env('LIGDICASH_RETURN_URL', env('APP_URL').'/payment/callback'),
         'cancel_url' => env('LIGDICASH_CANCEL_URL', env('APP_URL').'/payment/cancel'),
         'store_name' => env('LIGDICASH_STORE_NAME', 'Pouire'),
-        'store_website' => env('LIGDICASH_STORE_WEBSITE', 'https://pouire.bf'),
+        'store_website' => env('LIGDICASH_STORE_WEBSITE', 'https://pouire.tangagroup.com/'),
 
         // OTP Configuration
         'otp_api_url' => env('LIGDICASH_OTP_API_URL', 'https://app.ligdicash.com/pay/v02'),
