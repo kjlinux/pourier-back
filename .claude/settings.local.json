@@ -29,7 +29,8 @@
       "Bash(powershell -Command \"Get-Content ''c:\\\\laragon\\\\www\\\\pourier-back\\\\app\\\\Http\\\\Controllers\\\\Api\\\\OrderController.php'' | Measure-Object -Line\")",
       "Bash(grep:*)",
       "Bash(powershell:*)",
-      "Bash(del \"c:\\\\laragon\\\\www\\\\pourier-back\\\\test_phone.php\")"
+      "Bash(del \"c:\\\\laragon\\\\www\\\\pourier-back\\\\test_phone.php\")",
+      "Bash(del:*)"
     ],
     "deny": [],
     "ask": []
