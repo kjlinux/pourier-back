@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AdminPhotoResource;
 use App\Models\Photo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,24 +20,31 @@ class PhotoModerationController extends Controller
      *     summary="Get pending photos for moderation",
      *     description="Retrieve all photos awaiting moderation review with photographer and category information. Requires admin role.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         description="Number of items per page",
      *         required=false,
+     *
      *         @OA\Schema(type="integer", default=20, example=20)
      *     ),
+     *
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
      *         description="Page number",
      *         required=false,
+     *
      *         @OA\Schema(type="integer", default=1, example=1)
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Pending photos retrieved successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(
      *                 property="data",
@@ -47,6 +55,7 @@ class PhotoModerationController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -55,7 +64,9 @@ class PhotoModerationController extends Controller
      *     @OA\Response(
      *         response=403,
      *         description="Forbidden - Admin role required",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Accès non autorisé")
      *         )
@@ -71,7 +82,19 @@ class PhotoModerationController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $photos,
+            'data' => AdminPhotoResource::collection($photos)->response()->getData(true)['data'],
+            'meta' => [
+                'current_page' => $photos->currentPage(),
+                'last_page' => $photos->lastPage(),
+                'per_page' => $photos->perPage(),
+                'total' => $photos->total(),
+            ],
+            'links' => [
+                'first' => $photos->url(1),
+                'last' => $photos->url($photos->lastPage()),
+                'prev' => $photos->previousPageUrl(),
+                'next' => $photos->nextPageUrl(),
+            ],
         ]);
     }
 
@@ -83,38 +106,49 @@ class PhotoModerationController extends Controller
      *     summary="Get all photos with filtering",
      *     description="Retrieve all photos with advanced filtering options by status, photographer, and search term. Requires admin role.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="status",
      *         in="query",
      *         description="Filter by moderation status",
      *         required=false,
+     *
      *         @OA\Schema(type="string", enum={"pending", "approved", "rejected"}, example="pending")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="photographer_id",
      *         in="query",
      *         description="Filter by photographer UUID",
      *         required=false,
+     *
      *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="search",
      *         in="query",
      *         description="Search by photo title",
      *         required=false,
+     *
      *         @OA\Schema(type="string", example="sunset")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         description="Number of items per page",
      *         required=false,
+     *
      *         @OA\Schema(type="integer", default=20, example=20)
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Photos retrieved successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(
      *                 property="data",
@@ -125,6 +159,7 @@ class PhotoModerationController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -133,7 +168,9 @@ class PhotoModerationController extends Controller
      *     @OA\Response(
      *         response=403,
      *         description="Forbidden - Admin role required",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Accès non autorisé")
      *         )
@@ -156,7 +193,7 @@ class PhotoModerationController extends Controller
 
         // Search by title
         if ($request->has('search')) {
-            $query->where('title', 'ILIKE', '%' . $request->input('search') . '%');
+            $query->where('title', 'ILIKE', '%'.$request->input('search').'%');
         }
 
         $photos = $query->orderBy('created_at', 'desc')
@@ -164,7 +201,19 @@ class PhotoModerationController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $photos,
+            'data' => AdminPhotoResource::collection($photos)->response()->getData(true)['data'],
+            'meta' => [
+                'current_page' => $photos->currentPage(),
+                'last_page' => $photos->lastPage(),
+                'per_page' => $photos->perPage(),
+                'total' => $photos->total(),
+            ],
+            'links' => [
+                'first' => $photos->url(1),
+                'last' => $photos->url($photos->lastPage()),
+                'prev' => $photos->previousPageUrl(),
+                'next' => $photos->nextPageUrl(),
+            ],
         ]);
     }
 
@@ -176,30 +225,39 @@ class PhotoModerationController extends Controller
      *     summary="Approve a photo",
      *     description="Approve a pending photo, making it publicly visible. The photo's moderation status is set to 'approved' and visibility is changed to 'public'. Requires admin role.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="photo",
      *         in="path",
      *         description="Photo UUID",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Photo approved successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Photo approuvée avec succès."),
      *             @OA\Property(property="data", type="object")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=400,
      *         description="Photo already approved",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Cette photo est déjà approuvée.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -208,15 +266,20 @@ class PhotoModerationController extends Controller
      *     @OA\Response(
      *         response=403,
      *         description="Forbidden - Admin role required",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Accès non autorisé")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Photo not found",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Photo introuvable")
      *         )
@@ -246,7 +309,7 @@ class PhotoModerationController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Photo approuvée avec succès.',
-            'data' => $photo->load('photographer:id,first_name,last_name,email'),
+            'data' => new AdminPhotoResource($photo->load(['photographer:id,first_name,last_name,email', 'category:id,name'])),
         ]);
     }
 
@@ -258,36 +321,48 @@ class PhotoModerationController extends Controller
      *     summary="Reject a photo",
      *     description="Reject a pending photo with optional rejection reason. The photo's moderation status is set to 'rejected' and visibility is changed to 'private'. Requires admin role.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="photo",
      *         in="path",
      *         description="Photo UUID",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=false,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="rejection_reason", type="string", maxLength=500, example="Image quality does not meet platform standards", description="Reason for rejection")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Photo rejected successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Photo rejetée avec succès."),
      *             @OA\Property(property="data", type="object")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=400,
      *         description="Photo already rejected",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Cette photo est déjà rejetée.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -296,15 +371,20 @@ class PhotoModerationController extends Controller
      *     @OA\Response(
      *         response=403,
      *         description="Forbidden - Admin role required",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Accès non autorisé")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Photo not found",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Photo introuvable")
      *         )
@@ -339,7 +419,7 @@ class PhotoModerationController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Photo rejetée avec succès.',
-            'data' => $photo->load('photographer:id,first_name,last_name,email'),
+            'data' => new AdminPhotoResource($photo->load(['photographer:id,first_name,last_name,email', 'category:id,name'])),
         ]);
     }
 
@@ -351,30 +431,39 @@ class PhotoModerationController extends Controller
      *     summary="Toggle photo featured status",
      *     description="Feature or unfeature an approved photo. Only approved photos can be featured. Requires admin role.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="photo",
      *         in="path",
      *         description="Photo UUID",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Photo featured status toggled successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Photo mise en avant avec succès."),
      *             @OA\Property(property="data", type="object")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=400,
      *         description="Photo not approved",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Seules les photos approuvées peuvent être mises en avant.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -383,15 +472,20 @@ class PhotoModerationController extends Controller
      *     @OA\Response(
      *         response=403,
      *         description="Forbidden - Admin role required",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Accès non autorisé")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Photo not found",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Photo introuvable")
      *         )
@@ -408,7 +502,7 @@ class PhotoModerationController extends Controller
         }
 
         $photo->update([
-            'featured' => !$photo->featured,
+            'featured' => ! $photo->featured,
         ]);
 
         $message = $photo->featured
@@ -418,7 +512,7 @@ class PhotoModerationController extends Controller
         return response()->json([
             'success' => true,
             'message' => $message,
-            'data' => $photo,
+            'data' => new AdminPhotoResource($photo->load(['photographer:id,first_name,last_name,email', 'category:id,name'])),
         ]);
     }
 
@@ -430,21 +524,27 @@ class PhotoModerationController extends Controller
      *     summary="Delete a photo",
      *     description="Permanently delete a photo and its associated files from storage. This action cannot be undone. Requires admin role.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Parameter(
      *         name="photo",
      *         in="path",
      *         description="Photo UUID",
      *         required=true,
+     *
      *         @OA\Schema(type="string", format="uuid", example="9d445a1c-85c5-4b6d-9c38-99a4915d6dac")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Photo deleted successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Photo supprimée avec succès.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -453,15 +553,20 @@ class PhotoModerationController extends Controller
      *     @OA\Response(
      *         response=403,
      *         description="Forbidden - Admin role required",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Accès non autorisé")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="Photo not found",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Photo introuvable")
      *         )
@@ -492,36 +597,47 @@ class PhotoModerationController extends Controller
      *     summary="Bulk approve photos",
      *     description="Approve multiple pending photos at once. Only pending photos will be updated. All specified photos will have their moderation status set to 'approved' and visibility changed to 'public'. Requires admin role.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"photo_ids"},
+     *
      *             @OA\Property(
      *                 property="photo_ids",
      *                 type="array",
      *                 description="Array of photo UUIDs to approve",
+     *
      *                 @OA\Items(type="string", format="uuid"),
      *                 example={"9d445a1c-85c5-4b6d-9c38-99a4915d6dac", "9d445a1c-85c5-4b6d-9c38-99a4915d6dad"}
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Photos approved successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="5 photo(s) approuvée(s) avec succès.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=400,
      *         description="Validation error",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Validation failed"),
      *             @OA\Property(property="errors", type="object")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -530,7 +646,9 @@ class PhotoModerationController extends Controller
      *     @OA\Response(
      *         response=403,
      *         description="Forbidden - Admin role required",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Accès non autorisé")
      *         )
@@ -568,37 +686,49 @@ class PhotoModerationController extends Controller
      *     summary="Bulk reject photos",
      *     description="Reject multiple pending photos at once with optional rejection reason. Only pending photos will be updated. All specified photos will have their moderation status set to 'rejected' and visibility changed to 'private'. Requires admin role.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"photo_ids"},
+     *
      *             @OA\Property(
      *                 property="photo_ids",
      *                 type="array",
      *                 description="Array of photo UUIDs to reject",
+     *
      *                 @OA\Items(type="string", format="uuid"),
      *                 example={"9d445a1c-85c5-4b6d-9c38-99a4915d6dac", "9d445a1c-85c5-4b6d-9c38-99a4915d6dad"}
      *             ),
+     *
      *             @OA\Property(property="rejection_reason", type="string", maxLength=500, example="Images do not meet quality standards", description="Reason for rejection applied to all photos")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Photos rejected successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="5 photo(s) rejetée(s) avec succès.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=400,
      *         description="Validation error",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Validation failed"),
      *             @OA\Property(property="errors", type="object")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -607,7 +737,9 @@ class PhotoModerationController extends Controller
      *     @OA\Response(
      *         response=403,
      *         description="Forbidden - Admin role required",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Accès non autorisé")
      *         )

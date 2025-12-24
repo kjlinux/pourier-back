@@ -20,7 +20,8 @@ class PayOrderRequest extends FormRequest
 
         if ($this->input('payment_method') === 'mobile_money') {
             $rules['payment_provider'] = ['nullable', 'string', 'in:ORANGE,MTN,MOOV,WAVE'];
-            $rules['phone'] = ['nullable', 'string', 'regex:/^\+226\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}$/'];
+            // UEMOA: Burkina(226), Côte d'Ivoire(225), Mali(223), Sénégal(221), Togo(228), Bénin(229), Niger(227), Guinée-Bissau(245)
+            $rules['phone'] = ['nullable', 'string', 'regex:/^(\+|00)?(221|223|225|226|227|228|229|245)[0-9]{8,10}$/'];
         }
 
         return $rules;
@@ -31,7 +32,7 @@ class PayOrderRequest extends FormRequest
         return [
             'payment_method.required' => 'La méthode de paiement est requise',
             'payment_provider.in' => 'Le fournisseur Mobile Money n\'est pas supporté',
-            'phone.regex' => 'Le format du téléphone est invalide (ex: +226 70 12 34 56)',
+            'phone.regex' => 'Le format du téléphone est invalide. Utilisez un numéro UEMOA (ex: +226 70 12 34 56, +225 07 12 34 56 78)',
         ];
     }
 }

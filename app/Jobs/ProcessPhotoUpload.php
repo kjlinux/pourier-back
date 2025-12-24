@@ -28,38 +28,42 @@ class ProcessPhotoUpload implements ShouldQueue
     public function handle(ImageProcessingService $imageProcessingService): void
     {
         try {
-            // Traiter l'image - construire le chemin complet depuis storage/app
-            $fullPath = storage_path('app/'.$this->tempPath);
+            // Traiter l'image - utiliser le chemin correct du disk local
+            $fullPath = Storage::disk('local')->path($this->tempPath);
+
+            // Vérifier que le fichier existe
+            if (! file_exists($fullPath)) {
+                throw new \RuntimeException("Fichier temporaire introuvable: {$fullPath}");
+            }
+
             $result = $imageProcessingService->processUploadedPhoto(
                 $fullPath,
                 $this->photographerId
             );
 
-            // Mettre à jour la photo dans la BDD
-            $photo = Photo::where('photographer_id', $this->photographerId)
-                ->where('status', 'pending')
-                ->whereNull('original_url')
-                ->latest()
-                ->first();
+            // Mettre à jour la photo dans la BDD en utilisant l'ID exact
+            $photo = Photo::find($this->metadata['photo_id']);
 
-            if ($photo) {
-                $photo->update([
-                    'original_url' => $result['original_url'],
-                    'preview_url' => $result['preview_url'],
-                    'thumbnail_url' => $result['thumbnail_url'],
-                    'width' => $result['width'],
-                    'height' => $result['height'],
-                    'file_size' => $result['file_size'],
-                    'format' => $result['format'],
-                    'color_palette' => $result['color_palette'],
-                ]);
-
-                // Dispatcher le job d'extraction EXIF
-                ExtractExifData::dispatch($photo);
+            if (! $photo) {
+                throw new \RuntimeException("Photo introuvable avec l'ID: {$this->metadata['photo_id']}");
             }
 
-            // Nettoyer le fichier temporaire (utiliser @unlink car le fichier est hors du disk local)
-            @unlink($fullPath);
+            $photo->update([
+                'original_url' => $result['original_url'],
+                'preview_url' => $result['preview_url'],
+                'thumbnail_url' => $result['thumbnail_url'],
+                'width' => $result['width'],
+                'height' => $result['height'],
+                'file_size' => $result['file_size'],
+                'format' => $result['format'],
+                'color_palette' => $result['color_palette'],
+            ]);
+
+            // Dispatcher le job d'extraction EXIF
+            ExtractExifData::dispatch($photo);
+
+            // Nettoyer le fichier temporaire
+            Storage::disk('local')->delete($this->tempPath);
 
         } catch (\Exception $e) {
             \Log::error('Erreur traitement photo: '.$e->getMessage());
@@ -72,7 +76,6 @@ class ProcessPhotoUpload implements ShouldQueue
         \Log::error('Échec traitement photo: '.$exception->getMessage());
 
         // Tenter de nettoyer le fichier temporaire
-        $fullPath = storage_path('app/'.$this->tempPath);
-        @unlink($fullPath);
+        Storage::disk('local')->delete($this->tempPath);
     }
 }
