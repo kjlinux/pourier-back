@@ -12,7 +12,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, Notifiable, HasUuids, SoftDeletes, HasRoles;
+    use HasFactory, HasRoles, HasUuids, Notifiable, SoftDeletes;
 
     /**
      * Guard name for Spatie Permission
@@ -259,10 +259,18 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getPhotographerStatus(): ?string
     {
-        if (!$this->isPhotographer()) {
+        if (! $this->isPhotographer()) {
             return null;
         }
 
         return $this->photographerProfile?->status;
+    }
+
+    /**
+     * Accessor for photographer_status attribute.
+     */
+    public function getPhotographerStatusAttribute(): ?string
+    {
+        return $this->getPhotographerStatus();
     }
 }

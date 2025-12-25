@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Services\StorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,10 +20,13 @@ class ProfileController extends Controller
      *     summary="Get current user profile",
      *     description="Retrieve the authenticated user's profile information including photographer profile if available",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Profile retrieved successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(
      *                 property="data",
@@ -48,6 +52,7 @@ class ProfileController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -57,7 +62,12 @@ class ProfileController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        return response()->json(['success' => true, 'data' => $request->user()->load('photographerProfile')]);
+        $user = $request->user()->load('photographerProfile');
+
+        return response()->json([
+            'success' => true,
+            'data' => new UserResource($user),
+        ]);
     }
 
     /**
@@ -68,19 +78,25 @@ class ProfileController extends Controller
      *     summary="Update user profile",
      *     description="Update the authenticated user's profile information (first name, last name, phone, bio)",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="first_name", type="string", maxLength=50, example="Jean", description="User's first name"),
      *             @OA\Property(property="last_name", type="string", maxLength=50, example="Dupont", description="User's last name"),
      *             @OA\Property(property="phone", type="string", maxLength=20, nullable=true, example="+226 70 12 34 56", description="User's phone number"),
      *             @OA\Property(property="bio", type="string", maxLength=500, nullable=true, example="Passionate photographer from Burkina Faso", description="User biography")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Profile updated successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Profil mis à jour."),
      *             @OA\Property(
@@ -95,6 +111,7 @@ class ProfileController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -116,9 +133,14 @@ class ProfileController extends Controller
             'bio' => 'sometimes|nullable|string|max:500',
         ]);
 
-        $request->user()->update($request->only(['first_name', 'last_name', 'phone', 'bio']));
+        $user = $request->user();
+        $user->update($request->only(['first_name', 'last_name', 'phone', 'bio']));
 
-        return response()->json(['success' => true, 'message' => 'Profil mis à jour.', 'data' => $request->user()]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Profil mis à jour.',
+            'data' => new UserResource($user),
+        ]);
     }
 
     /**
@@ -129,12 +151,16 @@ class ProfileController extends Controller
      *     summary="Update user avatar",
      *     description="Upload and update the authenticated user's avatar image (max 2MB)",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
+     *
      *             @OA\Schema(
      *                 required={"avatar"},
+     *
      *                 @OA\Property(
      *                     property="avatar",
      *                     type="string",
@@ -144,14 +170,18 @@ class ProfileController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Avatar updated successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Avatar mis à jour.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -166,7 +196,7 @@ class ProfileController extends Controller
      */
     public function updateAvatar(Request $request, StorageService $storageService): JsonResponse
     {
-        $request->validate(['avatar' => 'required|image|mimes:jpeg,png,gif,webp|max:2048']);
+        $request->validate(['avatar' => 'required|image|mimes:jpeg,png,gif,webp|max:10240']);
 
         $user = $request->user();
 
@@ -186,8 +216,8 @@ class ProfileController extends Controller
             'success' => true,
             'message' => 'Avatar mis à jour avec succès.',
             'data' => [
-                'avatar_url' => $avatarUrl
-            ]
+                'avatar_url' => $avatarUrl,
+            ],
         ]);
     }
 
@@ -199,31 +229,41 @@ class ProfileController extends Controller
      *     summary="Update user password",
      *     description="Change the authenticated user's password (requires current password verification)",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"current_password", "password", "password_confirmation"},
+     *
      *             @OA\Property(property="current_password", type="string", format="password", example="OldPassword123!", description="Current password for verification"),
      *             @OA\Property(property="password", type="string", format="password", minLength=8, example="NewPassword123!", description="New password (min 8 characters)"),
      *             @OA\Property(property="password_confirmation", type="string", format="password", example="NewPassword123!", description="Password confirmation (must match password)")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Password updated successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Mot de passe modifié.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=400,
      *         description="Current password incorrect",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Mot de passe actuel incorrect.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
@@ -243,7 +283,7 @@ class ProfileController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        if (!Hash::check($request->current_password, $request->user()->password)) {
+        if (! Hash::check($request->current_password, $request->user()->password)) {
             return response()->json(['success' => false, 'message' => 'Mot de passe actuel incorrect.'], 400);
         }
 
