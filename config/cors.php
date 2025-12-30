@@ -22,8 +22,10 @@ return [
     'allowed_origins' => [
         'http://localhost:3000',
         'http://localhost:5173',
-        'http://pouire.tangagroup.com',
-        'https://pouire.tangagroup.com',
+        // 'http://pouire.tangagroup.com',
+        'http://pouire-bf.com',
+        // 'https://pouire.tangagroup.com',
+        'https://pouire-bf.com',
     ],
 
     'allowed_origins_patterns' => [],
